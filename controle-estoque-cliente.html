@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IAê Financeiro — Controle de Estoque</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --verde-escuro:  #1B3B28;
+      --verde-medio:   #2D5A3D;
+      --verde-claro:   #4A7A5A;
+      --marrom:        #8B5E3C;
+      --marrom-esc:    #5C3D1F;
+      --dourado:       #C49A3C;
+      --laranja:       #D4763A;
+      --bege:          #E8D5A3;
+      --bege-claro:    #F5EDD5;
+      --creme:         #FEFBF3;
+      --texto:         #2C1A0E;
+      --texto-suave:   #7A5C3E;
+      --sombra:        rgba(27,59,40,.10);
+      --sombra-f:      rgba(27,59,40,.22);
+      --entrada:       #1F6B42;
+      --saida:         #A0341E;
+      --entrada-bg:    #E6F4EC;
+      --saida-bg:      #FAEAE7;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: radial-gradient(ellipse at top, #F5EDD5 0%, #EDD8A8 60%, #E0C880 100%);
+      min-height: 100vh;
+      color: var(--texto);
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      background: linear-gradient(180deg, #132B1C 0%, #1B3B28 55%, #2D5A3D 100%);
+      border-bottom: 1px solid rgba(196,154,60,.28);
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      gap: 16px;
+    }
+
+    .header-brand { display: flex; align-items: center; gap: 12px; }
+
+    .logo-emblem {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--dourado), #A07828);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 900; color: var(--verde-escuro);
+      font-family: 'Playfair Display', serif;
+      box-shadow: 0 2px 10px rgba(196,154,60,.5);
+      flex-shrink: 0;
+    }
+
+    .brand { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: #FAF0D8; line-height: 1.2; }
+    .brand span { color: var(--dourado); }
+    .subbrand { font-size: 10px; color: rgba(245,240,216,.55); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 2px; }
+
+    .header-center { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .header-tagline { font-family: 'Playfair Display', serif; font-size: 14px; color: rgba(245,240,216,.7); font-style: italic; }
+    .header-badges { display: flex; gap: 6px; }
+    .hbadge {
+      background: rgba(196,154,60,.18); border: 1px solid rgba(196,154,60,.3);
+      color: var(--dourado); font-size: 9px; font-weight: 700;
+      letter-spacing: .8px; text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
+    }
+
+    .header-client { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .client-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(245,240,216,.4); }
+
+    .client-logo-wrap {
+      width: 110px; height: 52px;
+      border: 1.5px dashed rgba(196,154,60,.35); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; background: rgba(255,255,255,.04);
+      transition: border-color .2s, background .2s; overflow: hidden;
+    }
+    .client-logo-wrap:hover { border-color: var(--dourado); background: rgba(196,154,60,.08); }
+    .client-logo-wrap.has-logo { border-style: solid; border-color: rgba(196,154,60,.25); cursor: default; }
+    .client-logo-wrap.has-logo:hover { border-color: rgba(196,154,60,.5); }
+    .client-logo-placeholder { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .client-logo-placeholder span:first-child { font-size: 18px; opacity: .5; }
+    .upload-hint { font-size: 8px; color: rgba(245,240,216,.4); text-align: center; line-height: 1.4; }
+    #clientLogoImg { max-width: 104px; max-height: 48px; object-fit: contain; border-radius: 4px; display: none; }
+    .client-logo-actions { display: flex; gap: 4px; margin-top: 2px; }
+    .btn-logo-action {
+      font-family: 'Nunito', sans-serif; font-size: 9px; font-weight: 700;
+      padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(196,154,60,.35);
+      background: transparent; color: var(--dourado); cursor: pointer; transition: all .2s;
+    }
+    .btn-logo-action:hover { background: rgba(196,154,60,.15); }
+    .btn-logo-remove { border-color: rgba(160,52,30,.4); color: #e07060; }
+    .btn-logo-remove:hover { background: rgba(160,52,30,.15); }
+
+    .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+    #relogioHeader { font-family: 'Playfair Display', serif; font-size: 13px; color: rgba(245,240,216,.7); letter-spacing: .5px; }
+    .btn-reset-wrap button {
+      font-family: 'Nunito', sans-serif; font-size: 9px; font-weight: 700;
+      padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(196,154,60,.25);
+      background: transparent; color: rgba(196,154,60,.6); cursor: pointer;
+      text-transform: uppercase; letter-spacing: .6px; transition: all .2s;
+    }
+    .btn-reset-wrap button:hover { border-color: var(--saida); color: var(--saida); }
+
+    .nav-tabs { display: flex; padding: 0 28px; border-top: 1px solid rgba(196,154,60,.15); gap: 2px; }
+    .nav-tab {
+      font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .7px; padding: 10px 18px;
+      border: none; background: transparent; color: rgba(245,240,216,.45);
+      cursor: pointer; position: relative; transition: color .2s;
+    }
+    .nav-tab::after {
+      content: ''; position: absolute; bottom: 0; left: 16px; right: 16px;
+      height: 2px; background: var(--dourado); border-radius: 2px 2px 0 0;
+      transform: scaleX(0); transition: transform .2s;
+    }
+    .nav-tab:hover { color: rgba(245,240,216,.75); }
+    .nav-tab.active { color: #FAF0D8; }
+    .nav-tab.active::after { transform: scaleX(1); }
+
+    /* ─── LAYOUT ─── */
+    main { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .page-title {
+      font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
+      color: var(--verde-escuro); display: flex; align-items: center; gap: 14px; margin-bottom: 24px;
+    }
+    .page-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--bege), transparent); }
+    .deco-line { color: var(--dourado); font-size: 16px; letter-spacing: 10px; opacity: .6; text-align: center; margin: 8px 0 24px; }
+
+    /* ─── KPI CARDS ─── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .kpi-card { border-radius: 14px; padding: 20px 22px; position: relative; overflow: hidden; }
+    .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 14px 14px 0 0; }
+    .k-entrada { background: var(--entrada-bg); }
+    .k-entrada::before { background: linear-gradient(90deg, #1F6B42, #2D8A55); }
+    .k-saida { background: var(--saida-bg); }
+    .k-saida::before { background: linear-gradient(90deg, #A0341E, #C94B2A); }
+    .k-saldo { background: linear-gradient(135deg, #E8F0EC, #E0E8E4); }
+    .k-saldo::before { background: linear-gradient(90deg, var(--verde-escuro), var(--dourado)); }
+    .k-fixo { background: linear-gradient(135deg, #F5EDE5, #EDE0D5); }
+    .k-fixo::before { background: linear-gradient(90deg, var(--marrom), var(--laranja)); }
+    .kpi-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--texto-suave); margin-bottom: 8px; }
+    .kpi-value { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--verde-escuro); line-height: 1; }
+    .kpi-sub { font-size: 11px; color: var(--texto-suave); margin-top: 4px; }
+    .kpi-icon { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); opacity: .07; font-size: 44px; }
+
+    /* ─── CARDS ─── */
+    .card { background: var(--creme); border-radius: 14px; padding: 24px; box-shadow: 0 2px 16px var(--sombra); border: 1px solid rgba(196,154,60,.14); margin-bottom: 20px; }
+    .card-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; color: var(--verde-escuro); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .chart-wrap { position: relative; height: 240px; }
+
+    /* ─── FORMS ─── */
+    .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group.span-2 { grid-column: span 2; }
+    .form-group.span-3 { grid-column: span 3; }
+
+    label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--texto-suave); }
+    input, select, textarea {
+      font-family: 'Nunito', sans-serif; font-size: 13px; padding: 9px 12px;
+      border: 1.5px solid var(--bege); border-radius: 8px; background: #fff;
+      color: var(--texto); transition: border-color .2s; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--verde-claro); }
+    textarea { resize: vertical; min-height: 70px; }
+    .form-actions { display: flex; gap: 10px; margin-top: 6px; align-items: center; }
+
+    /* ─── BUTTONS ─── */
+    .btn { font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; padding: 9px 20px; border: none; border-radius: 8px; cursor: pointer; transition: all .2s; text-transform: uppercase; letter-spacing: .5px; }
+    .btn-primary { background: linear-gradient(135deg, var(--verde-escuro), var(--verde-medio)); color: var(--bege-claro); box-shadow: 0 2px 8px rgba(27,59,40,.25); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(27,59,40,.35); }
+    .btn-ghost { background: transparent; color: var(--texto-suave); border: 1.5px solid var(--bege); }
+    .btn-ghost:hover { border-color: var(--verde-claro); color: var(--verde-escuro); }
+    .btn-filter { background: var(--verde-escuro); color: var(--bege-claro); font-size: 11px; padding: 7px 14px; }
+    .btn-filter:hover { background: var(--verde-medio); }
+    .btn-sm-danger { background: transparent; color: var(--saida); border: 1px solid rgba(160,52,30,.3); font-size: 10px; font-family: 'Nunito', sans-serif; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all .2s; text-transform: uppercase; }
+    .btn-sm-danger:hover { background: var(--saida-bg); }
+    .btn-sm-edit { background: transparent; color: var(--marrom); border: 1px solid rgba(139,94,60,.3); font-size: 10px; font-family: 'Nunito', sans-serif; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all .2s; text-transform: uppercase; }
+    .btn-sm-edit:hover { background: linear-gradient(135deg, #F5EDE5, #EDE0D5); }
+
+    /* ─── BADGES ─── */
+    .badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+    .b-entrada    { background: var(--entrada-bg); color: var(--entrada); }
+    .b-em-estoque { background: rgba(196,154,60,.18); color: var(--marrom-esc); }
+    .b-baixado    { background: rgba(100,100,100,.12); color: #666; }
+    .b-cat        { background: rgba(196,154,60,.18); color: var(--marrom-esc); }
+    .b-ok         { background: var(--entrada-bg); color: var(--entrada); }
+    .b-warn       { background: rgba(212,118,58,.15); color: var(--laranja); }
+    .b-danger     { background: var(--saida-bg); color: var(--saida); }
+
+    /* ─── TABLE ─── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr { background: var(--verde-escuro); }
+    thead th { padding: 10px 14px; color: #FAF0D8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; text-align: left; white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid var(--bege); transition: background .15s; }
+    tbody tr:hover { background: var(--bege-claro); }
+    tbody td { padding: 10px 14px; vertical-align: middle; }
+    .td-desc { font-weight: 600; color: var(--verde-escuro); }
+    .td-value { font-family: 'Playfair Display', serif; font-weight: 600; }
+    .td-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* ─── FILTER BAR ─── */
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; }
+    .filter-bar .form-group { min-width: 140px; flex: 1; }
+
+    /* ─── CATEGORIES ─── */
+    .cat-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .cat-chip { display: inline-flex; align-items: center; gap: 5px; background: rgba(196,154,60,.15); border: 1px solid rgba(196,154,60,.3); color: var(--marrom-esc); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+    .cat-chip button { background: none; border: none; cursor: pointer; color: rgba(92,61,31,.4); font-size: 12px; padding: 0; line-height: 1; transition: color .2s; }
+    .cat-chip button:hover { color: var(--saida); }
+    .cat-add-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+    .cat-add-row input { flex: 1; max-width: 240px; }
+
+    /* ─── PRICING ─── */
+    .cost-breakdown { background: var(--bege-claro); border-radius: 10px; padding: 16px; border: 1px solid var(--bege); }
+    .cost-breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--bege); font-size: 13px; }
+    .cost-breakdown-row:last-child { border-bottom: none; }
+    .cost-breakdown-row.total { font-weight: 700; font-family: 'Playfair Display', serif; font-size: 15px; color: var(--verde-escuro); border-top: 2px solid var(--bege); margin-top: 4px; padding-top: 10px; }
+    .selling-price-display { text-align: center; padding: 20px; background: linear-gradient(135deg, var(--entrada-bg), #d0eedb); border-radius: 12px; border: 1px solid rgba(31,107,66,.15); margin-top: 14px; }
+    .selling-price-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--verde-escuro); opacity: .7; margin-bottom: 6px; }
+    .selling-price-value { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; color: var(--entrada); line-height: 1; }
+    .margin-display { margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--verde-escuro); opacity: .75; }
+
+    /* ─── OFERTA CARDS ─── */
+    .oferta-card { border-radius: 12px; padding: 16px 20px; display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; border: 1.5px solid; }
+    .oferta-ok     { background: var(--entrada-bg);           border-color: rgba(31,107,66,.2); }
+    .oferta-warn   { background: rgba(212,118,58,.08);         border-color: rgba(212,118,58,.25); }
+    .oferta-danger { background: var(--saida-bg);              border-color: rgba(160,52,30,.2); }
+    .oferta-icon { font-size: 28px; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+    .oferta-content { flex: 1; }
+    .oferta-title { font-weight: 700; font-size: 14px; color: var(--verde-escuro); margin-bottom: 4px; }
+    .oferta-desc { font-size: 12px; color: var(--texto-suave); line-height: 1.6; }
+
+    /* ─── TOAST ─── */
+    #toastBox { position: fixed; top: 18px; right: 18px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .toast { min-width: 260px; max-width: 340px; padding: 12px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 20px rgba(0,0,0,.18); animation: toastIn .3s ease; }
+    .toast.ok  { background: var(--verde-escuro); color: #FAF0D8; border-left: 4px solid var(--dourado); }
+    .toast.err { background: var(--saida); color: #fff; border-left: 4px solid #ffc9c9; }
+    @keyframes toastIn  { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(110%); opacity: 0; } }
+
+    /* ─── MODAL ─── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(19,43,28,.75); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 500; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: var(--creme); border-radius: 16px; padding: 36px 40px; max-width: 420px; width: 90%; animation: modalIn .2s ease; }
+    @keyframes modalIn { from { transform: scale(.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--verde-escuro); margin-bottom: 18px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+
+    /* ─── UTILS ─── */
+    .mt-16 { margin-top: 16px; }
+    .flex-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--texto-suave); font-size: 13px; }
+    .empty-icon { font-size: 40px; opacity: .3; margin-bottom: 8px; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .charts-row { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: repeat(2, 1fr); }
+      .header-center { display: none; }
+    }
+    @media (max-width: 560px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.span-2, .form-group.span-3 { grid-column: span 1; }
+      .header-client { display: none; }
+      .header-top { padding: 12px 16px; }
+      .nav-tabs { padding: 0 12px; }
+      main { padding: 16px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOASTS -->
+<div id="toastBox"></div>
+
+<!-- MODAL: Reset -->
+<div class="modal-overlay" id="modalReset">
+  <div class="modal-box">
+    <div class="modal-title">Resetar todos os dados?</div>
+    <p style="font-size:13px;color:var(--texto-suave)">Digite a senha de administrador para confirmar a exclusão permanente de todos os dados de estoque.</p>
+    <div class="form-group mt-16">
+      <label>Senha</label>
+      <input type="password" id="resetSenha" placeholder="••••••••••••">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="fecharModal('modalReset')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarReset()" style="background:linear-gradient(135deg,var(--saida),#c04030)">Confirmar Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Excluir Item -->
+<div class="modal-overlay" id="modalDelete">
+  <div class="modal-box">
+    <div class="modal-title">Excluir item?</div>
+    <p style="font-size:13px;color:var(--texto-suave)">Esta ação não pode ser desfeita. O item será removido permanentemente do estoque.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="fecharModal('modalDelete')">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmDelete" style="background:linear-gradient(135deg,var(--saida),#c04030)">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Baixa de Estoque -->
+<div class="modal-overlay" id="modalBaixa">
+  <div class="modal-box">
+    <div class="modal-title">Registrar Saída / Baixa</div>
+    <input type="hidden" id="baixaItemId">
+    <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:14px">
+      <div class="form-group">
+        <label>Quantidade *</label>
+        <input type="number" id="baixaQtd" min="0.001" step="any" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>Data de Saída *</label>
+        <input type="date" id="baixaData">
+      </div>
+      <div class="form-group span-2">
+        <label>Observação / Motivo</label>
+        <input type="text" id="baixaObs" placeholder="Ex: Venda, Consumo próprio, Devolução...">
+      </div>
+    </div>
+    <div id="baixaInfo" style="margin-top:12px;font-size:12px;color:var(--texto-suave);padding:10px;background:var(--bege-claro);border-radius:8px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="fecharModal('modalBaixa')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarBaixa()">Registrar Baixa</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Precificação -->
+<div class="modal-overlay" id="modalPreco">
+  <div class="modal-box" style="max-width:500px">
+    <div class="modal-title">💰 Precificação do Item</div>
+    <input type="hidden" id="precoItemId">
+    <p id="precoItemNome" style="font-size:13px;font-weight:700;color:var(--verde-escuro);margin-bottom:4px"></p>
+    <p id="precoItemCusto" style="font-size:12px;color:var(--texto-suave);margin-bottom:16px"></p>
+    <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>Impostos (%)</label>
+        <input type="number" id="precoImpostos" min="0" step="0.1" value="0" oninput="calcPreco()">
+      </div>
+      <div class="form-group">
+        <label>Frete (R$)</label>
+        <input type="number" id="precoFrete" min="0" step="0.01" value="0" oninput="calcPreco()">
+      </div>
+      <div class="form-group">
+        <label>Outros Custos (R$)</label>
+        <input type="number" id="precoOutros" min="0" step="0.01" value="0" oninput="calcPreco()">
+      </div>
+      <div class="form-group">
+        <label>Margem de Lucro (%)</label>
+        <input type="number" id="precoMargem" min="0" max="99" step="0.5" value="30" oninput="calcPreco()">
+      </div>
+    </div>
+    <div id="precBreakdown" style="margin-top:14px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="fecharModal('modalPreco')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarPreco()">Salvar Precificação</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<header>
+  <div class="header-top">
+    <div class="header-brand">
+      <div class="logo-emblem">IAê</div>
+      <div>
+        <div class="brand">IAê <span>Financeiro</span></div>
+        <div class="subbrand">Controle de Estoque • BPO Financeiro</div>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="header-tagline">Gestão inteligente do seu estoque</div>
+      <div class="header-badges">
+        <span class="hbadge">Estoque</span>
+        <span class="hbadge">Precificação</span>
+        <span class="hbadge">Relatórios</span>
+      </div>
+    </div>
+
+    <div class="header-client">
+      <div class="client-label">Elaborado para</div>
+      <div class="client-logo-wrap" id="clientLogoWrap" onclick="triggerLogoUpload()">
+        <img id="clientLogoImg" alt="Logomarca do Cliente">
+        <div class="client-logo-placeholder" id="clientLogoPlaceholder">
+          <span>🏢</span>
+          <span class="upload-hint">Adicionar<br>Logomarca</span>
+        </div>
+      </div>
+      <input type="file" id="logoFileInput" accept="image/*" style="display:none" onchange="onLogoChange(event)">
+      <div class="client-logo-actions" id="clientLogoActions" style="display:none">
+        <button class="btn-logo-action" onclick="triggerLogoUpload()">✎ trocar</button>
+        <button class="btn-logo-action btn-logo-remove" onclick="removeLogo(event)">✕ remover</button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div id="relogioHeader">—</div>
+      <div class="btn-reset-wrap">
+        <button onclick="abrirModal('modalReset')">⚠ Resetar Dados</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="mudarTab('dashboard', this)">📊 Dashboard</button>
+    <button class="nav-tab" onclick="mudarTab('estoque', this)">📦 Estoque</button>
+    <button class="nav-tab" onclick="mudarTab('precificacao', this)">💰 Precificação</button>
+    <button class="nav-tab" onclick="mudarTab('relatorios', this)">📋 Relatórios</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+  <section class="section active" id="dashboard">
+    <div class="page-title">📊 Visão Geral do Estoque</div>
+    <div class="deco-line">✦ ✦ ✦</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card k-entrada">
+        <div class="kpi-icon">📦</div>
+        <div class="kpi-label">Itens em Estoque</div>
+        <div class="kpi-value" id="kpiItens">0</div>
+        <div class="kpi-sub" id="kpiItensSub">itens ativos</div>
+      </div>
+      <div class="kpi-card k-saldo">
+        <div class="kpi-icon">💵</div>
+        <div class="kpi-label">Valor Total (Custo)</div>
+        <div class="kpi-value" id="kpiValorCusto">R$ 0,00</div>
+        <div class="kpi-sub" id="kpiValorCustoSub">em estoque</div>
+      </div>
+      <div class="kpi-card k-fixo">
+        <div class="kpi-icon">🏷</div>
+        <div class="kpi-label">Valor a Preço de Venda</div>
+        <div class="kpi-value" id="kpiValorVenda">—</div>
+        <div class="kpi-sub" id="kpiValorVendaSub">com precificação</div>
+      </div>
+      <div class="kpi-card k-saida">
+        <div class="kpi-icon">⏰</div>
+        <div class="kpi-label">Itens p/ Atenção</div>
+        <div class="kpi-value" id="kpiAtencao">0</div>
+        <div class="kpi-sub">parados &gt; 30 dias</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="card">
+        <div class="card-title">📊 Valor por Categoria</div>
+        <div class="chart-wrap"><canvas id="cPieCat"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">⏱ Distribuição por Tempo em Estoque</div>
+        <div class="chart-wrap"><canvas id="cBarDias"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Itens Recentes em Estoque</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Descrição</th>
+              <th>Status</th>
+              <th>Categoria</th>
+              <th>Qtd Disponível</th>
+              <th>Custo Unit.</th>
+              <th>Dias em Estoque</th>
+              <th>Situação</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyRecentes"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ ESTOQUE ═══════════════════════ -->
+  <section class="section" id="estoque">
+    <div class="page-title">📦 Lançamentos de Estoque</div>
+    <div class="deco-line">✦ ✦ ✦</div>
+
+    <div class="card">
+      <div class="card-title">➕ Cadastrar Novo Item</div>
+      <div class="form-grid">
+        <div class="form-group span-2">
+          <label>Descrição do Material *</label>
+          <input type="text" id="itemDesc" placeholder="Ex: Cimento CP-II 50 kg, Camiseta Polo M, Tinta Acrílica 18 L...">
+        </div>
+        <div class="form-group">
+          <label>Status *</label>
+          <select id="itemStatus">
+            <option value="entrada">📥 Entrada (chegando agora)</option>
+            <option value="em_estoque">📦 Já em Estoque</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Categoria de Produto</label>
+          <select id="itemCat">
+            <option value="">— Selecionar —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fornecedor</label>
+          <input type="text" id="itemForn" placeholder="Nome do fornecedor">
+        </div>
+        <div class="form-group">
+          <label>Data de Entrada *</label>
+          <input type="date" id="itemDataEntrada">
+        </div>
+        <div class="form-group">
+          <label>Quantidade *</label>
+          <input type="number" id="itemQtd" min="0.001" step="any" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Unidade de Medida</label>
+          <select id="itemUnidade">
+            <option value="un">un — unidade</option>
+            <option value="kg">kg — quilograma</option>
+            <option value="g">g — grama</option>
+            <option value="l">L — litro</option>
+            <option value="ml">mL — mililitro</option>
+            <option value="m">m — metro</option>
+            <option value="m2">m² — metro quadrado</option>
+            <option value="m3">m³ — metro cúbico</option>
+            <option value="cx">cx — caixa</option>
+            <option value="pc">pc — pacote</option>
+            <option value="par">par</option>
+            <option value="sc">sc — saco</option>
+            <option value="rolo">rolo</option>
+            <option value="peca">peça</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Preço de Custo Unitário (R$) *</label>
+          <input type="number" id="itemPreco" min="0" step="0.01" placeholder="0,00">
+        </div>
+        <div class="form-group span-3">
+          <label>Observações</label>
+          <input type="text" id="itemObs" placeholder="Número NF, lote, observações adicionais...">
+        </div>
+      </div>
+      <div class="form-actions mt-16">
+        <button class="btn btn-primary" onclick="adicionarItem()">✓ Cadastrar Item</button>
+        <button class="btn btn-ghost" onclick="limparFormItem()">Limpar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏷 Categorias de Produto</div>
+      <p style="font-size:12px;color:var(--texto-suave);margin-bottom:10px">Defina as categorias do seu negócio. Elas ficarão disponíveis para seleção no cadastro de itens.</p>
+      <div class="cat-chips" id="catChips">
+        <span style="font-size:12px;color:var(--texto-suave)">Nenhuma categoria definida. Adicione abaixo.</span>
+      </div>
+      <div class="cat-add-row">
+        <input type="text" id="novaCatInput" placeholder="Ex: Matéria-Prima, Embalagem, Produto Acabado..." onkeydown="if(event.key==='Enter')adicionarCategoria()">
+        <button class="btn btn-filter" style="font-size:11px;padding:7px 14px" onclick="adicionarCategoria()">+ Adicionar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Itens Cadastrados</div>
+      <div class="filter-bar">
+        <div class="form-group">
+          <label>Status</label>
+          <select id="filtroStatus" onchange="renderTabelaEstoque()">
+            <option value="">Todos</option>
+            <option value="entrada">Entrada</option>
+            <option value="em_estoque">Em Estoque</option>
+            <option value="baixado">Baixado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="filtroCategoria" onchange="renderTabelaEstoque()">
+            <option value="">Todas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Buscar</label>
+          <input type="text" id="filtroTexto" placeholder="Descrição ou fornecedor..." oninput="renderTabelaEstoque()">
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <button class="btn btn-filter" style="font-size:11px;padding:7px 14px" onclick="exportarCSV()">⬇ Exportar CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Descrição</th>
+              <th>Status</th>
+              <th>Categoria</th>
+              <th>Fornecedor</th>
+              <th>Data Entrada</th>
+              <th>Qtd Disponível</th>
+              <th>Custo Unit.</th>
+              <th>Custo Total</th>
+              <th>Dias</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyEstoque"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ PRECIFICAÇÃO ═══════════════════════ -->
+  <section class="section" id="precificacao">
+    <div class="page-title">💰 Precificação de Produtos</div>
+    <div class="deco-line">✦ ✦ ✦</div>
+
+    <div class="card" style="border-color:rgba(196,154,60,.3);background:linear-gradient(135deg,#FFFDF6,#FAF3E0)">
+      <div class="card-title">ℹ Como funciona a precificação</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;font-size:12px;color:var(--texto-suave)">
+        <div><b style="color:var(--verde-escuro)">1. Custo do produto</b><br>Preço de custo unitário já cadastrado no item.</div>
+        <div><b style="color:var(--verde-escuro)">2. Custos incidentes</b><br>Impostos (%), frete (R$) e outros custos fixos por unidade.</div>
+        <div><b style="color:var(--verde-escuro)">3. Margem de lucro</b><br>Percentual de margem desejada sobre o preço de venda (markup).</div>
+        <div><b style="color:var(--verde-escuro)">4. Preço de venda</b><br>Calculado automaticamente: Custo Total ÷ (1 − Margem%).</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Itens em Estoque — Precificação</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Descrição</th>
+              <th>Categoria</th>
+              <th>Custo Unit.</th>
+              <th>Impostos</th>
+              <th>Frete</th>
+              <th>Outros</th>
+              <th>Margem</th>
+              <th>Preço de Venda</th>
+              <th>Lucro Unit.</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyPrecos"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ RELATÓRIOS ═══════════════════════ -->
+  <section class="section" id="relatorios">
+    <div class="page-title">📋 Relatórios & Análise de Giro</div>
+    <div class="deco-line">✦ ✦ ✦</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card k-entrada">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-label">Normal (&lt; 30 dias)</div>
+        <div class="kpi-value" id="kpiRelNormal">0</div>
+        <div class="kpi-sub">Itens com bom giro</div>
+      </div>
+      <div class="kpi-card k-fixo">
+        <div class="kpi-icon">⚠</div>
+        <div class="kpi-label">Atenção (30–60 dias)</div>
+        <div class="kpi-value" id="kpiRelAtencao">0</div>
+        <div class="kpi-sub">Avaliar estratégia</div>
+      </div>
+      <div class="kpi-card k-saida">
+        <div class="kpi-icon">🔴</div>
+        <div class="kpi-label">Crítico (&gt; 60 dias)</div>
+        <div class="kpi-value" id="kpiRelCritico">0</div>
+        <div class="kpi-sub">Recomendar oferta</div>
+      </div>
+      <div class="kpi-card k-saldo">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-label">Média de Dias</div>
+        <div class="kpi-value" id="kpiRelMedia">0</div>
+        <div class="kpi-sub">dias em estoque</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔔 Itens que Necessitam Atenção ou Oferta</div>
+      <div id="ofertasList">
+        <div class="empty-state"><div class="empty-icon">✅</div>Nenhum item cadastrado ainda.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Análise Completa de Giro do Estoque</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Descrição</th>
+              <th>Categoria</th>
+              <th>Fornecedor</th>
+              <th>Data Entrada</th>
+              <th>Dias em Estoque</th>
+              <th>Qtd Disponível</th>
+              <th>Custo Total</th>
+              <th>Valor Venda Total</th>
+              <th>Situação</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyRelatorio"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⬇ Exportar Relatório Completo</div>
+      <div class="flex-row">
+        <button class="btn btn-primary" onclick="exportarRelatorio()">📊 Exportar CSV</button>
+        <span style="font-size:12px;color:var(--texto-suave)">Inclui todos os itens com dias em estoque, custos, preços de venda e situação de giro.</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ─── CONSTANTS ──────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'iaê_estoque_v1';
+const CATS_KEY    = 'iaê_estoque_cats_v1';
+const PREC_KEY    = 'iaê_estoque_prec_v1';
+const LOGO_KEY    = 'iaê_estoque_logo';
+const RESET_PASS  = 'iaefinanceiro2026';
+
+// ─── HELPERS ────────────────────────────────────────────────────────────────
+const uid  = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const fmt  = v  => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtN = v  => Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+const datePT = s => s ? new Date(s + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
+const today  = () => new Date().toISOString().slice(0, 10);
+
+function diasEmEstoque(entryDate) {
+  if (!entryDate) return 0;
+  return Math.max(0, Math.floor((new Date() - new Date(entryDate + 'T12:00:00')) / 86400000));
+}
+
+function classeDias(dias) {
+  if (dias < 30) return 'ok';
+  if (dias < 60) return 'warn';
+  return 'danger';
+}
+
+function labelDias(classe) {
+  const map = { ok: { badge: 'b-ok', text: '● Normal' }, warn: { badge: 'b-warn', text: '▲ Atenção' }, danger: { badge: 'b-danger', text: '■ Oferta!' } };
+  return map[classe];
+}
+
+function toast(msg, tipo = 'ok') {
+  const t = document.createElement('div');
+  t.className = `toast ${tipo}`;
+  t.textContent = msg;
+  document.getElementById('toastBox').appendChild(t);
+  setTimeout(() => { t.style.animation = 'toastOut .3s ease forwards'; setTimeout(() => t.remove(), 320); }, 3200);
+}
+
+function abrirModal(id)  { document.getElementById(id).classList.add('open'); }
+function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) fecharModal(o.id); }));
+
+// ─── DATA ────────────────────────────────────────────────────────────────────
+let itens      = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+let categorias = JSON.parse(localStorage.getItem(CATS_KEY)    || '[]');
+let precos     = JSON.parse(localStorage.getItem(PREC_KEY)    || '[]');
+
+function salvar() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(itens));
+  localStorage.setItem(CATS_KEY,    JSON.stringify(categorias));
+  localStorage.setItem(PREC_KEY,    JSON.stringify(precos));
+}
+
+// ─── CHARTS ─────────────────────────────────────────────────────────────────
+let charts = {};
+const PAL  = ['#1F6B42','#C49A3C','#D4763A','#8B5E3C','#4A7A5A','#A0341E','#2D5A3D','#E8D5A3','#6B8E6B','#B8860B'];
+
+function initCharts() {
+  ['cPieCat','cBarDias'].forEach(id => { const el = document.getElementById(id); if(el) { const key = id === 'cPieCat' ? 'pie' : 'bar'; if(charts[key]) charts[key].destroy(); } });
+
+  charts.pie = new Chart(document.getElementById('cPieCat'), {
+    type: 'doughnut',
+    data: { labels: [], datasets: [{ data: [], backgroundColor: PAL, borderWidth: 0, hoverOffset: 8 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: { legend: { position: 'right', labels: { font: { family: 'Nunito', size: 11 }, boxWidth: 12 } } } }
+  });
+
+  charts.bar = new Chart(document.getElementById('cBarDias'), {
+    type: 'bar',
+    data: { labels: ['< 30 dias', '30–60 dias', '> 60 dias'], datasets: [{ label: 'Itens', data: [0,0,0], backgroundColor: ['#1F6B42','#D4763A','#A0341E'], borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { font: { family: 'Nunito', size: 11 } } }, x: { ticks: { font: { family: 'Nunito', size: 11 } } } } }
+  });
+}
+
+function updateCharts() {
+  const ativos = itens.filter(i => i.status !== 'baixado');
+
+  const catMap = {};
+  ativos.forEach(i => {
+    const k = i.categoria || 'Sem categoria';
+    catMap[k] = (catMap[k] || 0) + i.preco * Math.max(0, i.quantidade - (i.qtdBaixada || 0));
+  });
+  const catLabels = Object.keys(catMap);
+  charts.pie.data.labels = catLabels.length ? catLabels : ['(vazio)'];
+  charts.pie.data.datasets[0].data = catLabels.length ? catLabels.map(k => catMap[k]) : [0];
+  charts.pie.data.datasets[0].backgroundColor = PAL.slice(0, Math.max(1, catLabels.length));
+  charts.pie.update();
+
+  const [ok, warn, danger] = [
+    ativos.filter(i => classeDias(diasEmEstoque(i.dataEntrada)) === 'ok').length,
+    ativos.filter(i => classeDias(diasEmEstoque(i.dataEntrada)) === 'warn').length,
+    ativos.filter(i => classeDias(diasEmEstoque(i.dataEntrada)) === 'danger').length
+  ];
+  charts.bar.data.datasets[0].data = [ok, warn, danger];
+  charts.bar.update();
+}
+
+// ─── CATEGORIES ─────────────────────────────────────────────────────────────
+function adicionarCategoria() {
+  const v = document.getElementById('novaCatInput').value.trim();
+  if (!v) return toast('Informe o nome da categoria.', 'err');
+  if (categorias.includes(v)) return toast('Categoria já existe.', 'err');
+  categorias.push(v);
+  salvar();
+  document.getElementById('novaCatInput').value = '';
+  renderCategorias();
+  toast(`Categoria "${v}" adicionada.`);
+}
+
+function removerCategoria(cat) {
+  categorias = categorias.filter(c => c !== cat);
+  salvar();
+  renderCategorias();
+  toast(`Categoria "${cat}" removida.`);
+}
+
+function renderCategorias() {
+  const wrap = document.getElementById('catChips');
+  wrap.innerHTML = categorias.length
+    ? categorias.map(c => `<span class="cat-chip">${c}<button onclick="removerCategoria(${JSON.stringify(c)})">✕</button></span>`).join('')
+    : '<span style="font-size:12px;color:var(--texto-suave)">Nenhuma categoria definida. Adicione abaixo.</span>';
+
+  ['itemCat','filtroCategoria'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = (id === 'itemCat' ? '<option value="">— Selecionar —</option>' : '<option value="">Todas</option>')
+      + categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+    if (categorias.includes(cur)) sel.value = cur;
+  });
+}
+
+// ─── ITEMS ───────────────────────────────────────────────────────────────────
+function adicionarItem() {
+  const desc  = document.getElementById('itemDesc').value.trim();
+  const st    = document.getElementById('itemStatus').value;
+  const cat   = document.getElementById('itemCat').value;
+  const forn  = document.getElementById('itemForn').value.trim();
+  const data  = document.getElementById('itemDataEntrada').value;
+  const qtd   = parseFloat(document.getElementById('itemQtd').value);
+  const un    = document.getElementById('itemUnidade').value;
+  const preco = parseFloat(document.getElementById('itemPreco').value);
+  const obs   = document.getElementById('itemObs').value.trim();
+
+  if (!desc)                      return toast('Informe a descrição do material.', 'err');
+  if (!data)                      return toast('Informe a data de entrada.', 'err');
+  if (isNaN(qtd) || qtd <= 0)    return toast('Informe uma quantidade válida.', 'err');
+  if (isNaN(preco) || preco < 0) return toast('Informe um preço de custo válido.', 'err');
+
+  itens.unshift({ id: uid(), descricao: desc, status: st, categoria: cat, fornecedor: forn, dataEntrada: data, quantidade: qtd, unidade: un, preco, observacoes: obs, qtdBaixada: 0, dataSaida: '', historicoBaixas: [] });
+  salvar();
+  limparFormItem();
+  renderAll();
+  toast('Item cadastrado com sucesso!');
+}
+
+function limparFormItem() {
+  ['itemDesc','itemForn','itemObs','itemQtd','itemPreco'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('itemStatus').value    = 'entrada';
+  document.getElementById('itemCat').value       = '';
+  document.getElementById('itemUnidade').value   = 'un';
+  document.getElementById('itemDataEntrada').value = today();
+}
+
+let _deletingId = null;
+function confirmarDelete(id) {
+  _deletingId = id;
+  abrirModal('modalDelete');
+  document.getElementById('btnConfirmDelete').onclick = () => {
+    itens  = itens.filter(i => i.id !== _deletingId);
+    precos = precos.filter(p => p.itemId !== _deletingId);
+    salvar();
+    fecharModal('modalDelete');
+    renderAll();
+    toast('Item excluído.');
+  };
+}
+
+function abrirBaixa(id) {
+  const item = itens.find(i => i.id === id);
+  if (!item) return;
+  const disp = item.quantidade - (item.qtdBaixada || 0);
+  document.getElementById('baixaItemId').value = id;
+  document.getElementById('baixaData').value   = today();
+  document.getElementById('baixaQtd').value    = '';
+  document.getElementById('baixaObs').value    = '';
+  document.getElementById('baixaInfo').innerHTML =
+    `<b>${item.descricao}</b><br>Quantidade disponível: <b>${fmtN(disp)} ${item.unidade}</b> · Custo unitário: <b>${fmt(item.preco)}</b>`;
+  abrirModal('modalBaixa');
+}
+
+function confirmarBaixa() {
+  const id   = document.getElementById('baixaItemId').value;
+  const qtd  = parseFloat(document.getElementById('baixaQtd').value);
+  const data = document.getElementById('baixaData').value;
+  const obs  = document.getElementById('baixaObs').value.trim();
+  const item = itens.find(i => i.id === id);
+  if (!item) return;
+  if (isNaN(qtd) || qtd <= 0) return toast('Informe uma quantidade válida.', 'err');
+  const disp = item.quantidade - (item.qtdBaixada || 0);
+  if (qtd > disp) return toast(`Quantidade excede o disponível (${fmtN(disp)} ${item.unidade}).`, 'err');
+  if (!data) return toast('Informe a data de saída.', 'err');
+
+  item.qtdBaixada = (item.qtdBaixada || 0) + qtd;
+  item.historicoBaixas.push({ qtd, data, obs });
+  if (item.qtdBaixada >= item.quantidade) { item.status = 'baixado'; item.dataSaida = data; }
+  salvar();
+  fecharModal('modalBaixa');
+  renderAll();
+  toast('Baixa registrada com sucesso!');
+}
+
+// ─── PRICING ─────────────────────────────────────────────────────────────────
+function getPrec(id) { return precos.find(p => p.itemId === id) || { itemId: id, impostos: 0, frete: 0, outros: 0, margem: 30, precoVenda: 0 }; }
+
+function abrirPreco(id) {
+  const item = itens.find(i => i.id === id);
+  if (!item) return;
+  const p = getPrec(id);
+  document.getElementById('precoItemId').value    = id;
+  document.getElementById('precoItemNome').textContent  = item.descricao;
+  document.getElementById('precoItemCusto').textContent = `Custo unitário: ${fmt(item.preco)} / ${item.unidade}`;
+  document.getElementById('precoImpostos').value  = p.impostos;
+  document.getElementById('precoFrete').value     = p.frete;
+  document.getElementById('precoOutros').value    = p.outros;
+  document.getElementById('precoMargem').value    = p.margem;
+  calcPreco();
+  abrirModal('modalPreco');
+}
+
+function calcPreco() {
+  const id     = document.getElementById('precoItemId').value;
+  const item   = itens.find(i => i.id === id);
+  if (!item) return;
+  const imp    = parseFloat(document.getElementById('precoImpostos').value) || 0;
+  const frete  = parseFloat(document.getElementById('precoFrete').value)    || 0;
+  const outros = parseFloat(document.getElementById('precoOutros').value)   || 0;
+  const margem = Math.min(99, parseFloat(document.getElementById('precoMargem').value) || 0);
+
+  const custoBase  = item.preco;
+  const custImp    = custoBase * (imp / 100);
+  const custoTotal = custoBase + custImp + frete + outros;
+  const precoVenda = custoTotal / (1 - margem / 100);
+  const lucro      = precoVenda - custoTotal;
+
+  document.getElementById('precBreakdown').innerHTML = `
+    <div class="cost-breakdown">
+      <div class="cost-breakdown-row"><span>Custo do produto</span><span>${fmt(custoBase)}</span></div>
+      <div class="cost-breakdown-row"><span>Impostos (${imp}%)</span><span>+ ${fmt(custImp)}</span></div>
+      <div class="cost-breakdown-row"><span>Frete</span><span>+ ${fmt(frete)}</span></div>
+      <div class="cost-breakdown-row"><span>Outros custos</span><span>+ ${fmt(outros)}</span></div>
+      <div class="cost-breakdown-row total"><span>Custo Total por Unidade</span><span>${fmt(custoTotal)}</span></div>
+    </div>
+    <div class="selling-price-display">
+      <div class="selling-price-label">Preço de Venda Sugerido</div>
+      <div class="selling-price-value">${fmt(precoVenda)}</div>
+      <div class="margin-display">Lucro unitário: ${fmt(lucro)} &nbsp;|&nbsp; Margem aplicada: ${margem.toFixed(1)}%</div>
+    </div>`;
+}
+
+function salvarPreco() {
+  const id     = document.getElementById('precoItemId').value;
+  const item   = itens.find(i => i.id === id);
+  if (!item) return;
+  const imp    = parseFloat(document.getElementById('precoImpostos').value) || 0;
+  const frete  = parseFloat(document.getElementById('precoFrete').value)    || 0;
+  const outros = parseFloat(document.getElementById('precoOutros').value)   || 0;
+  const margem = Math.min(99, parseFloat(document.getElementById('precoMargem').value) || 0);
+  const custoBase  = item.preco;
+  const custoTotal = custoBase + custoBase*(imp/100) + frete + outros;
+  const precoVenda = custoTotal / (1 - margem/100);
+
+  const idx = precos.findIndex(p => p.itemId === id);
+  const rec = { itemId: id, impostos: imp, frete, outros, margem, precoVenda };
+  if (idx >= 0) precos[idx] = rec; else precos.push(rec);
+  salvar();
+  fecharModal('modalPreco');
+  renderAll();
+  toast('Precificação salva!');
+}
+
+// ─── STATUS BADGE ────────────────────────────────────────────────────────────
+function statusBadge(s) {
+  if (s === 'entrada')    return '<span class="badge b-entrada">📥 Entrada</span>';
+  if (s === 'em_estoque') return '<span class="badge b-em-estoque">📦 Em Estoque</span>';
+  return '<span class="badge b-baixado">✔ Baixado</span>';
+}
+
+// ─── RENDER FUNCTIONS ────────────────────────────────────────────────────────
+function renderDashboard() {
+  const ativos     = itens.filter(i => i.status !== 'baixado');
+  const valorCusto = ativos.reduce((s, i) => s + i.preco * Math.max(0, i.quantidade - (i.qtdBaixada||0)), 0);
+  const valorVenda = ativos.reduce((s, i) => { const p = precos.find(x => x.itemId === i.id); return s + (p ? p.precoVenda * Math.max(0, i.quantidade - (i.qtdBaixada||0)) : 0); }, 0);
+  const atencao    = ativos.filter(i => classeDias(diasEmEstoque(i.dataEntrada)) !== 'ok').length;
+  const entradas   = itens.filter(i => i.status === 'entrada').length;
+
+  document.getElementById('kpiItens').textContent       = ativos.length;
+  document.getElementById('kpiItensSub').textContent    = `${entradas} entrada(s) recente(s)`;
+  document.getElementById('kpiValorCusto').textContent  = fmt(valorCusto);
+  document.getElementById('kpiValorCustoSub').textContent = `${ativos.length} item(ns) ativo(s)`;
+  document.getElementById('kpiValorVenda').textContent  = valorVenda > 0 ? fmt(valorVenda) : '—';
+  document.getElementById('kpiValorVendaSub').textContent = valorVenda > 0 ? `Lucro potencial: ${fmt(valorVenda - valorCusto)}` : 'Defina preços de venda';
+  document.getElementById('kpiAtencao').textContent = atencao;
+
+  const tbody = document.getElementById('tbodyRecentes');
+  const recentes = ativos.slice(0, 8);
+  if (!recentes.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📦</div>Nenhum item em estoque. Cadastre itens na aba Estoque.</div></td></tr>`;
+  } else {
+    tbody.innerHTML = recentes.map(i => {
+      const disp = Math.max(0, i.quantidade - (i.qtdBaixada||0));
+      const dias = diasEmEstoque(i.dataEntrada);
+      const cls  = classeDias(dias);
+      const lbl  = labelDias(cls);
+      return `<tr>
+        <td class="td-desc">${i.descricao}</td>
+        <td>${statusBadge(i.status)}</td>
+        <td>${i.categoria ? `<span class="badge b-cat">${i.categoria}</span>` : '—'}</td>
+        <td>${fmtN(disp)} ${i.unidade}</td>
+        <td class="td-value">${fmt(i.preco)}</td>
+        <td><span class="badge ${lbl.badge}">${dias}d</span></td>
+        <td><span class="badge ${lbl.badge}">${lbl.text}</span></td>
+      </tr>`;
+    }).join('');
+  }
+  updateCharts();
+}
+
+function renderTabelaEstoque() {
+  const st  = document.getElementById('filtroStatus').value;
+  const cat = document.getElementById('filtroCategoria').value;
+  const txt = (document.getElementById('filtroTexto').value || '').toLowerCase();
+
+  const lista = itens.filter(i =>
+    (!st  || i.status === st) &&
+    (!cat || i.categoria === cat) &&
+    (!txt || i.descricao.toLowerCase().includes(txt) || (i.fornecedor||'').toLowerCase().includes(txt))
+  );
+
+  const tbody = document.getElementById('tbodyEstoque');
+  if (!lista.length) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📦</div>Nenhum item encontrado.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = lista.map(i => {
+    const disp = Math.max(0, i.quantidade - (i.qtdBaixada||0));
+    const custoTotal = i.preco * disp;
+    const dias = i.status !== 'baixado' ? diasEmEstoque(i.dataEntrada) : null;
+    const cls  = dias !== null ? classeDias(dias) : null;
+    const lbl  = cls ? labelDias(cls) : null;
+
+    return `<tr>
+      <td class="td-desc">${i.descricao}${i.observacoes ? `<br><small style="color:var(--texto-suave);font-weight:400">${i.observacoes}</small>` : ''}</td>
+      <td>${statusBadge(i.status)}</td>
+      <td>${i.categoria ? `<span class="badge b-cat">${i.categoria}</span>` : '—'}</td>
+      <td>${i.fornecedor || '—'}</td>
+      <td>${datePT(i.dataEntrada)}</td>
+      <td>${fmtN(disp)} ${i.unidade}</td>
+      <td class="td-value">${fmt(i.preco)}</td>
+      <td class="td-value">${fmt(custoTotal)}</td>
+      <td>${dias !== null ? `<span class="badge ${lbl.badge}">${dias}d</span>` : `<span style="font-size:11px;color:#999">saído ${datePT(i.dataSaida)}</span>`}</td>
+      <td>
+        <div class="td-actions">
+          ${i.status !== 'baixado' ? `<button class="btn-sm-edit" onclick="abrirBaixa('${i.id}')">↓ Baixa</button>` : ''}
+          <button class="btn-sm-edit" onclick="abrirPreco('${i.id}')">💰 Preço</button>
+          <button class="btn-sm-danger" onclick="confirmarDelete('${i.id}')">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderTabelaPrecos() {
+  const ativos = itens.filter(i => i.status !== 'baixado');
+  const tbody  = document.getElementById('tbodyPrecos');
+  if (!ativos.length) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">💰</div>Nenhum item ativo. Cadastre itens na aba Estoque.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = ativos.map(i => {
+    const p = precos.find(x => x.itemId === i.id);
+    const lucro = p ? (p.precoVenda - (i.preco + i.preco*(p.impostos/100) + p.frete + p.outros)) : null;
+    return `<tr>
+      <td class="td-desc">${i.descricao}</td>
+      <td>${i.categoria ? `<span class="badge b-cat">${i.categoria}</span>` : '—'}</td>
+      <td class="td-value">${fmt(i.preco)}</td>
+      <td>${p ? p.impostos+'%' : '<span style="color:#ccc">—</span>'}</td>
+      <td>${p ? fmt(p.frete) : '<span style="color:#ccc">—</span>'}</td>
+      <td>${p ? fmt(p.outros) : '<span style="color:#ccc">—</span>'}</td>
+      <td>${p ? `<b>${p.margem}%</b>` : '<span style="color:var(--laranja)">—</span>'}</td>
+      <td class="td-value" style="color:var(--entrada);font-weight:700">${p ? fmt(p.precoVenda) : '<span style="color:var(--laranja);font-size:11px">Não definido</span>'}</td>
+      <td class="td-value" style="color:var(--verde-claro)">${lucro !== null ? fmt(lucro) : '—'}</td>
+      <td><button class="btn-sm-edit" onclick="abrirPreco('${i.id}')">${p ? '✏ Editar' : '+ Definir'}</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderRelatorios() {
+  const ativos = itens.filter(i => i.status !== 'baixado');
+  let nOk = 0, nWarn = 0, nDanger = 0, somaD = 0;
+
+  ativos.forEach(i => {
+    const d = diasEmEstoque(i.dataEntrada);
+    const c = classeDias(d);
+    somaD += d;
+    if (c === 'ok') nOk++; else if (c === 'warn') nWarn++; else nDanger++;
+  });
+
+  document.getElementById('kpiRelNormal').textContent  = nOk;
+  document.getElementById('kpiRelAtencao').textContent = nWarn;
+  document.getElementById('kpiRelCritico').textContent = nDanger;
+  document.getElementById('kpiRelMedia').textContent   = ativos.length ? Math.round(somaD / ativos.length) : 0;
+
+  // Oferta list
+  const urgentes = ativos.filter(i => classeDias(diasEmEstoque(i.dataEntrada)) !== 'ok').sort((a,b) => diasEmEstoque(b.dataEntrada) - diasEmEstoque(a.dataEntrada));
+  const ofertaEl = document.getElementById('ofertasList');
+
+  if (!ativos.length) {
+    ofertaEl.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div>Nenhum item em estoque.</div>';
+  } else if (!urgentes.length) {
+    ofertaEl.innerHTML = '<div class="oferta-card oferta-ok"><div class="oferta-icon">✅</div><div class="oferta-content"><div class="oferta-title">Estoque saudável!</div><div class="oferta-desc">Todos os itens estão dentro do prazo normal de giro (&lt; 30 dias). Continue monitorando.</div></div></div>';
+  } else {
+    ofertaEl.innerHTML = urgentes.map(i => {
+      const dias = diasEmEstoque(i.dataEntrada);
+      const cls  = classeDias(dias);
+      const disp = Math.max(0, i.quantidade - (i.qtdBaixada||0));
+      const p    = precos.find(x => x.itemId === i.id);
+      const tipo = cls === 'warn' ? 'warn' : 'danger';
+      const icon = cls === 'warn' ? '⚠️' : '🔴';
+      const titulo = cls === 'warn'
+        ? `Atenção: ${dias} dias em estoque`
+        : `Crítico: ${dias} dias parado!`;
+      const mensagem = cls === 'warn'
+        ? `Material parado há ${dias} dias. Avalie campanhas de venda ou promoção.`
+        : `Material parado há ${dias} dias! Recomenda-se fortemente realizar uma oferta ou liquidação.`;
+      const sugestao = p
+        ? `💡 Sugestão de oferta: ${fmt(p.precoVenda * 0.85)} (–15% sobre preço de venda de ${fmt(p.precoVenda)})`
+        : `💡 Defina a precificação para receber sugestão automática de preço de oferta.`;
+
+      return `<div class="oferta-card oferta-${tipo}">
+        <div class="oferta-icon">${icon}</div>
+        <div class="oferta-content">
+          <div class="oferta-title">${i.descricao} <span class="badge ${labelDias(cls).badge}" style="vertical-align:middle;margin-left:4px">${dias}d</span></div>
+          <div class="oferta-desc">
+            ${mensagem}<br>
+            ${sugestao}<br>
+            <small>Qtd disponível: <b>${fmtN(disp)} ${i.unidade}</b> · Custo unit.: <b>${fmt(i.preco)}</b> · Fornecedor: <b>${i.fornecedor || '—'}</b></small>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <button class="btn-sm-edit" onclick="abrirPreco('${i.id}')">💰 Preço</button>
+          <button class="btn-sm-edit" onclick="abrirBaixa('${i.id}')">↓ Baixa</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // full table
+  const tbody = document.getElementById('tbodyRelatorio');
+  if (!ativos.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📋</div>Nenhum item em estoque.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = [...ativos].sort((a,b) => diasEmEstoque(b.dataEntrada) - diasEmEstoque(a.dataEntrada)).map(i => {
+    const dias  = diasEmEstoque(i.dataEntrada);
+    const cls   = classeDias(dias);
+    const lbl   = labelDias(cls);
+    const disp  = Math.max(0, i.quantidade - (i.qtdBaixada||0));
+    const cTot  = i.preco * disp;
+    const p     = precos.find(x => x.itemId === i.id);
+    const vTot  = p ? p.precoVenda * disp : null;
+    return `<tr>
+      <td class="td-desc">${i.descricao}</td>
+      <td>${i.categoria ? `<span class="badge b-cat">${i.categoria}</span>` : '—'}</td>
+      <td>${i.fornecedor || '—'}</td>
+      <td>${datePT(i.dataEntrada)}</td>
+      <td><span class="badge ${lbl.badge}">${dias} dias</span></td>
+      <td>${fmtN(disp)} ${i.unidade}</td>
+      <td class="td-value">${fmt(cTot)}</td>
+      <td class="td-value" style="color:var(--entrada)">${vTot !== null ? fmt(vTot) : '<span style="color:#ccc">—</span>'}</td>
+      <td><span class="badge ${lbl.badge}">${lbl.text}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAll() {
+  renderCategorias();
+  renderDashboard();
+  renderTabelaEstoque();
+  renderTabelaPrecos();
+  renderRelatorios();
+}
+
+// ─── TAB ─────────────────────────────────────────────────────────────────────
+function mudarTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─── LOGO ─────────────────────────────────────────────────────────────────────
+function triggerLogoUpload() { document.getElementById('logoFileInput').click(); }
+
+function onLogoChange(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  if (f.size > 2 * 1024 * 1024) return toast('Imagem muito grande (máx. 2 MB).', 'err');
+  const r = new FileReader();
+  r.onload = ev => { localStorage.setItem(LOGO_KEY, ev.target.result); applyLogo(ev.target.result); };
+  r.readAsDataURL(f);
+}
+
+function applyLogo(src) {
+  const img  = document.getElementById('clientLogoImg');
+  const ph   = document.getElementById('clientLogoPlaceholder');
+  const wrap = document.getElementById('clientLogoWrap');
+  const acts = document.getElementById('clientLogoActions');
+  img.src = src; img.style.display = 'block';
+  ph.style.display = 'none';
+  wrap.classList.add('has-logo');
+  wrap.removeAttribute('onclick');
+  acts.style.display = 'flex';
+  toast('Logomarca adicionada!');
+}
+
+function removeLogo(e) {
+  e.stopPropagation();
+  localStorage.removeItem(LOGO_KEY);
+  const img  = document.getElementById('clientLogoImg');
+  const ph   = document.getElementById('clientLogoPlaceholder');
+  const wrap = document.getElementById('clientLogoWrap');
+  const acts = document.getElementById('clientLogoActions');
+  img.src = ''; img.style.display = 'none';
+  ph.style.display = 'flex';
+  wrap.classList.remove('has-logo');
+  wrap.setAttribute('onclick', 'triggerLogoUpload()');
+  acts.style.display = 'none';
+  toast('Logomarca removida.');
+}
+
+// ─── CLOCK ───────────────────────────────────────────────────────────────────
+function atualizarRelogio() {
+  const n = new Date();
+  const dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  document.getElementById('relogioHeader').textContent =
+    `${dias[n.getDay()]} ${n.toLocaleDateString('pt-BR')} ${n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+}
+
+// ─── RESET ───────────────────────────────────────────────────────────────────
+function confirmarReset() {
+  if (document.getElementById('resetSenha').value !== RESET_PASS) return toast('Senha incorreta.', 'err');
+  itens = []; categorias = []; precos = [];
+  salvar();
+  localStorage.removeItem(LOGO_KEY);
+  fecharModal('modalReset');
+  document.getElementById('resetSenha').value = '';
+  removeLogo({ stopPropagation: () => {} });
+  renderAll();
+  toast('Todos os dados foram resetados.');
+}
+
+// ─── EXPORT CSV ──────────────────────────────────────────────────────────────
+function exportarCSV() {
+  const hdr = ['Descrição','Status','Categoria','Fornecedor','Data Entrada','Qtd Total','Qtd Baixada','Qtd Disponível','Unidade','Custo Unit.','Custo Total','Data Saída','Dias em Estoque','Preço Venda','Margem %'];
+  const rows = itens.map(i => {
+    const disp = Math.max(0, i.quantidade - (i.qtdBaixada||0));
+    const dias = i.status !== 'baixado' ? diasEmEstoque(i.dataEntrada) : 'Baixado';
+    const p    = precos.find(x => x.itemId === i.id);
+    return [`"${i.descricao}"`, i.status, `"${i.categoria}"`, `"${i.fornecedor}"`, i.dataEntrada,
+      i.quantidade, i.qtdBaixada||0, disp, i.unidade, i.preco.toFixed(2),
+      (i.preco*disp).toFixed(2), i.dataSaida||'', dias,
+      p ? p.precoVenda.toFixed(2) : '', p ? p.margem : ''].join(',');
+  });
+  baixarCSV([hdr.join(','), ...rows].join('\n'), `estoque_${today()}.csv`);
+}
+
+function exportarRelatorio() {
+  const ativos = itens.filter(i => i.status !== 'baixado');
+  const hdr = ['Descrição','Categoria','Fornecedor','Data Entrada','Dias em Estoque','Qtd Disponível','Unidade','Custo Unit.','Custo Total','Preço Venda','Valor Venda Total','Situação'];
+  const rows = ativos.sort((a,b) => diasEmEstoque(b.dataEntrada) - diasEmEstoque(a.dataEntrada)).map(i => {
+    const disp = Math.max(0, i.quantidade - (i.qtdBaixada||0));
+    const dias = diasEmEstoque(i.dataEntrada);
+    const sit  = ['Normal','Atenção','Crítico'][['ok','warn','danger'].indexOf(classeDias(dias))];
+    const p    = precos.find(x => x.itemId === i.id);
+    return [`"${i.descricao}"`, `"${i.categoria}"`, `"${i.fornecedor}"`, i.dataEntrada,
+      dias, disp, i.unidade, i.preco.toFixed(2), (i.preco*disp).toFixed(2),
+      p ? p.precoVenda.toFixed(2) : '', p ? (p.precoVenda*disp).toFixed(2) : '', sit].join(',');
+  });
+  baixarCSV([hdr.join(','), ...rows].join('\n'), `relatorio_estoque_${today()}.csv`);
+}
+
+function baixarCSV(conteudo, nome) {
+  const blob = new Blob(['﻿' + conteudo], { type: 'text/csv;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = nome; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.getElementById('itemDataEntrada').value = today();
+document.getElementById('baixaData').value       = today();
+atualizarRelogio();
+setInterval(atualizarRelogio, 30000);
+initCharts();
+renderAll();
+const logoSalvo = localStorage.getItem(LOGO_KEY);
+if (logoSalvo) applyLogo(logoSalvo);
+</script>
+</body>
+</html>

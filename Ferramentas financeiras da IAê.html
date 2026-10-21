@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAê Financeiro — Central de Ferramentas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --verde-escuro:  #1B3B28;
+            --verde-medio:   #2D5A3D;
+            --verde-claro:   #4A7A5A;
+            --marrom:        #8B5E3C;
+            --marrom-esc:    #5C3D1F;
+            --dourado:       #C49A3C;
+            --dourado-claro: #E0B84A;
+            --laranja:       #D4763A;
+            --bege:          #E8D5A3;
+            --bege-claro:    #F5EDD5;
+            --creme:         #FEFBF3;
+            --texto:         #2C1A0E;
+            --texto-suave:   #7A5C3E;
+            --sombra:        rgba(27,59,40,.12);
+            --sombra-f:      rgba(27,59,40,.28);
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: #0E2018;
+            color: var(--texto);
+            min-height: 100vh;
+        }
+
+        /* ── HERO ────────────────────────────────────────────── */
+        .hero {
+            background: linear-gradient(160deg, #0A180F 0%, #132B1C 40%, #1B3B28 70%, #2D5A3D 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* decorative circles */
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 700px; height: 700px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(196,154,60,.07) 0%, transparent 70%);
+            top: -200px; right: -200px;
+            pointer-events: none;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 500px; height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(196,154,60,.05) 0%, transparent 70%);
+            bottom: -100px; left: -100px;
+            pointer-events: none;
+        }
+
+        /* ── NAVBAR ──────────────────────────────────────────── */
+        .navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 22px 56px;
+            border-bottom: 1px solid rgba(196,154,60,.15);
+            position: relative; z-index: 10;
+        }
+
+        .nav-brand { display: flex; align-items: center; gap: 14px; }
+
+        .nav-emblem {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--dourado), #A07828);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 19px; font-weight: 900; color: var(--verde-escuro);
+            font-family: 'Playfair Display', serif;
+            box-shadow: 0 2px 14px rgba(196,154,60,.45);
+            flex-shrink: 0;
+        }
+
+        .nav-brand-text .name {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px; font-weight: 700;
+            color: #FAF0D8; letter-spacing: 1.5px; line-height: 1.1;
+        }
+        .nav-brand-text .name span { color: var(--dourado); }
+        .nav-brand-text .sub {
+            font-size: 8px; color: rgba(245,240,216,.4);
+            letter-spacing: 3px; text-transform: uppercase; margin-top: 2px;
+        }
+
+        .nav-right {
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .nav-badge {
+            font-size: 9px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: rgba(245,240,216,.45);
+            border: 1px solid rgba(196,154,60,.25); border-radius: 20px;
+            padding: 3px 12px;
+        }
+
+        /* ── HERO CONTENT ─────────────────────────────────────── */
+        .hero-content {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center;
+            padding: 60px 40px 40px;
+            position: relative; z-index: 5;
+        }
+
+        .hero-eyebrow {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 4px; color: var(--dourado);
+            margin-bottom: 20px; opacity: .85;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(36px, 5vw, 62px);
+            font-weight: 700; color: #FAF0D8;
+            line-height: 1.15; margin-bottom: 18px;
+            max-width: 780px;
+        }
+        .hero-title em { color: var(--dourado); font-style: italic; }
+
+        .hero-sub {
+            font-size: 16px; color: rgba(245,240,216,.6);
+            max-width: 520px; line-height: 1.7; margin-bottom: 40px;
+            font-weight: 400;
+        }
+
+        .hero-deco {
+            font-size: 13px; letter-spacing: 14px;
+            color: var(--dourado); opacity: .4; margin-bottom: 56px;
+        }
+
+        /* ── TOOLS SECTION ────────────────────────────────────── */
+        .tools-section {
+            background: radial-gradient(ellipse at top, #F5EDD5 0%, #EDD8A8 60%, #E0C880 100%);
+            padding: 72px 40px 80px;
+        }
+
+        .section-header {
+            text-align: center; margin-bottom: 52px;
+        }
+
+        .section-label {
+            font-size: 9px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 3.5px; color: var(--texto-suave); margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(26px, 3vw, 36px); font-weight: 700;
+            color: var(--verde-escuro); margin-bottom: 12px;
+        }
+
+        .section-divider {
+            width: 48px; height: 2px;
+            background: linear-gradient(90deg, var(--dourado), transparent);
+            margin: 14px auto 0;
+        }
+
+        /* ── TOOL GRID ────────────────────────────────────────── */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tool-card {
+            background: var(--creme);
+            border-radius: 20px;
+            border: 1px solid rgba(196,154,60,.18);
+            box-shadow: 0 4px 24px var(--sombra);
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            transition: transform .25s, box-shadow .25s;
+            text-decoration: none; color: inherit;
+            position: relative;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 48px var(--sombra-f);
+        }
+
+        .tool-card-accent {
+            height: 5px;
+        }
+
+        .tool-card:nth-child(1) .tool-card-accent { background: linear-gradient(90deg, #1F6B42, #52A878); }
+        .tool-card:nth-child(2) .tool-card-accent { background: linear-gradient(90deg, #1B3B28, #C49A3C); }
+        .tool-card:nth-child(3) .tool-card-accent { background: linear-gradient(90deg, #5C3D1F, #D4763A); }
+        .tool-card:nth-child(4) .tool-card-accent { background: linear-gradient(90deg, #A0341E, #E07050); }
+        .tool-card:nth-child(5) .tool-card-accent { background: linear-gradient(90deg, #1A4060, #2E86C1); }
+
+        .tool-card-body {
+            padding: 28px 28px 24px;
+            flex: 1; display: flex; flex-direction: column;
+        }
+
+        .tool-icon-wrap {
+            width: 60px; height: 60px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .tool-card:nth-child(1) .tool-icon-wrap { background: #E6F4EC; }
+        .tool-card:nth-child(2) .tool-icon-wrap { background: rgba(196,154,60,.12); }
+        .tool-card:nth-child(3) .tool-icon-wrap { background: rgba(212,118,58,.12); }
+        .tool-card:nth-child(4) .tool-icon-wrap { background: rgba(160,52,30,.10); }
+        .tool-card:nth-child(5) .tool-icon-wrap { background: rgba(46,134,193,.10); }
+
+        .tool-tag {
+            font-size: 8px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.5px; border-radius: 20px; padding: 3px 10px;
+            display: inline-block; margin-bottom: 10px; width: fit-content;
+        }
+
+        .tool-card:nth-child(1) .tool-tag { background: #E6F4EC; color: #1F6B42; }
+        .tool-card:nth-child(2) .tool-tag { background: rgba(196,154,60,.15); color: #7A4C10; }
+        .tool-card:nth-child(3) .tool-tag { background: rgba(212,118,58,.12); color: #8B4010; }
+        .tool-card:nth-child(4) .tool-tag { background: rgba(160,52,30,.10); color: #A0341E; }
+        .tool-card:nth-child(5) .tool-tag { background: rgba(46,134,193,.12); color: #1A4060; }
+
+        .tool-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px; font-weight: 700;
+            color: var(--verde-escuro); margin-bottom: 10px; line-height: 1.25;
+        }
+
+        .tool-desc {
+            font-size: 13px; color: var(--texto-suave);
+            line-height: 1.65; flex: 1; margin-bottom: 24px;
+        }
+
+        .tool-features {
+            list-style: none; margin-bottom: 26px; display: flex; flex-direction: column; gap: 6px;
+        }
+
+        .tool-features li {
+            font-size: 12px; color: var(--texto-suave);
+            display: flex; align-items: center; gap: 7px;
+        }
+
+        .tool-features li::before {
+            content: '✦';
+            font-size: 8px; color: var(--dourado); flex-shrink: 0;
+        }
+
+        .tool-cta {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: all .2s;
+            text-decoration: none;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .tool-card:nth-child(1) .tool-cta {
+            background: linear-gradient(135deg, #1B3B28, #2D5A3D);
+            color: #FAF0D8;
+            box-shadow: 0 3px 12px rgba(27,59,40,.35);
+        }
+        .tool-card:nth-child(2) .tool-cta {
+            background: linear-gradient(135deg, #1B3B28, var(--dourado));
+            color: #FAF0D8;
+            box-shadow: 0 3px 12px rgba(27,59,40,.30);
+        }
+        .tool-card:nth-child(3) .tool-cta {
+            background: linear-gradient(135deg, #5C3D1F, #D4763A);
+            color: #FAF0D8;
+            box-shadow: 0 3px 12px rgba(92,61,31,.35);
+        }
+        .tool-card:nth-child(4) .tool-cta {
+            background: linear-gradient(135deg, #A0341E, #C04030);
+            color: #FAF0D8;
+            box-shadow: 0 3px 12px rgba(160,52,30,.35);
+        }
+        .tool-card:nth-child(5) .tool-cta {
+            background: linear-gradient(135deg, #1A4060, #2E86C1);
+            color: #FAF0D8;
+            box-shadow: 0 3px 12px rgba(26,64,96,.35);
+        }
+        .tool-card:nth-child(6) .tool-card-accent { background: linear-gradient(90deg, #1A5C42, #27AE60); }
+        .tool-card:nth-child(6) .tool-icon-wrap { background: rgba(39,174,96,.10); }
+        .tool-card:nth-child(6) .tool-tag { background: rgba(39,174,96,.12); color: #1A5C42; }
+        .tool-card:nth-child(6) .tool-cta {
+            background: linear-gradient(135deg, #1A5C42, #27AE60);
+            color: #FAF0D8;
+            box-shadow: 0 3px 12px rgba(26,92,66,.35);
+        }
+
+        .tool-cta:hover { transform: translateY(-1px); filter: brightness(1.08); }
+
+        .cta-arrow { font-size: 16px; transition: transform .2s; }
+        .tool-cta:hover .cta-arrow { transform: translateX(4px); }
+
+        .tool-card.em-breve .tool-cta {
+            background: rgba(139,94,60,.12) !important;
+            color: var(--texto-suave) !important;
+            box-shadow: none !important;
+            cursor: default;
+        }
+        .tool-card.em-breve .tool-cta:hover { transform: none; filter: none; }
+
+        .badge-breve {
+            position: absolute; top: 18px; right: 18px;
+            font-size: 8px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; background: rgba(196,154,60,.18);
+            color: var(--marrom); border-radius: 20px; padding: 4px 10px;
+            border: 1px solid rgba(196,154,60,.3);
+        }
+
+        /* ── STATS BAR ────────────────────────────────────────── */
+        .stats-bar {
+            background: var(--verde-escuro);
+            padding: 36px 56px;
+            display: flex; align-items: center; justify-content: center;
+            gap: 0; flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 8px 48px;
+            border-right: 1px solid rgba(196,154,60,.18);
+        }
+        .stat-item:last-child { border-right: none; }
+
+        .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px; font-weight: 700; color: var(--dourado);
+            line-height: 1.1;
+        }
+        .stat-label {
+            font-size: 10px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1.2px; color: rgba(245,240,216,.45); margin-top: 5px;
+        }
+
+        /* ── FOOTER ───────────────────────────────────────────── */
+        footer {
+            background: #0A180F;
+            padding: 36px 56px;
+            border-top: 1px solid rgba(196,154,60,.12);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 16px;
+        }
+
+        .footer-brand { display: flex; align-items: center; gap: 12px; }
+        .footer-emblem {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--dourado), #A07828);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 900; color: var(--verde-escuro);
+            font-family: 'Playfair Display', serif;
+        }
+        .footer-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px; font-weight: 700; color: rgba(245,240,216,.7);
+        }
+        .footer-name span { color: var(--dourado); }
+
+        .footer-copy {
+            font-size: 11px; color: rgba(245,240,216,.25);
+            letter-spacing: .5px;
+        }
+
+        /* ── SCROLL CTA (hero bottom) ─────────────────────────── */
+        .scroll-cta {
+            text-align: center; padding: 0 0 40px;
+            position: relative; z-index: 5;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+        }
+        .scroll-cta span {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 2px; color: rgba(245,240,216,.3);
+        }
+        .scroll-arrow {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 1px solid rgba(196,154,60,.3);
+            display: flex; align-items: center; justify-content: center;
+            color: rgba(196,154,60,.6); font-size: 14px;
+            animation: bounce 2s infinite;
+            cursor: pointer;
+        }
+        @keyframes bounce {
+            0%,100%{transform:translateY(0)}
+            50%{transform:translateY(6px)}
+        }
+
+        /* ── RESPONSIVE ───────────────────────────────────────── */
+        @media(max-width:900px) {
+            .navbar { padding: 16px 24px; }
+            .hero-content { padding: 40px 24px 32px; }
+            .tools-section { padding: 48px 20px 60px; }
+            .stats-bar { padding: 28px 20px; }
+            .stat-item { padding: 8px 24px; }
+            footer { padding: 24px 24px; }
+        }
+
+        @media(max-width:600px) {
+            .tools-grid { grid-template-columns: 1fr; }
+            .stat-item { border-right: none; border-bottom: 1px solid rgba(196,154,60,.18); padding: 14px 20px; }
+            .stat-item:last-child { border-bottom: none; }
+            .nav-right { display: none; }
+            .hero-deco { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ HERO ════════════════════════════════════════════════════ -->
+<section class="hero">
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="nav-emblem">IAê</div>
+            <div class="nav-brand-text">
+                <div class="name">IAê <span>Financeiro</span></div>
+                <div class="sub">BPO Financeiro &bull; Consultoria</div>
+            </div>
+        </div>
+        <div class="nav-right">
+            <span class="nav-badge">BPO Financeiro</span>
+            <span class="nav-badge">Consultoria Financeira</span>
+        </div>
+    </nav>
+
+    <div class="hero-content">
+        <div class="hero-eyebrow">Central de Ferramentas Financeiras</div>
+        <h1 class="hero-title">
+            Inteligência que organiza.<br>
+            <em>Estratégia que transforma.</em>
+        </h1>
+        <p class="hero-sub">
+            Ferramentas desenvolvidas para o seu negócio — do diagnóstico financeiro
+            à gestão completa do fluxo de caixa, DRE e estoque.
+        </p>
+        <div class="hero-deco">✦ &nbsp; ✦ &nbsp; ✦</div>
+    </div>
+
+    <div class="scroll-cta" onclick="document.getElementById('ferramentas').scrollIntoView({behavior:'smooth'})">
+        <span>Explorar ferramentas</span>
+        <div class="scroll-arrow">▼</div>
+    </div>
+</section>
+
+<!-- ══ STATS ════════════════════════════════════════════════════ -->
+<div class="stats-bar">
+    <div class="stat-item">
+        <div class="stat-value">6</div>
+        <div class="stat-label">Ferramentas</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">100%</div>
+        <div class="stat-label">Offline</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">Local</div>
+        <div class="stat-label">Dados Seguros</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">BPO</div>
+        <div class="stat-label">Financeiro</div>
+    </div>
+</div>
+
+<!-- ══ FERRAMENTAS ══════════════════════════════════════════════ -->
+<section class="tools-section" id="ferramentas">
+    <div class="section-header">
+        <div class="section-label">Soluções disponíveis</div>
+        <h2 class="section-title">Escolha sua ferramenta</h2>
+        <div class="section-divider"></div>
+    </div>
+
+    <div class="tools-grid">
+
+        <!-- 1. Diagnóstico Empresarial -->
+        <div class="tool-card">
+            <div class="tool-card-accent"></div>
+            <div class="tool-card-body">
+                <div class="tool-icon-wrap">🔍</div>
+                <span class="tool-tag">Diagnóstico</span>
+                <h3 class="tool-name">Diagnóstico Empresarial</h3>
+                <p class="tool-desc">
+                    Análise completa da saúde financeira do seu negócio — indicadores-chave,
+                    pontos críticos e recomendações estratégicas em um único relatório.
+                </p>
+                <ul class="tool-features">
+                    <li>Indicadores financeiros automatizados</li>
+                    <li>Análise de liquidez e endividamento</li>
+                    <li>Relatório de pontos de atenção</li>
+                    <li>Recomendações personalizadas</li>
+                </ul>
+                <a class="tool-cta" href="https://dcmfinance2026-consultor.github.io/IAe-Financeiro/" target="_blank">
+                    <span>Acessar ferramenta</span>
+                    <span class="cta-arrow">→</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. Fluxo de Caixa -->
+        <div class="tool-card">
+            <div class="tool-card-accent"></div>
+            <div class="tool-card-body">
+                <div class="tool-icon-wrap">💰</div>
+                <span class="tool-tag">Disponível</span>
+                <h3 class="tool-name">Fluxo de Caixa</h3>
+                <p class="tool-desc">
+                    Controle completo de entradas e saídas, custos fixos, projeções
+                    e dashboard interativo com gráficos em tempo real.
+                </p>
+                <ul class="tool-features">
+                    <li>Dashboard com KPIs e gráficos</li>
+                    <li>Lançamentos de entradas e saídas</li>
+                    <li>Gestão de custos fixos mensais</li>
+                    <li>Projeções de fluxo futuro</li>
+                </ul>
+                <a class="tool-cta" href="fluxo-caixa-cliente.html">
+                    <span>Acessar ferramenta</span>
+                    <span class="cta-arrow">→</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 3. DRE Mensal -->
+        <div class="tool-card">
+            <div class="tool-card-accent"></div>
+            <div class="tool-card-body">
+                <div class="tool-icon-wrap">📊</div>
+                <span class="tool-tag">DRE</span>
+                <h3 class="tool-name">DRE Mensal</h3>
+                <p class="tool-desc">
+                    Demonstração do Resultado do Exercício estruturada mês a mês —
+                    da receita bruta ao lucro líquido, com visão consolidada do ano.
+                </p>
+                <ul class="tool-features">
+                    <li>Receita bruta e deduções</li>
+                    <li>Custos, despesas e margens</li>
+                    <li>Comparativo mensal e anual</li>
+                    <li>Exportação para relatório</li>
+                </ul>
+                <a class="tool-cta" href="dre-mensal-cliente.html">
+                    <span>Acessar ferramenta</span>
+                    <span class="cta-arrow">→</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 4. Controle de Estoque e Precificação -->
+        <div class="tool-card">
+            <div class="tool-card-accent"></div>
+            <div class="tool-card-body">
+                <div class="tool-icon-wrap">📦</div>
+                <span class="tool-tag">Estoque</span>
+                <h3 class="tool-name">Controle de Estoque e Precificação</h3>
+                <p class="tool-desc">
+                    Gestão de produtos e insumos com precificação inteligente —
+                    CMV, markup, ponto de equilíbrio e margem de contribuição.
+                </p>
+                <ul class="tool-features">
+                    <li>Cadastro de produtos e insumos</li>
+                    <li>Cálculo automático de CMV e markup</li>
+                    <li>Ponto de equilíbrio por produto</li>
+                    <li>Alertas de estoque mínimo</li>
+                </ul>
+                <a class="tool-cta" href="controle-estoque-cliente.html">
+                    <span>Acessar ferramenta</span>
+                    <span class="cta-arrow">→</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 5. Contas a Pagar e Receber -->
+        <div class="tool-card">
+            <div class="tool-card-accent"></div>
+            <div class="tool-card-body">
+                <div class="tool-icon-wrap">📑</div>
+                <span class="tool-tag">Financeiro</span>
+                <h3 class="tool-name">Contas a Pagar & Receber</h3>
+                <p class="tool-desc">
+                    Planejamento completo de pagamentos por fornecedor, controle de impostos
+                    retidos e conciliação bancária automática com upload de extrato.
+                </p>
+                <ul class="tool-features">
+                    <li>Registro por fornecedor com impostos (ICMS, PIS, COFINS, ISS…)</li>
+                    <li>Conciliação bancária via upload de extrato CSV/OFX</li>
+                    <li>Proteção contra pagamento em duplicidade</li>
+                    <li>Dashboard de vencimentos e saldo projetado</li>
+                </ul>
+                <a class="tool-cta" href="contas-pagar-receber.html">
+                    <span>Acessar ferramenta</span>
+                    <span class="cta-arrow">→</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 6. Planejamento Orçamentário -->
+        <div class="tool-card">
+            <div class="tool-card-accent"></div>
+            <div class="tool-card-body">
+                <div class="tool-icon-wrap">📊</div>
+                <span class="tool-tag">Planejamento</span>
+                <h3 class="tool-name">Planejamento Orçamentário</h3>
+                <p class="tool-desc">
+                    Orce receitas, custos e despesas por categoria com sazonalidade automática.
+                    Compare orçado × realizado trimestralmente com semáforos e insights.
+                </p>
+                <ul class="tool-features">
+                    <li>Sazonalidade configurável (Natal, Black Friday, Páscoa e +)</li>
+                    <li>Custos como % da receita ou valor fixo</li>
+                    <li>Análise trimestral Q1–Q4 com semáforos automáticos</li>
+                    <li>Revisões trimestrais e versionamento do orçamento</li>
+                </ul>
+                <a class="tool-cta" href="planejamento-orcamentario.html">
+                    <span>Acessar ferramenta</span>
+                    <span class="cta-arrow">→</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ══ FOOTER ═══════════════════════════════════════════════════ -->
+<footer>
+    <div class="footer-brand">
+        <div class="footer-emblem">IAê</div>
+        <div class="footer-name">IAê <span>Financeiro</span></div>
+    </div>
+    <div class="footer-copy">BPO Financeiro &bull; Consultoria Financeira &bull; Todos os direitos reservados</div>
+</footer>
+
+</body>
+</html>

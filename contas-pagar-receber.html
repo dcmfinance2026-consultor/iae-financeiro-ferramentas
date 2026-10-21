@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IAê Financeiro — Contas a Pagar e Receber</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --verde-escuro:  #1B3B28;
+      --verde-medio:   #2D5A3D;
+      --verde-claro:   #4A7A5A;
+      --marrom:        #8B5E3C;
+      --marrom-esc:    #5C3D1F;
+      --dourado:       #C49A3C;
+      --dourado-claro: #E0B84A;
+      --laranja:       #D4763A;
+      --vermelho:      #C0392B;
+      --verde-ok:      #27AE60;
+      --bege:          #E8D5A3;
+      --bege-claro:    #F5EDD5;
+      --creme:         #FEFBF3;
+      --texto:         #2C1A0E;
+      --texto-suave:   #7A5C3E;
+      --sombra:        rgba(27,59,40,.12);
+      --sombra-f:      rgba(27,59,40,.28);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Nunito', sans-serif; background: #0E2018; color: var(--texto); min-height: 100vh; }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 48px;
+      background: linear-gradient(180deg,#0A180F,#132B1C);
+      border-bottom: 1px solid rgba(196,154,60,.2);
+      position: sticky; top: 0; z-index: 200;
+    }
+    .nav-brand { display:flex; align-items:center; gap:12px; }
+    .nav-emblem {
+      width:40px; height:40px; border-radius:50%;
+      background: radial-gradient(circle at 35% 35%, var(--dourado-claro), var(--dourado));
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Playfair Display',serif; font-size:16px; font-weight:700; color:#0A180F;
+      box-shadow: 0 0 16px rgba(196,154,60,.35);
+    }
+    .nav-title { font-family:'Playfair Display',serif; color:var(--bege); font-size:17px; font-weight:600; }
+    .nav-sub { font-size:11px; color:rgba(228,213,163,.5); letter-spacing:.06em; }
+    .nav-back {
+      font-size:13px; color:rgba(228,213,163,.6); text-decoration:none;
+      border:1px solid rgba(196,154,60,.2); padding:6px 16px; border-radius:20px;
+      transition:.2s;
+    }
+    .nav-back:hover { color:var(--dourado-claro); border-color:rgba(196,154,60,.5); }
+
+    /* ── HERO STRIP ── */
+    .hero-strip {
+      background: linear-gradient(135deg,#0A180F 0%,#132B1C 50%,#1B3B28 100%);
+      padding: 36px 48px 28px;
+      border-bottom: 1px solid rgba(196,154,60,.12);
+    }
+    .hero-strip h1 { font-family:'Playfair Display',serif; color:var(--bege); font-size:26px; font-weight:700; margin-bottom:6px; }
+    .hero-strip p { color:rgba(228,213,163,.6); font-size:14px; }
+
+    /* ── TABS ── */
+    .tabs-bar {
+      display:flex; gap:2px;
+      background: #0E2018;
+      padding: 0 48px;
+      border-bottom: 1px solid rgba(196,154,60,.15);
+    }
+    .tab-btn {
+      padding:14px 22px; font-family:'Nunito',sans-serif; font-size:13px; font-weight:600;
+      color:rgba(228,213,163,.5); background:none; border:none; cursor:pointer;
+      border-bottom: 2px solid transparent; margin-bottom:-1px;
+      transition:.2s; letter-spacing:.03em; white-space:nowrap;
+    }
+    .tab-btn.active { color:var(--dourado-claro); border-bottom-color:var(--dourado); }
+    .tab-btn:hover:not(.active) { color:rgba(228,213,163,.8); }
+
+    /* ── MAIN CONTENT ── */
+    .main { padding: 32px 48px 64px; max-width: 1400px; margin: 0 auto; }
+    .panel { display:none; }
+    .panel.active { display:block; }
+
+    /* ── KPI GRID ── */
+    .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:28px; }
+    .kpi-card {
+      background: linear-gradient(135deg,#132B1C,#1B3B28);
+      border: 1px solid rgba(196,154,60,.18);
+      border-radius:14px; padding:20px 22px;
+      position:relative; overflow:hidden;
+    }
+    .kpi-card::before {
+      content:''; position:absolute; top:-30px; right:-30px;
+      width:80px; height:80px; border-radius:50%;
+      background: radial-gradient(circle, rgba(196,154,60,.08), transparent 70%);
+    }
+    .kpi-label { font-size:11px; color:rgba(228,213,163,.5); letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px; }
+    .kpi-value { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:var(--bege); }
+    .kpi-value.danger { color:#F08080; }
+    .kpi-value.ok { color:#90EE90; }
+    .kpi-value.warn { color:var(--dourado-claro); }
+    .kpi-sub { font-size:11px; color:rgba(228,213,163,.4); margin-top:4px; }
+
+    /* ── SECTION HEADER ── */
+    .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+    .section-title { font-family:'Playfair Display',serif; color:var(--bege); font-size:18px; font-weight:600; }
+    .section-sub { font-size:12px; color:rgba(228,213,163,.4); margin-top:2px; }
+
+    /* ── BUTTON ── */
+    .btn {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 20px; border-radius:8px; border:none; cursor:pointer;
+      font-family:'Nunito',sans-serif; font-size:13px; font-weight:700;
+      transition:.2s; letter-spacing:.02em;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg,var(--dourado),var(--dourado-claro));
+      color:#0A180F;
+      box-shadow: 0 4px 14px rgba(196,154,60,.3);
+    }
+    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(196,154,60,.45); }
+    .btn-ghost {
+      background:transparent; color:rgba(228,213,163,.7);
+      border:1px solid rgba(196,154,60,.25);
+    }
+    .btn-ghost:hover { color:var(--dourado-claro); border-color:rgba(196,154,60,.5); }
+    .btn-danger { background:rgba(192,57,43,.15); color:#F08080; border:1px solid rgba(192,57,43,.3); }
+    .btn-danger:hover { background:rgba(192,57,43,.25); }
+    .btn-ok { background:rgba(39,174,96,.15); color:#90EE90; border:1px solid rgba(39,174,96,.3); }
+    .btn-ok:hover { background:rgba(39,174,96,.25); }
+    .btn-sm { padding:6px 14px; font-size:12px; }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: linear-gradient(135deg,#132B1C,#1B3B28);
+      border: 1px solid rgba(196,154,60,.18);
+      border-radius:16px; padding:28px 32px; margin-bottom:24px;
+    }
+    .form-card-title { font-family:'Playfair Display',serif; color:var(--dourado-claro); font-size:15px; margin-bottom:22px; display:flex; align-items:center; gap:8px; }
+    .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    .form-group { display:flex; flex-direction:column; gap:6px; }
+    .form-group.full { grid-column: 1/-1; }
+    .form-group.half { grid-column: span 2; }
+    label { font-size:12px; color:rgba(228,213,163,.6); letter-spacing:.05em; font-weight:600; }
+    input, select, textarea {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(196,154,60,.2);
+      border-radius:8px; padding:10px 14px;
+      color:var(--bege); font-family:'Nunito',sans-serif; font-size:13px;
+      transition:.2s; outline:none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color:rgba(196,154,60,.5);
+      background:rgba(255,255,255,.07);
+      box-shadow:0 0 0 3px rgba(196,154,60,.08);
+    }
+    input::placeholder { color:rgba(228,213,163,.25); }
+    select option { background:#1B3B28; color:var(--bege); }
+    textarea { resize:vertical; min-height:80px; }
+
+    /* ── TAXES SUB-FORM ── */
+    .taxes-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-top:12px; }
+    .tax-item { display:flex; flex-direction:column; gap:5px; }
+    .tax-total-bar {
+      background:rgba(196,154,60,.08); border:1px solid rgba(196,154,60,.2);
+      border-radius:8px; padding:12px 16px; margin-top:12px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .tax-total-label { font-size:12px; color:rgba(228,213,163,.6); }
+    .tax-total-value { font-family:'Playfair Display',serif; font-size:16px; color:var(--dourado-claro); font-weight:600; }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      background: linear-gradient(135deg,#0F2419,#132B1C);
+      border: 1px solid rgba(196,154,60,.15);
+      border-radius:16px; overflow:hidden;
+    }
+    .table-toolbar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 20px; border-bottom:1px solid rgba(196,154,60,.1);
+      gap:12px; flex-wrap:wrap;
+    }
+    .search-box {
+      display:flex; align-items:center; gap:8px;
+      background:rgba(255,255,255,.04); border:1px solid rgba(196,154,60,.2);
+      border-radius:8px; padding:8px 14px; min-width:220px;
+    }
+    .search-box input { background:none; border:none; padding:0; flex:1; color:var(--bege); font-size:13px; }
+    .search-box input:focus { box-shadow:none; }
+    .filter-select { padding:8px 14px; min-width:140px; }
+    table { width:100%; border-collapse:collapse; }
+    thead th {
+      padding:12px 16px; text-align:left;
+      font-size:11px; color:rgba(228,213,163,.45); letter-spacing:.08em; text-transform:uppercase;
+      border-bottom: 1px solid rgba(196,154,60,.1);
+      font-weight:700;
+    }
+    tbody tr { border-bottom:1px solid rgba(196,154,60,.07); transition:.15s; }
+    tbody tr:hover { background:rgba(196,154,60,.04); }
+    tbody tr:last-child { border-bottom:none; }
+    td { padding:12px 16px; font-size:13px; color:rgba(228,213,163,.8); vertical-align:middle; }
+    td .td-main { color:var(--bege); font-weight:600; }
+    td .td-sub { font-size:11px; color:rgba(228,213,163,.4); margin-top:2px; }
+
+    /* ── STATUS BADGES ── */
+    .badge {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;
+      letter-spacing:.04em;
+    }
+    .badge::before { content:''; width:6px; height:6px; border-radius:50%; background:currentColor; }
+    .badge-pending { background:rgba(196,154,60,.15); color:var(--dourado-claro); }
+    .badge-paid    { background:rgba(39,174,96,.15);  color:#90EE90; }
+    .badge-overdue { background:rgba(192,57,43,.15);  color:#F08080; }
+    .badge-cancelled { background:rgba(120,120,120,.15); color:rgba(200,200,200,.6); }
+    .badge-reconciled { background:rgba(52,152,219,.15); color:#87CEEB; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align:center; padding:56px 32px;
+      color:rgba(228,213,163,.3); font-size:14px;
+    }
+    .empty-state .icon { font-size:42px; margin-bottom:12px; opacity:.4; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:500;
+      display:none; align-items:center; justify-content:center;
+    }
+    .modal-overlay.show { display:flex; }
+    .modal {
+      background: linear-gradient(135deg,#132B1C,#1B3B28);
+      border:1px solid rgba(196,154,60,.3);
+      border-radius:20px; padding:36px 40px;
+      max-width:460px; width:90%; position:relative;
+      box-shadow: 0 24px 80px rgba(0,0,0,.5);
+    }
+    .modal-icon { font-size:40px; margin-bottom:16px; }
+    .modal-title { font-family:'Playfair Display',serif; color:var(--bege); font-size:20px; margin-bottom:10px; }
+    .modal-body { color:rgba(228,213,163,.65); font-size:14px; line-height:1.6; margin-bottom:22px; }
+    .modal-body strong { color:var(--dourado-claro); }
+    .modal-actions { display:flex; gap:12px; justify-content:flex-end; }
+    .modal-close { position:absolute; top:16px; right:16px; background:none; border:none; color:rgba(228,213,163,.4); font-size:20px; cursor:pointer; }
+    .modal-close:hover { color:var(--bege); }
+    .modal-error { color:#F08080; font-size:12px; margin-top:8px; display:none; }
+
+    /* ── RECONCILIATION ── */
+    .upload-zone {
+      border:2px dashed rgba(196,154,60,.25); border-radius:14px;
+      padding:40px; text-align:center; cursor:pointer;
+      transition:.2s; background:rgba(196,154,60,.03);
+    }
+    .upload-zone:hover, .upload-zone.drag { border-color:rgba(196,154,60,.55); background:rgba(196,154,60,.06); }
+    .upload-zone .up-icon { font-size:36px; margin-bottom:12px; opacity:.5; }
+    .upload-zone .up-title { color:rgba(228,213,163,.7); font-size:15px; font-weight:600; margin-bottom:6px; }
+    .upload-zone .up-sub { color:rgba(228,213,163,.35); font-size:12px; }
+    .upload-zone input { display:none; }
+
+    .recon-match {
+      background:rgba(196,154,60,.04); border:1px solid rgba(196,154,60,.12);
+      border-radius:10px; padding:14px 16px; margin-bottom:8px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      flex-wrap:wrap;
+    }
+    .recon-match .rm-left { flex:1; min-width:200px; }
+    .recon-match .rm-date { font-size:11px; color:rgba(228,213,163,.4); }
+    .recon-match .rm-desc { font-size:13px; color:var(--bege); font-weight:600; margin:2px 0; }
+    .recon-match .rm-amount { font-family:'Playfair Display',serif; font-size:16px; }
+    .recon-match .rm-amount.credit { color:#90EE90; }
+    .recon-match .rm-amount.debit  { color:#F08080; }
+    .recon-match-status { display:flex; align-items:center; gap:8px; }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap { background:rgba(196,154,60,.1); border-radius:100px; height:6px; margin-top:8px; overflow:hidden; }
+    .progress-bar  { height:100%; border-radius:100px; background:linear-gradient(90deg,var(--dourado),var(--dourado-claro)); transition:width .4s ease; }
+
+    /* ── TOAST ── */
+    #toast-container { position:fixed; bottom:24px; right:24px; z-index:1000; display:flex; flex-direction:column; gap:10px; }
+    .toast {
+      background:linear-gradient(135deg,#1B3B28,#2D5A3D);
+      border:1px solid rgba(196,154,60,.3); border-radius:10px;
+      padding:14px 20px; font-size:13px; color:var(--bege);
+      box-shadow:0 8px 32px rgba(0,0,0,.4);
+      animation: slideIn .25s ease;
+      display:flex; align-items:center; gap:10px;
+    }
+    .toast.success { border-color:rgba(39,174,96,.4); }
+    .toast.error   { border-color:rgba(192,57,43,.4); background:linear-gradient(135deg,#2B1515,#3B1B1B); }
+    .toast.warning { border-color:rgba(196,154,60,.5); }
+    @keyframes slideIn { from { transform:translateX(60px); opacity:0; } to { transform:translateX(0); opacity:1; } }
+
+    /* ── RESPONSIVENESS ── */
+    @media (max-width:768px) {
+      .navbar { padding:14px 20px; }
+      .hero-strip, .tabs-bar, .main { padding-left:20px; padding-right:20px; }
+      .form-grid { grid-template-columns:1fr; }
+      .form-group.half { grid-column:1/-1; }
+      .kpi-grid { grid-template-columns:1fr 1fr; }
+    }
+
+    /* ── DIVIDER ── */
+    .divider { border:none; border-top:1px solid rgba(196,154,60,.1); margin:24px 0; }
+
+    /* ── CHIP FILTERS ── */
+    .chip-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+    .chip {
+      padding:5px 14px; border-radius:20px; font-size:12px; font-weight:600;
+      cursor:pointer; border:1px solid rgba(196,154,60,.2); color:rgba(228,213,163,.5);
+      background:transparent; transition:.15s;
+    }
+    .chip.active, .chip:hover { background:rgba(196,154,60,.12); color:var(--dourado-claro); border-color:rgba(196,154,60,.4); }
+
+    /* ── CONCILIATION SUMMARY ── */
+    .recon-summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:22px; }
+    .recon-stat {
+      background:rgba(196,154,60,.06); border:1px solid rgba(196,154,60,.14);
+      border-radius:10px; padding:16px 18px; text-align:center;
+    }
+    .recon-stat .rs-val { font-family:'Playfair Display',serif; font-size:20px; color:var(--bege); }
+    .recon-stat .rs-lbl { font-size:11px; color:rgba(228,213,163,.45); margin-top:4px; }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-emblem">IAê</div>
+    <div>
+      <div class="nav-title">IAê Financeiro</div>
+      <div class="nav-sub">Contas a Pagar & Receber · Conciliação Bancária</div>
+    </div>
+  </div>
+  <a href="Ferramentas financeiras da IAê.html" class="nav-back">← Voltar</a>
+</nav>
+
+<!-- HERO STRIP -->
+<div class="hero-strip">
+  <h1>Gestão de Contas & Conciliação Bancária</h1>
+  <p>Planeje pagamentos por fornecedor, controle recebimentos e concilie automaticamente com seu extrato bancário.</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('pagar')">Contas a Pagar</button>
+  <button class="tab-btn" onclick="switchTab('receber')">Contas a Receber</button>
+  <button class="tab-btn" onclick="switchTab('conciliacao')">Conciliação Bancária</button>
+</div>
+
+<!-- ═══════════════════════════ MAIN ═══════════════════════════ -->
+<div class="main">
+
+  <!-- ── DASHBOARD ── -->
+  <div id="panel-dashboard" class="panel active">
+    <div class="kpi-grid" id="kpi-grid"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:8px">
+      <!-- Próximos vencimentos -->
+      <div>
+        <div class="section-header">
+          <div><div class="section-title">Próximos Vencimentos</div><div class="section-sub">Contas a pagar nos próximos 30 dias</div></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Fornecedor</th><th>Vencimento</th><th>Valor Total</th><th>Status</th>
+            </tr></thead>
+            <tbody id="tb-upcoming"></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Recebimentos próximos -->
+      <div>
+        <div class="section-header">
+          <div><div class="section-title">Próximos Recebimentos</div><div class="section-sub">Contas a receber nos próximos 30 dias</div></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Cliente</th><th>Vencimento</th><th>Valor</th><th>Status</th>
+            </tr></thead>
+            <tbody id="tb-upcoming-recv"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTAS A PAGAR ── -->
+  <div id="panel-pagar" class="panel">
+    <!-- FORM -->
+    <div class="form-card" id="form-pagar-card">
+      <div class="form-card-title">
+        <span>➕</span> Registrar Conta a Pagar
+      </div>
+      <form id="form-pagar" onsubmit="submitPagar(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>FORNECEDOR *</label>
+            <input type="text" id="p-supplier" placeholder="Nome do fornecedor" required>
+          </div>
+          <div class="form-group">
+            <label>CATEGORIA</label>
+            <select id="p-category">
+              <option value="">Selecione...</option>
+              <option>Aluguel</option>
+              <option>Fornecedor de produtos</option>
+              <option>Serviços</option>
+              <option>Utilities (energia, água)</option>
+              <option>Folha de pagamento</option>
+              <option>Empréstimo / Financiamento</option>
+              <option>Impostos</option>
+              <option>Marketing</option>
+              <option>Tecnologia / Software</option>
+              <option>Outros</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>DATA DE VENCIMENTO *</label>
+            <input type="date" id="p-duedate" required>
+          </div>
+          <div class="form-group">
+            <label>VALOR PRINCIPAL (R$) *</label>
+            <input type="number" id="p-amount" step="0.01" min="0.01" placeholder="0,00" required>
+          </div>
+          <div class="form-group">
+            <label>NÚMERO DO DOCUMENTO</label>
+            <input type="text" id="p-docnumber" placeholder="NF, boleto, contrato...">
+          </div>
+          <div class="form-group">
+            <label>FORMA DE PAGAMENTO</label>
+            <select id="p-paymethod">
+              <option value="">Selecione...</option>
+              <option>Boleto bancário</option>
+              <option>Transferência (TED/PIX)</option>
+              <option>Débito automático</option>
+              <option>Cheque</option>
+              <option>Cartão de crédito</option>
+              <option>Dinheiro</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>DESCRIÇÃO / OBSERVAÇÕES</label>
+            <textarea id="p-desc" placeholder="Descreva o pagamento, referência do contrato, etc."></textarea>
+          </div>
+        </div>
+
+        <!-- IMPOSTOS -->
+        <hr class="divider">
+        <div style="color:rgba(228,213,163,.6);font-size:12px;font-weight:700;letter-spacing:.08em;margin-bottom:14px">IMPOSTOS RETIDOS / INCIDENTES</div>
+        <div class="taxes-grid">
+          <div class="tax-item"><label>ICMS (%)</label><input type="number" id="t-icms" step="0.01" min="0" placeholder="0,00" oninput="calcTaxTotal()"></div>
+          <div class="tax-item"><label>PIS (%)</label><input type="number" id="t-pis" step="0.01" min="0" placeholder="0,00" oninput="calcTaxTotal()"></div>
+          <div class="tax-item"><label>COFINS (%)</label><input type="number" id="t-cofins" step="0.01" min="0" placeholder="0,00" oninput="calcTaxTotal()"></div>
+          <div class="tax-item"><label>ISS (%)</label><input type="number" id="t-iss" step="0.01" min="0" placeholder="0,00" oninput="calcTaxTotal()"></div>
+          <div class="tax-item"><label>IRPJ (%)</label><input type="number" id="t-irpj" step="0.01" min="0" placeholder="0,00" oninput="calcTaxTotal()"></div>
+          <div class="tax-item"><label>CSLL (%)</label><input type="number" id="t-csll" step="0.01" min="0" placeholder="0,00" oninput="calcTaxTotal()"></div>
+          <div class="tax-item"><label>OUTROS (R$)</label><input type="number" id="t-outros" step="0.01" min="0" placeholder="0,00" oninput="calcTaxTotal()"></div>
+        </div>
+        <div class="tax-total-bar">
+          <div>
+            <div class="tax-total-label">VALOR TOTAL COM IMPOSTOS</div>
+            <div id="tax-total-display" class="tax-total-value">R$ 0,00</div>
+          </div>
+          <div style="text-align:right">
+            <div class="tax-total-label">IMPOSTOS TOTAIS</div>
+            <div id="tax-sum-display" style="font-size:14px;color:rgba(228,213,163,.5);">R$ 0,00</div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:20px">
+          <button type="button" class="btn btn-ghost" onclick="resetFormPagar()">Limpar</button>
+          <button type="submit" class="btn btn-primary">Registrar Conta a Pagar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- TABLE -->
+    <div class="section-header">
+      <div><div class="section-title">Contas a Pagar</div></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV('pagar')">⬇ Exportar CSV</button>
+      </div>
+    </div>
+    <div class="chip-row" id="filter-chips-pagar">
+      <button class="chip active" data-filter="all" onclick="filterPagar('all',this)">Todas</button>
+      <button class="chip" data-filter="pending" onclick="filterPagar('pending',this)">Pendentes</button>
+      <button class="chip" data-filter="overdue" onclick="filterPagar('overdue',this)">Vencidas</button>
+      <button class="chip" data-filter="paid" onclick="filterPagar('paid',this)">Pagas</button>
+    </div>
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <div class="search-box">
+          <span style="color:rgba(228,213,163,.3)">🔍</span>
+          <input type="text" placeholder="Buscar fornecedor..." id="search-pagar" oninput="renderPagar()">
+        </div>
+        <select class="filter-select" id="month-filter-pagar" onchange="renderPagar()">
+          <option value="">Todos os meses</option>
+        </select>
+      </div>
+      <table>
+        <thead><tr>
+          <th>Fornecedor / Categoria</th>
+          <th>Vencimento</th>
+          <th>Valor</th>
+          <th>Impostos</th>
+          <th>Total</th>
+          <th>Pagamento</th>
+          <th>Status</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="tb-pagar"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── CONTAS A RECEBER ── -->
+  <div id="panel-receber" class="panel">
+    <!-- FORM -->
+    <div class="form-card">
+      <div class="form-card-title"><span>💰</span> Registrar Conta a Receber</div>
+      <form id="form-receber" onsubmit="submitReceber(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>CLIENTE *</label>
+            <input type="text" id="r-client" placeholder="Nome do cliente" required>
+          </div>
+          <div class="form-group">
+            <label>CATEGORIA</label>
+            <select id="r-category">
+              <option value="">Selecione...</option>
+              <option>Venda de produtos</option>
+              <option>Prestação de serviços</option>
+              <option>Aluguel</option>
+              <option>Comissões</option>
+              <option>Empréstimo recebido</option>
+              <option>Outros</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>DATA DE VENCIMENTO *</label>
+            <input type="date" id="r-duedate" required>
+          </div>
+          <div class="form-group">
+            <label>VALOR (R$) *</label>
+            <input type="number" id="r-amount" step="0.01" min="0.01" placeholder="0,00" required>
+          </div>
+          <div class="form-group">
+            <label>NÚMERO DA NF / DOCUMENTO</label>
+            <input type="text" id="r-docnumber" placeholder="NF, contrato...">
+          </div>
+          <div class="form-group">
+            <label>FORMA DE RECEBIMENTO</label>
+            <select id="r-paymethod">
+              <option value="">Selecione...</option>
+              <option>PIX</option>
+              <option>Transferência (TED)</option>
+              <option>Boleto bancário</option>
+              <option>Cartão de débito</option>
+              <option>Cartão de crédito</option>
+              <option>Dinheiro</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>DESCRIÇÃO / OBSERVAÇÕES</label>
+            <textarea id="r-desc" placeholder="Descreva o recebimento, referência, etc."></textarea>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:20px">
+          <button type="button" class="btn btn-ghost" onclick="resetFormReceber()">Limpar</button>
+          <button type="submit" class="btn btn-primary">Registrar Conta a Receber</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- TABLE -->
+    <div class="section-header">
+      <div><div class="section-title">Contas a Receber</div></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV('receber')">⬇ Exportar CSV</button>
+      </div>
+    </div>
+    <div class="chip-row">
+      <button class="chip active" onclick="filterReceber('all',this)">Todas</button>
+      <button class="chip" onclick="filterReceber('pending',this)">Pendentes</button>
+      <button class="chip" onclick="filterReceber('overdue',this)">Vencidas</button>
+      <button class="chip" onclick="filterReceber('received',this)">Recebidas</button>
+    </div>
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <div class="search-box">
+          <span style="color:rgba(228,213,163,.3)">🔍</span>
+          <input type="text" placeholder="Buscar cliente..." id="search-receber" oninput="renderReceber()">
+        </div>
+        <select class="filter-select" id="month-filter-receber" onchange="renderReceber()">
+          <option value="">Todos os meses</option>
+        </select>
+      </div>
+      <table>
+        <thead><tr>
+          <th>Cliente / Categoria</th>
+          <th>Vencimento</th>
+          <th>Valor</th>
+          <th>Documento</th>
+          <th>Recebimento</th>
+          <th>Status</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="tb-receber"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── CONCILIAÇÃO BANCÁRIA ── -->
+  <div id="panel-conciliacao" class="panel">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+      <!-- Upload -->
+      <div class="form-card">
+        <div class="form-card-title"><span>📂</span> Importar Extrato Bancário</div>
+        <p style="font-size:13px;color:rgba(228,213,163,.5);margin-bottom:16px">
+          Aceita arquivos <strong style="color:var(--dourado-claro)">CSV</strong> ou <strong style="color:var(--dourado-claro)">OFX</strong>.
+          O CSV deve conter colunas de data, descrição e valor.
+        </p>
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+          <div class="up-icon">📄</div>
+          <div class="up-title">Clique ou arraste o arquivo aqui</div>
+          <div class="up-sub">CSV (vírgula ou ponto-e-vírgula) · OFX · máx 10MB</div>
+          <input type="file" id="file-input" accept=".csv,.ofx,.txt" onchange="handleFileUpload(event)">
+        </div>
+
+        <div id="col-mapping" style="display:none;margin-top:20px">
+          <hr class="divider">
+          <div style="font-size:12px;font-weight:700;color:rgba(228,213,163,.5);letter-spacing:.08em;margin-bottom:14px">MAPEAMENTO DE COLUNAS</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div class="form-group"><label>COLUNA DATA</label><select id="col-date"></select></div>
+            <div class="form-group"><label>COLUNA DESCRIÇÃO</label><select id="col-desc"></select></div>
+            <div class="form-group"><label>COLUNA VALOR</label><select id="col-value"></select></div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:14px" onclick="parseAndLoadCSV()">Carregar Extrato</button>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div>
+        <div class="section-header" style="margin-bottom:14px">
+          <div><div class="section-title">Resumo da Conciliação</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="clearExtrato()" id="btn-clear-extrato" style="display:none">Limpar extrato</button>
+        </div>
+        <div class="recon-summary-grid" id="recon-summary-grid">
+          <div class="recon-stat"><div class="rs-val" id="rs-total">0</div><div class="rs-lbl">Lançamentos</div></div>
+          <div class="recon-stat"><div class="rs-val ok" id="rs-matched">0</div><div class="rs-lbl">Conciliados</div></div>
+          <div class="recon-stat"><div class="rs-val warn" id="rs-unmatched">0</div><div class="rs-lbl">Não conciliados</div></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar" id="recon-progress" style="width:0%"></div></div>
+        <div style="font-size:11px;color:rgba(228,213,163,.4);margin-top:6px" id="recon-pct-label">0% conciliado</div>
+        <div style="margin-top:16px;font-size:12px;color:rgba(228,213,163,.4)">
+          O sistema compara automaticamente os lançamentos do extrato com as contas registradas pelo <strong style="color:rgba(228,213,163,.6)">valor</strong> e <strong style="color:rgba(228,213,163,.6)">data</strong> (tolerância de ±3 dias).
+        </div>
+      </div>
+    </div>
+
+    <!-- Transactions list -->
+    <div class="section-header">
+      <div><div class="section-title">Lançamentos do Extrato</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="autoReconcile()">⚡ Conciliar Automaticamente</button>
+      </div>
+    </div>
+    <div class="chip-row">
+      <button class="chip active" onclick="filterRecon('all',this)">Todos</button>
+      <button class="chip" onclick="filterRecon('unmatched',this)">Não conciliados</button>
+      <button class="chip" onclick="filterRecon('matched',this)">Conciliados</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Data</th>
+          <th>Descrição</th>
+          <th>Valor</th>
+          <th>Tipo</th>
+          <th>Conta vinculada</th>
+          <th>Status</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="tb-recon"></tbody>
+      </table>
+      <div id="recon-empty" class="empty-state">
+        <div class="icon">🏦</div>
+        Importe um extrato bancário para iniciar a conciliação
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL DUPLICIDADE ══ -->
+<div class="modal-overlay" id="modal-duplicate">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-duplicate')">✕</button>
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title">Possível Duplicidade Detectada</div>
+    <div class="modal-body" id="modal-dup-body"></div>
+    <div class="form-group" style="margin-bottom:18px">
+      <label>SENHA DE AUTORIZAÇÃO</label>
+      <input type="password" id="dup-password" placeholder="Digite a senha para prosseguir" autocomplete="off">
+      <div class="modal-error" id="dup-error">Senha incorreta. Operação bloqueada.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-duplicate');cancelDupPending()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmDuplicate()">Autorizar e Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL MARCAR PAGO ══ -->
+<div class="modal-overlay" id="modal-mark-paid">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-mark-paid')">✕</button>
+    <div class="modal-icon">✅</div>
+    <div class="modal-title" id="mmp-title">Registrar Pagamento</div>
+    <div class="modal-body" id="mmp-body"></div>
+    <div class="form-group" style="margin-bottom:18px">
+      <label>DATA DO PAGAMENTO</label>
+      <input type="date" id="mmp-date">
+    </div>
+    <div class="form-group" style="margin-bottom:18px">
+      <label>OBSERVAÇÃO (OPCIONAL)</label>
+      <input type="text" id="mmp-obs" placeholder="Número de comprovante, banco, etc.">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-mark-paid')">Cancelar</button>
+      <button class="btn btn-ok" onclick="confirmMarkPaid()">Confirmar Pagamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL VINCULAR EXTRATO ══ -->
+<div class="modal-overlay" id="modal-link">
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeModal('modal-link')">✕</button>
+    <div class="modal-icon">🔗</div>
+    <div class="modal-title">Vincular Lançamento</div>
+    <div class="modal-body" id="modal-link-body">Selecione a conta que corresponde a este lançamento do extrato.</div>
+    <div style="max-height:280px;overflow-y:auto;margin-bottom:18px" id="link-list"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-link')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA LAYER
+// ═══════════════════════════════════════════════════════════════
+const DB = {
+  get: k => { try { return JSON.parse(localStorage.getItem('iae_' + k) || 'null'); } catch { return null; } },
+  set: (k, v) => localStorage.setItem('iae_' + k, JSON.stringify(v)),
+};
+
+function getPayables()    { return DB.get('payables')  || []; }
+function getReceivables() { return DB.get('recv')      || []; }
+function getExtrato()     { return DB.get('extrato')   || []; }
+function savePayables(d)    { DB.set('payables', d); }
+function saveReceivables(d) { DB.set('recv', d); }
+function saveExtrato(d)     { DB.set('extrato', d); }
+
+function uuid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+// ═══════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    const tabs = ['dashboard','pagar','receber','conciliacao'];
+    b.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'pagar') { renderPagar(); populateMonthFilter('month-filter-pagar', getPayables()); }
+  if (name === 'receber') { renderReceber(); populateMonthFilter('month-filter-receber', getReceivables()); }
+  if (name === 'conciliacao') renderRecon();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+const fmt = v => v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+const fmtDate = s => s ? new Date(s + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
+
+function isOverdue(dueDate, status) {
+  if (status === 'paid' || status === 'received' || status === 'cancelled') return false;
+  return new Date(dueDate + 'T23:59:59') < new Date();
+}
+
+function getStatus(item, type) {
+  if (item.status === 'cancelled') return 'cancelled';
+  if (type === 'pagar' && item.status === 'paid') return 'paid';
+  if (type === 'receber' && item.status === 'received') return 'received';
+  if (isOverdue(item.dueDate, item.status)) return 'overdue';
+  return 'pending';
+}
+
+function statusBadge(s) {
+  const m = {
+    pending:   ['badge-pending', 'Pendente'],
+    paid:      ['badge-paid',    'Paga'],
+    received:  ['badge-paid',    'Recebida'],
+    overdue:   ['badge-overdue', 'Vencida'],
+    cancelled: ['badge-cancelled','Cancelada'],
+    reconciled:['badge-reconciled','Conciliada'],
+  };
+  const [cls, lbl] = m[s] || m.pending;
+  return `<span class="badge ${cls}">${lbl}</span>`;
+}
+
+function monthKey(dateStr) {
+  if (!dateStr) return '';
+  return dateStr.slice(0,7);
+}
+
+function populateMonthFilter(id, items) {
+  const sel = document.getElementById(id);
+  const curr = sel.value;
+  const months = [...new Set(items.map(i => monthKey(i.dueDate)).filter(Boolean))].sort().reverse();
+  sel.innerHTML = '<option value="">Todos os meses</option>' +
+    months.map(m => `<option value="${m}">${new Date(m + '-01T12:00:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}</option>`).join('');
+  sel.value = curr;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TAXES
+// ═══════════════════════════════════════════════════════════════
+function calcTaxTotal() {
+  const base = parseFloat(document.getElementById('p-amount').value) || 0;
+  const pct = ['icms','pis','cofins','iss','irpj','csll'].reduce((a, k) => {
+    return a + (parseFloat(document.getElementById('t-' + k).value) || 0);
+  }, 0);
+  const outros = parseFloat(document.getElementById('t-outros').value) || 0;
+  const taxSum = base * (pct / 100) + outros;
+  document.getElementById('tax-sum-display').textContent = fmt(taxSum);
+  document.getElementById('tax-total-display').textContent = fmt(base + taxSum);
+}
+
+function getTaxObj() {
+  const base = parseFloat(document.getElementById('p-amount').value) || 0;
+  const keys = ['icms','pis','cofins','iss','irpj','csll'];
+  const pcts = {};
+  let pctSum = 0;
+  keys.forEach(k => { pcts[k] = parseFloat(document.getElementById('t-' + k).value) || 0; pctSum += pcts[k]; });
+  const outros = parseFloat(document.getElementById('t-outros').value) || 0;
+  const taxValue = base * (pctSum / 100) + outros;
+  return { ...pcts, outros, taxValue };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DUPLICATE DETECTION
+// ═══════════════════════════════════════════════════════════════
+let _dupPending = null;
+
+function checkDuplicate(supplier, dueDate, amount) {
+  const payables = getPayables();
+  const month = monthKey(dueDate);
+  return payables.filter(p =>
+    p.supplier.toLowerCase().trim() === supplier.toLowerCase().trim() &&
+    monthKey(p.dueDate) === month &&
+    Math.abs(p.amount - amount) < 0.01
+  );
+}
+
+function cancelDupPending() { _dupPending = null; }
+
+function confirmDuplicate() {
+  const pwd = document.getElementById('dup-password').value;
+  const errEl = document.getElementById('dup-error');
+  if (pwd !== 'iaefinanceiro2026') {
+    errEl.style.display = 'block';
+    document.getElementById('dup-password').value = '';
+    return;
+  }
+  errEl.style.display = 'none';
+  closeModal('modal-duplicate');
+  if (_dupPending) {
+    _dupPending();
+    _dupPending = null;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUBMIT PAGAR
+// ═══════════════════════════════════════════════════════════════
+function submitPagar(e) {
+  e.preventDefault();
+  const supplier = document.getElementById('p-supplier').value.trim();
+  const dueDate  = document.getElementById('p-duedate').value;
+  const amount   = parseFloat(document.getElementById('p-amount').value);
+
+  const dupes = checkDuplicate(supplier, dueDate, amount);
+  if (dupes.length > 0) {
+    const month = new Date(dueDate + '-01T12:00:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    document.getElementById('modal-dup-body').innerHTML =
+      `Já existe <strong>${dupes.length} lançamento(s)</strong> para o fornecedor <strong>${supplier}</strong> no valor de <strong>${fmt(amount)}</strong> em <strong>${month}</strong>.<br><br>
+       Para evitar pagamento em duplicidade, informe a senha de autorização abaixo.`;
+    document.getElementById('dup-password').value = '';
+    document.getElementById('dup-error').style.display = 'none';
+    _dupPending = () => savePagar();
+    openModal('modal-duplicate');
+    return;
+  }
+  savePagar();
+}
+
+function savePagar() {
+  const taxes = getTaxObj();
+  const amount = parseFloat(document.getElementById('p-amount').value);
+  const item = {
+    id: uuid(),
+    supplier:   document.getElementById('p-supplier').value.trim(),
+    category:   document.getElementById('p-category').value,
+    dueDate:    document.getElementById('p-duedate').value,
+    amount,
+    taxes,
+    totalAmount: amount + taxes.taxValue,
+    docNumber:   document.getElementById('p-docnumber').value.trim(),
+    payMethod:   document.getElementById('p-paymethod').value,
+    desc:        document.getElementById('p-desc').value.trim(),
+    status:      'pending',
+    paidDate:    null,
+    paidObs:     '',
+    reconciled:  false,
+    createdAt:   new Date().toISOString(),
+  };
+  const list = getPayables();
+  list.push(item);
+  savePayables(list);
+  resetFormPagar();
+  renderPagar();
+  populateMonthFilter('month-filter-pagar', list);
+  renderDashboard();
+  showToast('Conta a pagar registrada com sucesso!', 'success');
+}
+
+function resetFormPagar() {
+  document.getElementById('form-pagar').reset();
+  document.getElementById('tax-total-display').textContent = 'R$ 0,00';
+  document.getElementById('tax-sum-display').textContent = 'R$ 0,00';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUBMIT RECEBER
+// ═══════════════════════════════════════════════════════════════
+function submitReceber(e) {
+  e.preventDefault();
+  const item = {
+    id: uuid(),
+    client:    document.getElementById('r-client').value.trim(),
+    category:  document.getElementById('r-category').value,
+    dueDate:   document.getElementById('r-duedate').value,
+    amount:    parseFloat(document.getElementById('r-amount').value),
+    docNumber: document.getElementById('r-docnumber').value.trim(),
+    payMethod: document.getElementById('r-paymethod').value,
+    desc:      document.getElementById('r-desc').value.trim(),
+    status:    'pending',
+    receivedDate: null,
+    reconciled: false,
+    createdAt: new Date().toISOString(),
+  };
+  const list = getReceivables();
+  list.push(item);
+  saveReceivables(list);
+  resetFormReceber();
+  renderReceber();
+  populateMonthFilter('month-filter-receber', list);
+  renderDashboard();
+  showToast('Conta a receber registrada com sucesso!', 'success');
+}
+
+function resetFormReceber() { document.getElementById('form-receber').reset(); }
+
+// ═══════════════════════════════════════════════════════════════
+// FILTER STATE
+// ═══════════════════════════════════════════════════════════════
+let _filterPagar   = 'all';
+let _filterReceber = 'all';
+let _filterRecon   = 'all';
+
+function filterPagar(v, el) {
+  _filterPagar = v;
+  document.querySelectorAll('#filter-chips-pagar .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderPagar();
+}
+function filterReceber(v, el) {
+  _filterReceber = v;
+  el.closest('.chip-row').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderReceber();
+}
+function filterRecon(v, el) {
+  _filterRecon = v;
+  el.closest('.chip-row').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderRecon();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER PAGAR
+// ═══════════════════════════════════════════════════════════════
+function renderPagar() {
+  const tbody  = document.getElementById('tb-pagar');
+  const search = (document.getElementById('search-pagar').value || '').toLowerCase();
+  const month  = document.getElementById('month-filter-pagar').value;
+  let items = getPayables();
+
+  items = items.filter(i => {
+    const st = getStatus(i, 'pagar');
+    if (_filterPagar !== 'all' && st !== _filterPagar) return false;
+    if (month && monthKey(i.dueDate) !== month) return false;
+    if (search && !i.supplier.toLowerCase().includes(search) && !i.desc.toLowerCase().includes(search)) return false;
+    return true;
+  }).sort((a,b) => a.dueDate.localeCompare(b.dueDate));
+
+  if (!items.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="icon">📋</div>Nenhuma conta encontrada</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = items.map(item => {
+    const st = getStatus(item, 'pagar');
+    const isLate = st === 'overdue';
+    return `<tr>
+      <td>
+        <div class="td-main">${item.supplier}</div>
+        <div class="td-sub">${item.category || '—'} ${item.docNumber ? '· ' + item.docNumber : ''}</div>
+      </td>
+      <td style="${isLate ? 'color:#F08080' : ''}">${fmtDate(item.dueDate)}</td>
+      <td>${fmt(item.amount)}</td>
+      <td>${item.taxes.taxValue > 0 ? fmt(item.taxes.taxValue) : '<span style="color:rgba(228,213,163,.3)">—</span>'}</td>
+      <td><strong style="color:var(--dourado-claro)">${fmt(item.totalAmount)}</strong></td>
+      <td style="font-size:12px;color:rgba(228,213,163,.5)">${item.payMethod || '—'}</td>
+      <td>${statusBadge(st)} ${item.reconciled ? statusBadge('reconciled') : ''}</td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${st !== 'paid' && st !== 'cancelled' ? `<button class="btn btn-ok btn-sm" onclick="openMarkPaid('${item.id}','pagar')">✓ Pago</button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="deletePagar('${item.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function deletePagar(id) {
+  if (!confirm('Remover esta conta?')) return;
+  savePayables(getPayables().filter(i => i.id !== id));
+  renderPagar(); renderDashboard();
+  showToast('Conta removida.', 'warning');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER RECEBER
+// ═══════════════════════════════════════════════════════════════
+function renderReceber() {
+  const tbody  = document.getElementById('tb-receber');
+  const search = (document.getElementById('search-receber').value || '').toLowerCase();
+  const month  = document.getElementById('month-filter-receber').value;
+  let items = getReceivables();
+
+  items = items.filter(i => {
+    const st = getStatus(i, 'receber');
+    if (_filterReceber !== 'all' && st !== _filterReceber) return false;
+    if (month && monthKey(i.dueDate) !== month) return false;
+    if (search && !i.client.toLowerCase().includes(search) && !i.desc.toLowerCase().includes(search)) return false;
+    return true;
+  }).sort((a,b) => a.dueDate.localeCompare(b.dueDate));
+
+  if (!items.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="icon">💰</div>Nenhuma conta encontrada</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = items.map(item => {
+    const st = getStatus(item, 'receber');
+    const isLate = st === 'overdue';
+    return `<tr>
+      <td>
+        <div class="td-main">${item.client}</div>
+        <div class="td-sub">${item.category || '—'}</div>
+      </td>
+      <td style="${isLate ? 'color:#F08080' : ''}">${fmtDate(item.dueDate)}</td>
+      <td><strong style="color:#90EE90">${fmt(item.amount)}</strong></td>
+      <td style="font-size:12px;color:rgba(228,213,163,.5)">${item.docNumber || '—'}</td>
+      <td style="font-size:12px;color:rgba(228,213,163,.5)">${item.payMethod || '—'}</td>
+      <td>${statusBadge(st)} ${item.reconciled ? statusBadge('reconciled') : ''}</td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${st !== 'received' && st !== 'cancelled' ? `<button class="btn btn-ok btn-sm" onclick="openMarkPaid('${item.id}','receber')">✓ Recebido</button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="deleteReceber('${item.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function deleteReceber(id) {
+  if (!confirm('Remover esta conta?')) return;
+  saveReceivables(getReceivables().filter(i => i.id !== id));
+  renderReceber(); renderDashboard();
+  showToast('Conta removida.', 'warning');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MARK PAID / RECEIVED
+// ═══════════════════════════════════════════════════════════════
+let _markPaidContext = null;
+
+function openMarkPaid(id, type) {
+  _markPaidContext = { id, type };
+  const items  = type === 'pagar' ? getPayables() : getReceivables();
+  const item   = items.find(i => i.id === id);
+  const isP    = type === 'pagar';
+  document.getElementById('mmp-title').textContent = isP ? 'Registrar Pagamento' : 'Registrar Recebimento';
+  document.getElementById('mmp-body').innerHTML =
+    `<strong>${isP ? item.supplier : item.client}</strong> — ${fmt(isP ? item.totalAmount : item.amount)}<br>
+     Vencimento: ${fmtDate(item.dueDate)}`;
+  document.getElementById('mmp-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('mmp-obs').value = '';
+  openModal('modal-mark-paid');
+}
+
+function confirmMarkPaid() {
+  if (!_markPaidContext) return;
+  const { id, type } = _markPaidContext;
+  const date = document.getElementById('mmp-date').value;
+  const obs  = document.getElementById('mmp-obs').value;
+  if (type === 'pagar') {
+    const list = getPayables();
+    const i = list.find(x => x.id === id);
+    if (i) { i.status = 'paid'; i.paidDate = date; i.paidObs = obs; }
+    savePayables(list);
+    renderPagar();
+  } else {
+    const list = getReceivables();
+    const i = list.find(x => x.id === id);
+    if (i) { i.status = 'received'; i.receivedDate = date; i.paidObs = obs; }
+    saveReceivables(list);
+    renderReceber();
+  }
+  renderDashboard();
+  closeModal('modal-mark-paid');
+  _markPaidContext = null;
+  showToast('Registrado com sucesso!', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+function renderDashboard() {
+  const payables     = getPayables();
+  const receivables  = getReceivables();
+  const now          = new Date();
+  const in30         = new Date(now.getTime() + 30 * 86400000);
+
+  const totalPagar    = payables.filter(i => i.status !== 'paid' && i.status !== 'cancelled')
+                                .reduce((s,i) => s + i.totalAmount, 0);
+  const totalReceber  = receivables.filter(i => i.status !== 'received' && i.status !== 'cancelled')
+                                   .reduce((s,i) => s + i.amount, 0);
+  const totalVencido  = payables.filter(i => isOverdue(i.dueDate, i.status))
+                                .reduce((s,i) => s + i.totalAmount, 0);
+  const pagoMes       = payables.filter(i => i.status === 'paid' && monthKey(i.paidDate) === monthKey(now.toISOString()))
+                                .reduce((s,i) => s + i.totalAmount, 0);
+  const recebMes      = receivables.filter(i => i.status === 'received' && monthKey(i.receivedDate) === monthKey(now.toISOString()))
+                                   .reduce((s,i) => s + i.amount, 0);
+  const extrato       = getExtrato();
+  const reconciled    = extrato.filter(t => t.matched).length;
+
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card">
+      <div class="kpi-label">Total a Pagar</div>
+      <div class="kpi-value warn">${fmt(totalPagar)}</div>
+      <div class="kpi-sub">${payables.filter(i=>i.status==='pending').length} pendente(s)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total a Receber</div>
+      <div class="kpi-value ok">${fmt(totalReceber)}</div>
+      <div class="kpi-sub">${receivables.filter(i=>i.status==='pending').length} pendente(s)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Em Atraso</div>
+      <div class="kpi-value danger">${fmt(totalVencido)}</div>
+      <div class="kpi-sub">${payables.filter(i=>isOverdue(i.dueDate,i.status)).length} conta(s)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Pago este mês</div>
+      <div class="kpi-value">${fmt(pagoMes)}</div>
+      <div class="kpi-sub">Saída realizada</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Recebido este mês</div>
+      <div class="kpi-value ok">${fmt(recebMes)}</div>
+      <div class="kpi-sub">Entrada realizada</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Saldo Projetado</div>
+      <div class="kpi-value ${totalReceber - totalPagar >= 0 ? 'ok' : 'danger'}">${fmt(totalReceber - totalPagar)}</div>
+      <div class="kpi-sub">Receber − Pagar</div>
+    </div>
+  `;
+
+  // Upcoming payments
+  const upcoming = payables.filter(i => {
+    const d = new Date(i.dueDate + 'T12:00:00');
+    return d >= now && d <= in30 && i.status !== 'paid' && i.status !== 'cancelled';
+  }).sort((a,b) => a.dueDate.localeCompare(b.dueDate)).slice(0,8);
+
+  const tbUp = document.getElementById('tb-upcoming');
+  tbUp.innerHTML = upcoming.length ? upcoming.map(i => `<tr>
+    <td><div class="td-main">${i.supplier}</div><div class="td-sub">${i.category||'—'}</div></td>
+    <td>${fmtDate(i.dueDate)}</td>
+    <td>${fmt(i.totalAmount)}</td>
+    <td>${statusBadge(getStatus(i,'pagar'))}</td>
+  </tr>`).join('') : '<tr><td colspan="4"><div class="empty-state" style="padding:24px">Sem vencimentos nos próximos 30 dias</div></td></tr>';
+
+  const upRecv = receivables.filter(i => {
+    const d = new Date(i.dueDate + 'T12:00:00');
+    return d >= now && d <= in30 && i.status !== 'received' && i.status !== 'cancelled';
+  }).sort((a,b) => a.dueDate.localeCompare(b.dueDate)).slice(0,8);
+
+  const tbUpR = document.getElementById('tb-upcoming-recv');
+  tbUpR.innerHTML = upRecv.length ? upRecv.map(i => `<tr>
+    <td><div class="td-main">${i.client}</div><div class="td-sub">${i.category||'—'}</div></td>
+    <td>${fmtDate(i.dueDate)}</td>
+    <td style="color:#90EE90">${fmt(i.amount)}</td>
+    <td>${statusBadge(getStatus(i,'receber'))}</td>
+  </tr>`).join('') : '<tr><td colspan="4"><div class="empty-state" style="padding:24px">Sem recebimentos nos próximos 30 dias</div></td></tr>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BANK RECONCILIATION — FILE UPLOAD
+// ═══════════════════════════════════════════════════════════════
+let _csvHeaders = [];
+let _csvRows    = [];
+let _ofxParsed  = null;
+
+function handleDragOver(e)  { e.preventDefault(); document.getElementById('upload-zone').classList.add('drag'); }
+function handleDragLeave()  { document.getElementById('upload-zone').classList.remove('drag'); }
+function handleDrop(e)      { e.preventDefault(); handleDragLeave(); processFile(e.dataTransfer.files[0]); }
+function handleFileUpload(e){ processFile(e.target.files[0]); }
+
+function processFile(file) {
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { showToast('Arquivo muito grande (máx 10MB)', 'error'); return; }
+  const ext = file.name.split('.').pop().toLowerCase();
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    if (ext === 'ofx') { parseOFX(text); return; }
+    parseCSVPreview(text);
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSVPreview(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) { showToast('Arquivo CSV vazio ou inválido.', 'error'); return; }
+  const sep  = lines[0].includes(';') ? ';' : ',';
+  _csvHeaders = lines[0].split(sep).map(h => h.replace(/^["']|["']$/g,'').trim());
+  _csvRows = lines.slice(1).map(l => l.split(sep).map(c => c.replace(/^["']|["']$/g,'').trim()));
+
+  const fill = id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = _csvHeaders.map((h,i) => `<option value="${i}">${h}</option>`).join('');
+  };
+  fill('col-date'); fill('col-desc'); fill('col-value');
+
+  // Auto-detect common column names
+  const lower = _csvHeaders.map(h => h.toLowerCase());
+  const tryCol = (id, keywords) => {
+    const idx = lower.findIndex(h => keywords.some(k => h.includes(k)));
+    if (idx >= 0) document.getElementById(id).value = idx;
+  };
+  tryCol('col-date',  ['data','date','dt']);
+  tryCol('col-desc',  ['histor','desc','memo','lancamento','historico']);
+  tryCol('col-value', ['valor','value','amount','credito','debito','saldo']);
+
+  document.getElementById('col-mapping').style.display = 'block';
+}
+
+function parseAndLoadCSV() {
+  const ci = parseInt(document.getElementById('col-date').value);
+  const di = parseInt(document.getElementById('col-desc').value);
+  const vi = parseInt(document.getElementById('col-value').value);
+
+  const transactions = [];
+  _csvRows.forEach((row, idx) => {
+    if (!row[vi]) return;
+    const rawVal = row[vi].replace(/\./g,'').replace(',','.');
+    const val = parseFloat(rawVal);
+    if (isNaN(val)) return;
+
+    const rawDate = row[ci] || '';
+    let parsedDate = '';
+    // Try different date formats
+    const dParts = rawDate.match(/(\d{2})[\/\-\.](\d{2})[\/\-\.](\d{4})/);
+    const dPartsY = rawDate.match(/(\d{4})[\/\-\.](\d{2})[\/\-\.](\d{2})/);
+    if (dParts)  parsedDate = `${dParts[3]}-${dParts[2]}-${dParts[1]}`;
+    else if (dPartsY) parsedDate = `${dPartsY[1]}-${dPartsY[2]}-${dPartsY[3]}`;
+    else parsedDate = rawDate;
+
+    transactions.push({
+      id: uuid(),
+      date: parsedDate,
+      desc: row[di] || '',
+      amount: Math.abs(val),
+      type: val < 0 ? 'debit' : 'credit',
+      matched: false,
+      matchedAccountId: null,
+    });
+  });
+
+  if (!transactions.length) { showToast('Nenhum lançamento válido encontrado.', 'error'); return; }
+  saveExtrato(transactions);
+  document.getElementById('col-mapping').style.display = 'none';
+  document.getElementById('btn-clear-extrato').style.display = 'inline-flex';
+  renderRecon();
+  updateReconSummary();
+  showToast(`${transactions.length} lançamentos importados.`, 'success');
+}
+
+function parseOFX(text) {
+  const txns = [];
+  const stmtRe = /<STMTTRN>([\s\S]*?)<\/STMTTRN>/gi;
+  let m;
+  while ((m = stmtRe.exec(text)) !== null) {
+    const block = m[1];
+    const get = tag => { const r = new RegExp(`<${tag}>([^<]+)`,'i').exec(block); return r ? r[1].trim() : ''; };
+    const dtRaw = get('DTPOSTED');
+    let date = '';
+    if (dtRaw.length >= 8) date = `${dtRaw.slice(0,4)}-${dtRaw.slice(4,6)}-${dtRaw.slice(6,8)}`;
+    const amt = parseFloat(get('TRNAMT')) || 0;
+    txns.push({
+      id: uuid(),
+      date,
+      desc: get('MEMO') || get('NAME') || '',
+      amount: Math.abs(amt),
+      type: amt < 0 ? 'debit' : 'credit',
+      matched: false,
+      matchedAccountId: null,
+    });
+  }
+  if (!txns.length) { showToast('Não foi possível ler o arquivo OFX.', 'error'); return; }
+  saveExtrato(txns);
+  document.getElementById('btn-clear-extrato').style.display = 'inline-flex';
+  renderRecon();
+  updateReconSummary();
+  showToast(`${txns.length} lançamentos OFX importados.`, 'success');
+}
+
+function clearExtrato() {
+  if (!confirm('Limpar todos os lançamentos do extrato?')) return;
+  saveExtrato([]);
+  renderRecon();
+  updateReconSummary();
+  document.getElementById('btn-clear-extrato').style.display = 'none';
+  showToast('Extrato limpo.', 'warning');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUTO RECONCILE
+// ═══════════════════════════════════════════════════════════════
+function autoReconcile() {
+  const extrato  = getExtrato();
+  const payables = getPayables();
+  const recvbles = getReceivables();
+  let matched = 0;
+
+  extrato.forEach(tx => {
+    if (tx.matched) return;
+    const txDate = new Date(tx.date + 'T12:00:00');
+    const tol    = 3 * 86400000; // 3 days tolerance
+
+    if (tx.type === 'debit') {
+      const match = payables.find(p =>
+        !p.reconciled &&
+        Math.abs(p.totalAmount - tx.amount) < 0.02 &&
+        Math.abs(new Date(p.dueDate + 'T12:00:00') - txDate) <= tol
+      );
+      if (match) {
+        tx.matched = true;
+        tx.matchedAccountId = match.id;
+        tx.matchedLabel = match.supplier;
+        match.reconciled = true;
+        if (match.status === 'pending') { match.status = 'paid'; match.paidDate = tx.date; }
+        matched++;
+      }
+    } else {
+      const match = recvbles.find(r =>
+        !r.reconciled &&
+        Math.abs(r.amount - tx.amount) < 0.02 &&
+        Math.abs(new Date(r.dueDate + 'T12:00:00') - txDate) <= tol
+      );
+      if (match) {
+        tx.matched = true;
+        tx.matchedAccountId = match.id;
+        tx.matchedLabel = match.client;
+        match.reconciled = true;
+        if (match.status === 'pending') { match.status = 'received'; match.receivedDate = tx.date; }
+        matched++;
+      }
+    }
+  });
+
+  saveExtrato(extrato);
+  savePayables(payables);
+  saveReceivables(recvbles);
+  renderRecon();
+  updateReconSummary();
+  renderDashboard();
+  showToast(`${matched} lançamento(s) conciliado(s) automaticamente.`, matched > 0 ? 'success' : 'warning');
+}
+
+function updateReconSummary() {
+  const ex  = getExtrato();
+  const tot = ex.length;
+  const mat = ex.filter(t => t.matched).length;
+  const unm = tot - mat;
+  const pct = tot > 0 ? Math.round((mat / tot) * 100) : 0;
+  document.getElementById('rs-total').textContent     = tot;
+  document.getElementById('rs-matched').textContent   = mat;
+  document.getElementById('rs-unmatched').textContent = unm;
+  document.getElementById('recon-progress').style.width = pct + '%';
+  document.getElementById('recon-pct-label').textContent = pct + '% conciliado';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER RECONCILIATION TABLE
+// ═══════════════════════════════════════════════════════════════
+function renderRecon() {
+  const extrato = getExtrato();
+  const tbody   = document.getElementById('tb-recon');
+  const empty   = document.getElementById('recon-empty');
+  updateReconSummary();
+
+  if (!extrato.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  let items = extrato.filter(t => {
+    if (_filterRecon === 'matched'   && !t.matched) return false;
+    if (_filterRecon === 'unmatched' && t.matched)  return false;
+    return true;
+  }).sort((a,b) => (a.date||'').localeCompare(b.date||''));
+
+  tbody.innerHTML = items.map(tx => `<tr>
+    <td>${fmtDate(tx.date)}</td>
+    <td><div class="td-main">${tx.desc}</div></td>
+    <td class="${tx.type === 'debit' ? 'rm-amount debit' : 'rm-amount credit'}" style="font-family:'Playfair Display',serif">
+      ${tx.type === 'debit' ? '− ' : '+ '}${fmt(tx.amount)}
+    </td>
+    <td><span class="badge ${tx.type === 'debit' ? 'badge-overdue' : 'badge-paid'}">${tx.type === 'debit' ? 'Débito' : 'Crédito'}</span></td>
+    <td style="font-size:12px;color:rgba(228,213,163,.5)">${tx.matchedLabel || '—'}</td>
+    <td>${tx.matched ? statusBadge('reconciled') : '<span class="badge badge-pending">Pendente</span>'}</td>
+    <td>
+      ${!tx.matched ? `<button class="btn btn-ghost btn-sm" onclick="openLinkModal('${tx.id}')">🔗 Vincular</button>` : `<button class="btn btn-ghost btn-sm" onclick="unlinkTx('${tx.id}')">✕</button>`}
+    </td>
+  </tr>`).join('');
+}
+
+// MANUAL LINK
+let _linkTxId = null;
+
+function openLinkModal(txId) {
+  _linkTxId = txId;
+  const tx  = getExtrato().find(t => t.id === txId);
+  const payables   = getPayables().filter(p => !p.reconciled);
+  const recvbles   = getReceivables().filter(r => !r.reconciled);
+  const candidates = tx.type === 'debit' ? payables : recvbles;
+
+  document.getElementById('modal-link-body').textContent =
+    `Selecione a conta que corresponde ao lançamento de ${fmt(tx.amount)} em ${fmtDate(tx.date)}.`;
+
+  const list = document.getElementById('link-list');
+  if (!candidates.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:24px">Nenhuma conta disponível para vinculação.</div>';
+  } else {
+    list.innerHTML = candidates.map(c => {
+      const label  = tx.type === 'debit' ? c.supplier : c.client;
+      const amount = tx.type === 'debit' ? c.totalAmount : c.amount;
+      return `<div class="recon-match" onclick="confirmLink('${c.id}',${tx.type === 'debit' ? '"pagar"' : '"receber"'})" style="cursor:pointer">
+        <div class="rm-left">
+          <div class="rm-date">${fmtDate(c.dueDate)}</div>
+          <div class="rm-desc">${label}</div>
+          <div class="td-sub">${c.category || ''}</div>
+        </div>
+        <div class="rm-amount ${tx.type === 'debit' ? 'debit' : 'credit'}">${fmt(amount)}</div>
+      </div>`;
+    }).join('');
+  }
+  openModal('modal-link');
+}
+
+function confirmLink(accountId, type) {
+  const extrato  = getExtrato();
+  const tx = extrato.find(t => t.id === _linkTxId);
+  if (!tx) return;
+
+  tx.matched = true;
+  tx.matchedAccountId = accountId;
+
+  if (type === 'pagar') {
+    const list = getPayables();
+    const acc  = list.find(p => p.id === accountId);
+    if (acc) {
+      acc.reconciled = true;
+      tx.matchedLabel = acc.supplier;
+      if (acc.status === 'pending') { acc.status = 'paid'; acc.paidDate = tx.date; }
+      savePayables(list);
+    }
+  } else {
+    const list = getReceivables();
+    const acc  = list.find(r => r.id === accountId);
+    if (acc) {
+      acc.reconciled = true;
+      tx.matchedLabel = acc.client;
+      if (acc.status === 'pending') { acc.status = 'received'; acc.receivedDate = tx.date; }
+      saveReceivables(list);
+    }
+  }
+
+  saveExtrato(extrato);
+  closeModal('modal-link');
+  renderRecon();
+  renderDashboard();
+  showToast('Lançamento vinculado com sucesso!', 'success');
+}
+
+function unlinkTx(txId) {
+  const extrato = getExtrato();
+  const tx = extrato.find(t => t.id === txId);
+  if (!tx) return;
+
+  const accountId = tx.matchedAccountId;
+  tx.matched = false;
+  tx.matchedAccountId = null;
+  tx.matchedLabel = null;
+  saveExtrato(extrato);
+
+  // unmark reconciled on the account
+  const pay = getPayables();
+  const acc = pay.find(p => p.id === accountId);
+  if (acc) { acc.reconciled = false; savePayables(pay); }
+  else {
+    const rec = getReceivables();
+    const acc2 = rec.find(r => r.id === accountId);
+    if (acc2) { acc2.reconciled = false; saveReceivables(rec); }
+  }
+  renderRecon();
+  renderDashboard();
+  showToast('Vínculo removido.', 'warning');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════════════════════════
+function exportCSV(type) {
+  const items = type === 'pagar' ? getPayables() : getReceivables();
+  let csv = '';
+  if (type === 'pagar') {
+    csv = 'Fornecedor;Categoria;Vencimento;Valor;Impostos;Total;Método;Status;Pago em\n';
+    csv += items.map(i => [
+      i.supplier, i.category, i.dueDate, i.amount.toFixed(2),
+      i.taxes.taxValue.toFixed(2), i.totalAmount.toFixed(2),
+      i.payMethod, getStatus(i,'pagar'), i.paidDate||''
+    ].join(';')).join('\n');
+  } else {
+    csv = 'Cliente;Categoria;Vencimento;Valor;Documento;Método;Status;Recebido em\n';
+    csv += items.map(i => [
+      i.client, i.category, i.dueDate, i.amount.toFixed(2),
+      i.docNumber, i.payMethod, getStatus(i,'receber'), i.receivedDate||''
+    ].join(';')).join('\n');
+  }
+  const blob = new Blob(['﻿' + csv], { type:'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `contas_${type}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════════════════════════════
+function openModal(id)  { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('show'); }));
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+function showToast(msg, type='success') {
+  const icons = { success:'✅', error:'❌', warning:'⚠️' };
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+(function init() {
+  // Set default date to today on forms
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('p-duedate').value = today;
+  document.getElementById('r-duedate').value = today;
+  document.getElementById('mmp-date').value  = today;
+
+  const extrato = getExtrato();
+  if (extrato.length > 0) document.getElementById('btn-clear-extrato').style.display = 'inline-flex';
+
+  populateMonthFilter('month-filter-pagar',   getPayables());
+  populateMonthFilter('month-filter-receber', getReceivables());
+  renderDashboard();
+})();
+</script>
+</body>
+</html>

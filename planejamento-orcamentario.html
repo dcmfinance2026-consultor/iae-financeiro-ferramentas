@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IAê — Planejamento Orçamentário</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --verde-escuro:#1B3B28; --verde-medio:#2D5A3D; --verde-claro:#4A7A5A;
+      --dourado:#C49A3C; --dourado-claro:#E0B84A;
+      --bege:#E8D5A3; --creme:#FEFBF3; --texto:#2C1A0E; --texto-suave:#7A5C3E;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Nunito',sans-serif;background:#0E2018;color:var(--texto);min-height:100vh}
+
+    /* NAVBAR */
+    .navbar{display:flex;align-items:center;justify-content:space-between;padding:15px 48px;
+      background:linear-gradient(180deg,#0A180F,#132B1C);border-bottom:1px solid rgba(196,154,60,.18);
+      position:sticky;top:0;z-index:200;gap:14px;flex-wrap:wrap}
+    .nav-brand{display:flex;align-items:center;gap:11px}
+    .nav-emblem{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 35% 35%,var(--dourado-claro),var(--dourado));
+      display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;
+      font-size:15px;font-weight:700;color:#0A180F;box-shadow:0 0 14px rgba(196,154,60,.35);flex-shrink:0}
+    .nav-title{font-family:'Playfair Display',serif;color:var(--bege);font-size:16px;font-weight:600}
+    .nav-sub{font-size:11px;color:rgba(228,213,163,.4);letter-spacing:.06em}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .year-badge{display:flex;align-items:center;gap:5px;background:rgba(196,154,60,.12);
+      border:1px solid rgba(196,154,60,.3);border-radius:20px;padding:5px 13px;
+      font-size:12px;color:var(--dourado-claro);font-weight:700}
+    .year-badge select{background:transparent;border:none;color:var(--dourado-claro);
+      font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;outline:none;cursor:pointer}
+    .nav-back{font-size:12px;color:rgba(228,213,163,.55);text-decoration:none;
+      border:1px solid rgba(196,154,60,.2);padding:6px 15px;border-radius:20px;transition:.2s}
+    .nav-back:hover{color:var(--dourado-claro);border-color:rgba(196,154,60,.5)}
+
+    /* HERO */
+    .hero-strip{background:linear-gradient(135deg,#0A180F 0%,#132B1C 50%,#1B3B28 100%);
+      padding:24px 48px 18px;border-bottom:1px solid rgba(196,154,60,.1)}
+    .hero-strip h1{font-family:'Playfair Display',serif;color:var(--bege);font-size:22px;font-weight:700;margin-bottom:4px}
+    .hero-strip p{color:rgba(228,213,163,.5);font-size:13px}
+
+    /* TABS */
+    .tabs-bar{display:flex;background:#0E2018;padding:0 48px;
+      border-bottom:1px solid rgba(196,154,60,.12);overflow-x:auto}
+    .tabs-bar::-webkit-scrollbar{height:2px}
+    .tabs-bar::-webkit-scrollbar-thumb{background:rgba(196,154,60,.3)}
+    .tab-btn{padding:13px 19px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;
+      color:rgba(228,213,163,.4);background:none;border:none;cursor:pointer;
+      border-bottom:2px solid transparent;margin-bottom:-1px;transition:.2s;white-space:nowrap}
+    .tab-btn.active{color:var(--dourado-claro);border-bottom-color:var(--dourado)}
+    .tab-btn:hover:not(.active){color:rgba(228,213,163,.72)}
+
+    /* MAIN */
+    .main{padding:26px 48px 60px;max-width:1520px;margin:0 auto}
+    .panel{display:none}.panel.active{display:block}
+
+    /* KPI */
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:13px;margin-bottom:22px}
+    .kpi-card{background:linear-gradient(135deg,#132B1C,#1B3B28);border:1px solid rgba(196,154,60,.15);
+      border-radius:13px;padding:16px 18px;position:relative;overflow:hidden}
+    .kpi-card::after{content:'';position:absolute;top:-18px;right:-18px;width:55px;height:55px;
+      border-radius:50%;background:radial-gradient(circle,rgba(196,154,60,.07),transparent 70%)}
+    .kpi-label{font-size:10px;color:rgba(228,213,163,.42);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+    .kpi-value{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--bege)}
+    .kpi-value.ok{color:#90EE90}.kpi-value.warn{color:var(--dourado-claro)}.kpi-value.bad{color:#F08080}
+    .kpi-sub{font-size:10px;color:rgba(228,213,163,.32);margin-top:3px}
+
+    /* SECTION */
+    .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+    .section-title{font-family:'Playfair Display',serif;color:var(--bege);font-size:17px;font-weight:600}
+    .section-sub{font-size:12px;color:rgba(228,213,163,.38);margin-top:2px}
+
+    /* BUTTONS */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 17px;border-radius:8px;border:none;
+      cursor:pointer;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;transition:.18s;white-space:nowrap}
+    .btn-primary{background:linear-gradient(135deg,var(--dourado),var(--dourado-claro));color:#0A180F;
+      box-shadow:0 4px 12px rgba(196,154,60,.24)}
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(196,154,60,.38)}
+    .btn-ghost{background:transparent;color:rgba(228,213,163,.6);border:1px solid rgba(196,154,60,.2)}
+    .btn-ghost:hover{color:var(--dourado-claro);border-color:rgba(196,154,60,.42)}
+    .btn-ok{background:rgba(39,174,96,.14);color:#90EE90;border:1px solid rgba(39,174,96,.28)}
+    .btn-ok:hover{background:rgba(39,174,96,.22)}
+    .btn-danger{background:rgba(192,57,43,.13);color:#F08080;border:1px solid rgba(192,57,43,.28)}
+    .btn-sm{padding:5px 11px;font-size:11px}
+
+    /* CARD */
+    .card{background:linear-gradient(135deg,#132B1C,#1B3B28);border:1px solid rgba(196,154,60,.15);
+      border-radius:15px;padding:22px 26px;margin-bottom:18px}
+    .card-title{font-family:'Playfair Display',serif;color:var(--dourado-claro);font-size:14px;
+      margin-bottom:16px;display:flex;align-items:center;gap:7px}
+
+    /* FORMS */
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px}
+    .form-group{display:flex;flex-direction:column;gap:4px}
+    .form-group.full{grid-column:1/-1}
+    label{font-size:10px;color:rgba(228,213,163,.52);letter-spacing:.07em;font-weight:700;text-transform:uppercase}
+    input[type=text],input[type=number],input[type=date],select,textarea{
+      background:rgba(255,255,255,.04);border:1px solid rgba(196,154,60,.18);border-radius:8px;
+      padding:8px 12px;color:var(--bege);font-family:'Nunito',sans-serif;font-size:13px;transition:.18s;outline:none}
+    input:focus,select:focus,textarea:focus{border-color:rgba(196,154,60,.45);
+      background:rgba(255,255,255,.07);box-shadow:0 0 0 3px rgba(196,154,60,.07)}
+    input::placeholder{color:rgba(228,213,163,.18)}
+    select option{background:#1B3B28;color:var(--bege)}
+    textarea{resize:vertical;min-height:70px}
+
+    /* WIZARD STEPS */
+    .steps-row{display:flex;border-bottom:1px solid rgba(196,154,60,.11);margin-bottom:22px;overflow-x:auto}
+    .step-btn{padding:11px 18px;background:none;border:none;cursor:pointer;
+      font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;
+      color:rgba(228,213,163,.38);border-bottom:2px solid transparent;margin-bottom:-1px;
+      transition:.2s;white-space:nowrap;display:flex;align-items:center;gap:7px}
+    .step-num{width:20px;height:20px;border-radius:50%;background:rgba(196,154,60,.13);
+      border:1px solid rgba(196,154,60,.2);display:flex;align-items:center;justify-content:center;
+      font-size:10px;font-weight:800;color:rgba(228,213,163,.38)}
+    .step-btn.active{color:var(--dourado-claro);border-bottom-color:var(--dourado)}
+    .step-btn.active .step-num{background:var(--dourado);color:#0A180F;border-color:var(--dourado)}
+    .step-btn.done{color:rgba(228,213,163,.6)}
+    .step-btn.done .step-num{background:rgba(39,174,96,.22);color:#90EE90;border-color:rgba(39,174,96,.38)}
+    .step-content{display:none}.step-content.active{display:block}
+    .step-nav{display:flex;gap:9px;justify-content:flex-end;margin-top:18px;padding-top:15px;
+      border-top:1px solid rgba(196,154,60,.09)}
+
+    /* CHIPS */
+    .chip-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}
+    .chip{padding:5px 13px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;
+      border:1px solid rgba(196,154,60,.18);color:rgba(228,213,163,.5);background:transparent;transition:.14s}
+    .chip:hover,.chip.active{background:rgba(196,154,60,.11);color:var(--dourado-claro);border-color:rgba(196,154,60,.4)}
+    .chip-sug{border-style:dashed;border-color:rgba(196,154,60,.22)}
+    .chip-sug:hover{border-style:solid}
+
+    /* CAT LIST */
+    .cat-list{display:flex;flex-direction:column;gap:7px;margin-bottom:13px}
+    .cat-row{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.03);
+      border:1px solid rgba(196,154,60,.11);border-radius:8px;padding:9px 13px}
+    .cat-row input[type=text]{flex:1;padding:5px 9px;font-size:12px}
+    .cat-badge{font-size:9px;font-weight:800;letter-spacing:.06em;padding:2px 8px;border-radius:10px;
+      background:rgba(196,154,60,.14);color:var(--dourado-claro);white-space:nowrap}
+    .cat-badge.pct{background:rgba(52,152,219,.14);color:#87CEEB}
+    .cat-pct{width:64px;text-align:center;padding:4px 7px;font-size:12px}
+
+    /* SEASONS */
+    .season-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:11px}
+    .season-card{background:rgba(255,255,255,.03);border:1px solid rgba(196,154,60,.1);
+      border-radius:10px;padding:13px;transition:.18s;display:flex;flex-direction:column;gap:4px}
+    .season-card.on{background:rgba(196,154,60,.07);border-color:rgba(196,154,60,.28)}
+    .season-top{display:flex;align-items:center;justify-content:space-between}
+    .season-left{display:flex;align-items:center;gap:9px}
+    .season-icon{font-size:22px}
+    .season-name{font-size:13px;color:rgba(228,213,163,.8);font-weight:700}
+    .season-month{font-size:10px;color:rgba(228,213,163,.38)}
+    .season-toggle{width:36px;height:20px;border-radius:10px;background:rgba(196,154,60,.15);
+      border:1px solid rgba(196,154,60,.22);cursor:pointer;position:relative;transition:.2s;flex-shrink:0}
+    .season-toggle.on{background:var(--dourado);border-color:var(--dourado)}
+    .season-toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;
+      background:white;top:2px;left:2px;transition:.2s;opacity:.6}
+    .season-toggle.on::after{left:18px;opacity:1}
+    .season-pct-row{display:flex;align-items:center;gap:7px;margin-top:4px}
+    .season-pct-row span{font-size:11px;color:rgba(228,213,163,.45)}
+    .season-pct-input{width:62px;padding:4px 7px;font-size:12px;text-align:center}
+    .custom-season-add{margin-top:14px;padding-top:14px;border-top:1px solid rgba(196,154,60,.1)}
+
+    /* BUDGET TABLE */
+    .budget-wrap{background:linear-gradient(135deg,#0F2419,#132B1C);
+      border:1px solid rgba(196,154,60,.13);border-radius:15px;overflow:hidden;margin-bottom:18px}
+    .budget-toolbar{display:flex;align-items:center;justify-content:space-between;
+      padding:12px 16px;border-bottom:1px solid rgba(196,154,60,.09);flex-wrap:wrap;gap:9px}
+    .sub-tabs-row{display:flex;padding:0 16px;border-bottom:1px solid rgba(196,154,60,.09);
+      background:rgba(0,0,0,.1)}
+    .sub-tab{padding:9px 15px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;
+      font-size:12px;font-weight:700;color:rgba(228,213,163,.38);border-bottom:2px solid transparent;
+      margin-bottom:-1px;transition:.18s;letter-spacing:.03em}
+    .sub-tab.active{color:var(--dourado-claro);border-bottom-color:var(--dourado)}
+    .tbl-wrap{overflow-x:auto}
+    .tbl{width:100%;border-collapse:collapse;min-width:1050px}
+    .tbl thead th{padding:9px 5px;text-align:center;font-size:9px;color:rgba(228,213,163,.38);
+      letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid rgba(196,154,60,.1);font-weight:700}
+    .tbl thead th.th-cat{text-align:left;padding-left:16px;min-width:155px;
+      position:sticky;left:0;background:#132B1C;z-index:2}
+    .tbl thead th.th-season{background:rgba(196,154,60,.07)}
+    .tbl thead th.th-total{background:rgba(196,154,60,.06)}
+    .tbl tbody tr{border-bottom:1px solid rgba(196,154,60,.06);transition:.1s}
+    .tbl tbody tr:hover{background:rgba(196,154,60,.03)}
+    .tbl tbody tr:last-child{border-bottom:none}
+    .tbl td{padding:7px 5px;text-align:center;vertical-align:middle}
+    .tbl td.td-cat{text-align:left;padding:7px 16px;min-width:155px;
+      position:sticky;left:0;z-index:1;background:inherit}
+    .tbl tbody tr:hover td.td-cat{background:rgba(196,154,60,.03)}
+    .tbl td.td-total{background:rgba(196,154,60,.05);font-weight:700;font-size:12px;color:var(--dourado-claro)}
+    .tbl tr.tbl-total td{background:rgba(196,154,60,.08);font-weight:700;font-size:12px;
+      color:var(--bege);border-top:1px solid rgba(196,154,60,.18)}
+    .tbl tr.tbl-total td.td-total{color:var(--dourado-claro);font-size:13px}
+
+    .ci{width:86px;text-align:right;background:rgba(255,255,255,.03);
+      border:1px solid rgba(196,154,60,.09);border-radius:4px;padding:5px 7px;
+      font-size:11px;color:var(--bege);font-family:'Nunito',sans-serif;transition:.12s}
+    .ci:focus{border-color:rgba(196,154,60,.4);background:rgba(255,255,255,.06);outline:none}
+    .ci.seas{background:rgba(196,154,60,.07);border-color:rgba(196,154,60,.2)}
+    .ci.comp{color:rgba(228,213,163,.35);background:transparent;border-color:transparent;
+      cursor:default;font-style:italic}
+    .cat-name-cell{font-size:12px;color:var(--bege);font-weight:700}
+    .cat-sub-cell{font-size:9px;color:rgba(228,213,163,.32)}
+    .month-icons{font-size:10px;margin-top:1px}
+
+    /* ANALYSIS */
+    .q-tabs{display:flex;gap:0;margin-bottom:22px;border-bottom:1px solid rgba(196,154,60,.12)}
+    .q-tab{padding:10px 18px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;
+      font-size:12px;font-weight:700;color:rgba(228,213,163,.4);border-bottom:2px solid transparent;
+      margin-bottom:-1px;transition:.18s}
+    .q-tab.active{color:var(--dourado-claro);border-bottom-color:var(--dourado)}
+    .q-panel{display:none}.q-panel.active{display:block}
+
+    .an-tbl{width:100%;border-collapse:collapse}
+    .an-tbl th{padding:9px 13px;font-size:10px;color:rgba(228,213,163,.38);letter-spacing:.08em;
+      text-transform:uppercase;border-bottom:1px solid rgba(196,154,60,.11);font-weight:700;text-align:right}
+    .an-tbl th:first-child{text-align:left}
+    .an-tbl td{padding:10px 13px;font-size:13px;text-align:right;color:rgba(228,213,163,.72);
+      border-bottom:1px solid rgba(196,154,60,.06)}
+    .an-tbl td:first-child{text-align:left;color:var(--bege);font-weight:600}
+    .an-tbl tr.sum-row td{font-weight:700;background:rgba(196,154,60,.06);
+      border-top:1px solid rgba(196,154,60,.14)}
+    .an-tbl tr.sec-hdr td{background:rgba(0,0,0,.13);font-size:9px;color:rgba(228,213,163,.32);
+      text-transform:uppercase;letter-spacing:.1em;padding:6px 13px}
+    .d-pos{color:#90EE90}.d-neg{color:#F08080}.d-neu{color:rgba(228,213,163,.55)}
+
+    .tl{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+    .tl-g{background:#27AE60;box-shadow:0 0 5px rgba(39,174,96,.55)}
+    .tl-y{background:#F39C12;box-shadow:0 0 5px rgba(243,156,18,.55)}
+    .tl-r{background:#E74C3C;box-shadow:0 0 5px rgba(231,76,60,.55)}
+
+    /* INSIGHTS */
+    .insight{padding:11px 15px;border-radius:9px;margin-bottom:9px;
+      display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.52}
+    .insight-icon{font-size:17px;flex-shrink:0;margin-top:1px}
+    .ins-ok{background:rgba(39,174,96,.09);border:1px solid rgba(39,174,96,.2);color:#A8DDB5}
+    .ins-warn{background:rgba(243,156,18,.09);border:1px solid rgba(243,156,18,.2);color:#FFD791}
+    .ins-alert{background:rgba(231,76,60,.09);border:1px solid rgba(231,76,60,.2);color:#F5A0A0}
+    .ins-crit{background:rgba(192,57,43,.14);border:1px solid rgba(192,57,43,.32);color:#FF7070}
+    .ins-info{background:rgba(52,152,219,.09);border:1px solid rgba(52,152,219,.2);color:#87CEEB}
+
+    /* REVISIONS */
+    .rev-timeline{display:flex;flex-direction:column;gap:11px}
+    .rev-item{background:rgba(255,255,255,.03);border:1px solid rgba(196,154,60,.11);
+      border-radius:11px;padding:14px 18px;display:flex;align-items:flex-start;gap:13px}
+    .rev-dot{width:9px;height:9px;border-radius:50%;background:var(--dourado);flex-shrink:0;
+      margin-top:4px;box-shadow:0 0 7px rgba(196,154,60,.38)}
+    .rev-dot.orig{background:#90EE90;box-shadow:0 0 7px rgba(39,174,96,.38)}
+    .rev-q{font-size:10px;color:var(--dourado-claro);font-weight:800;letter-spacing:.08em;margin-bottom:2px}
+    .rev-date{font-size:10px;color:rgba(228,213,163,.32)}
+    .rev-notes{font-size:13px;color:rgba(228,213,163,.65);margin-top:5px;line-height:1.48}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;
+      display:none;align-items:center;justify-content:center;padding:18px}
+    .modal-overlay.show{display:flex}
+    .modal{background:linear-gradient(135deg,#132B1C,#1B3B28);border:1px solid rgba(196,154,60,.26);
+      border-radius:18px;padding:30px 34px;max-width:480px;width:100%;position:relative;
+      box-shadow:0 22px 70px rgba(0,0,0,.5)}
+    .modal-wide{max-width:640px}
+    .modal-close{position:absolute;top:13px;right:15px;background:none;border:none;
+      color:rgba(228,213,163,.32);font-size:17px;cursor:pointer}
+    .modal-close:hover{color:var(--bege)}
+    .modal-title{font-family:'Playfair Display',serif;color:var(--bege);font-size:17px;margin-bottom:7px}
+    .modal-sub{color:rgba(228,213,163,.5);font-size:13px;margin-bottom:18px;line-height:1.5}
+    .modal-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:18px}
+
+    /* MONTH PROGRESS */
+    .month-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin-bottom:18px}
+    .m-cell{text-align:center;padding:7px 3px;border-radius:6px;font-size:9px;font-weight:700;
+      letter-spacing:.05em;background:rgba(196,154,60,.05);border:1px solid rgba(196,154,60,.1);
+      color:rgba(228,213,163,.32)}
+    .m-cell.has-bud{background:rgba(196,154,60,.09);color:rgba(228,213,163,.55);border-color:rgba(196,154,60,.18)}
+    .m-cell.has-act{background:rgba(39,174,96,.11);color:#90EE90;border-color:rgba(39,174,96,.24)}
+    .m-cell.cur{background:rgba(196,154,60,.18);color:var(--dourado-claro);border-color:rgba(196,154,60,.5)}
+    .m-dot{width:4px;height:4px;border-radius:50%;margin:2px auto 0;background:transparent}
+    .m-dot.s{background:var(--dourado)}
+
+    /* MISC */
+    hr.div{border:none;border-top:1px solid rgba(196,154,60,.1);margin:18px 0}
+    .empty-state{text-align:center;padding:42px 22px;color:rgba(228,213,163,.28);font-size:13px}
+    .empty-state .ei{font-size:36px;margin-bottom:10px;opacity:.32}
+    #tc{position:fixed;bottom:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:8px}
+    .toast{background:linear-gradient(135deg,#1B3B28,#2D5A3D);border:1px solid rgba(196,154,60,.26);
+      border-radius:9px;padding:11px 16px;font-size:13px;color:var(--bege);
+      box-shadow:0 8px 28px rgba(0,0,0,.4);animation:si .2s ease;
+      display:flex;align-items:center;gap:8px;max-width:320px}
+    .toast.success{border-color:rgba(39,174,96,.32)}
+    .toast.error{border-color:rgba(192,57,43,.32);background:linear-gradient(135deg,#2B1515,#3B1B1B)}
+    .toast.warning{border-color:rgba(196,154,60,.42)}
+    @keyframes si{from{transform:translateX(45px);opacity:0}to{transform:translateX(0);opacity:1}}
+    @media(max-width:768px){
+      .navbar,.hero-strip,.tabs-bar,.main{padding-left:18px;padding-right:18px}
+      .kpi-grid{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-emblem">IAê</div>
+    <div>
+      <div class="nav-title">IAê Financeiro</div>
+      <div class="nav-sub">Planejamento Orçamentário</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="year-badge">
+      📅 Ano:
+      <select id="year-sel" onchange="changeYear(this.value)"></select>
+    </div>
+    <a href="Ferramentas financeiras da IAê.html" class="nav-back">← Voltar</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-strip">
+  <h1>Planejamento Orçamentário</h1>
+  <p>Defina metas por categoria, configure sazonalidades, acompanhe o realizado e revise trimestralmente.</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('config')">Configuração</button>
+  <button class="tab-btn" onclick="switchTab('budget')">Orçamento</button>
+  <button class="tab-btn" onclick="switchTab('actuals')">Realizado</button>
+  <button class="tab-btn" onclick="switchTab('analysis')">Análise Trimestral</button>
+  <button class="tab-btn" onclick="switchTab('revisions')">Revisões</button>
+</div>
+
+<div class="main">
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div id="panel-dashboard" class="panel active">
+    <div id="dash-kpis" class="kpi-grid"></div>
+    <div class="section-header">
+      <div><div class="section-title">Progresso do Ano</div><div class="section-sub">Verde = realizado lançado · Dourado = orçado definido · Cinza = sem dados</div></div>
+    </div>
+    <div id="dash-months" class="month-grid"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div class="section-header"><div class="section-title">Próximas Sazonalidades</div></div>
+        <div id="dash-seasons"></div>
+      </div>
+      <div>
+        <div class="section-header"><div class="section-title">Alertas</div></div>
+        <div id="dash-alerts"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CONFIGURAÇÃO ═══ -->
+  <div id="panel-config" class="panel">
+    <div class="card">
+      <div class="steps-row" id="steps-row"></div>
+
+      <!-- STEP 1: Empresa -->
+      <div id="step-0" class="step-content active">
+        <div class="card-title">🏢 Dados da Empresa</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nome da Empresa</label>
+            <input type="text" id="cfg-company" placeholder="Minha Empresa Ltda" oninput="updateMeta('company',this.value)">
+          </div>
+          <div class="form-group">
+            <label>Setor de Atuação</label>
+            <select id="cfg-sector" onchange="updateMeta('sector',this.value);renderSectorChips()">
+              <option value="varejo">Varejo / Comércio</option>
+              <option value="servicos">Serviços</option>
+              <option value="alimentacao">Alimentação / Food Service</option>
+              <option value="industria">Indústria</option>
+              <option value="outros">Outro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Ano do Planejamento</label>
+            <select id="cfg-year" onchange="updateYearFromConfig(this.value)"></select>
+          </div>
+        </div>
+        <div class="step-nav"><button class="btn btn-primary" onclick="goStep(1)">Próximo: Categorias de Receita →</button></div>
+      </div>
+
+      <!-- STEP 2: Receitas -->
+      <div id="step-1" class="step-content">
+        <div class="card-title">💰 Categorias de Receita</div>
+        <p style="font-size:13px;color:rgba(228,213,163,.5);margin-bottom:14px">Defina as linhas de receita do negócio. Use as sugestões abaixo ou crie as suas próprias.</p>
+        <div style="font-size:10px;color:rgba(228,213,163,.4);letter-spacing:.08em;font-weight:700;margin-bottom:8px">SUGESTÕES PARA SEU SETOR</div>
+        <div id="rev-chips" class="chip-row"></div>
+        <div id="rev-cat-list" class="cat-list"></div>
+        <button class="btn btn-ghost btn-sm" onclick="addCat('rev','Nova Categoria')">+ Adicionar</button>
+        <div class="step-nav">
+          <button class="btn btn-ghost" onclick="goStep(0)">← Anterior</button>
+          <button class="btn btn-primary" onclick="goStep(2)">Próximo: Sazonalidade →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Sazonalidade -->
+      <div id="step-2" class="step-content">
+        <div class="card-title">📅 Sazonalidade</div>
+        <p style="font-size:13px;color:rgba(228,213,163,.5);margin-bottom:16px">Ative os períodos de alta e defina o crescimento esperado em relação ao mês base. Esses multiplicadores serão aplicados automaticamente ao orçar receitas.</p>
+        <div id="season-grid" class="season-grid"></div>
+        <div class="custom-season-add">
+          <div style="font-size:11px;color:rgba(228,213,163,.45);font-weight:700;letter-spacing:.07em;margin-bottom:10px">ADICIONAR PERÍODO CUSTOMIZADO</div>
+          <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end">
+            <div class="form-group"><label>Nome</label><input type="text" id="cs-name" placeholder="Ex: Aniversário"></div>
+            <div class="form-group"><label>Mês</label>
+              <select id="cs-month">
+                <option value="0">Janeiro</option><option value="1">Fevereiro</option>
+                <option value="2">Março</option><option value="3">Abril</option>
+                <option value="4">Maio</option><option value="5">Junho</option>
+                <option value="6">Julho</option><option value="7">Agosto</option>
+                <option value="8">Setembro</option><option value="9">Outubro</option>
+                <option value="10">Novembro</option><option value="11">Dezembro</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Crescimento %</label><input type="number" id="cs-pct" placeholder="20" style="width:90px" min="1" max="500"></div>
+            <button class="btn btn-ghost btn-sm" onclick="addCustomSeason()" style="margin-bottom:1px">+ Adicionar</button>
+          </div>
+        </div>
+        <div class="step-nav">
+          <button class="btn btn-ghost" onclick="goStep(1)">← Anterior</button>
+          <button class="btn btn-primary" onclick="goStep(3)">Próximo: Custos →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Custos -->
+      <div id="step-3" class="step-content">
+        <div class="card-title">📦 Categorias de Custo</div>
+        <p style="font-size:13px;color:rgba(228,213,163,.5);margin-bottom:14px">Custos estão diretamente ligados à produção/operação. Você pode defini-los como valor fixo mensal ou como <strong style="color:var(--dourado-claro)">% da receita</strong> (ideal para CMV, comissões, etc.).</p>
+        <div style="font-size:10px;color:rgba(228,213,163,.4);letter-spacing:.08em;font-weight:700;margin-bottom:8px">SUGESTÕES PARA SEU SETOR</div>
+        <div id="cost-chips" class="chip-row"></div>
+        <div id="cost-cat-list" class="cat-list"></div>
+        <button class="btn btn-ghost btn-sm" onclick="addCat('cost','Novo Custo')">+ Adicionar</button>
+        <div class="step-nav">
+          <button class="btn btn-ghost" onclick="goStep(2)">← Anterior</button>
+          <button class="btn btn-primary" onclick="goStep(4)">Próximo: Despesas →</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: Despesas -->
+      <div id="step-4" class="step-content">
+        <div class="card-title">🧾 Categorias de Despesa</div>
+        <p style="font-size:13px;color:rgba(228,213,163,.5);margin-bottom:14px">Despesas são gastos fixos e administrativos, independentes do volume de vendas.</p>
+        <div style="font-size:10px;color:rgba(228,213,163,.4);letter-spacing:.08em;font-weight:700;margin-bottom:8px">SUGESTÕES</div>
+        <div id="exp-chips" class="chip-row"></div>
+        <div id="exp-cat-list" class="cat-list"></div>
+        <button class="btn btn-ghost btn-sm" onclick="addCat('exp','Nova Despesa')">+ Adicionar</button>
+        <div class="step-nav">
+          <button class="btn btn-ghost" onclick="goStep(3)">← Anterior</button>
+          <button class="btn btn-primary" onclick="finishConfig()">Concluir Configuração → Ir para Orçamento</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ORÇAMENTO ═══ -->
+  <div id="panel-budget" class="panel">
+    <div class="budget-wrap">
+      <div class="budget-toolbar">
+        <div>
+          <div class="section-title">Orçamento <span id="bud-year-label" style="color:var(--dourado-claro)"></span></div>
+          <div class="section-sub">Preencha o valor orçado por mês. Use ⚡ para auto-preenchimento com sazonalidade.</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="exportBudgetCSV()">⬇ CSV</button>
+          <button class="btn btn-ok btn-sm" onclick="snapshotBudget()">📸 Salvar versão</button>
+        </div>
+      </div>
+      <div class="sub-tabs-row">
+        <button class="sub-tab active" id="btab-rev"  onclick="switchBTab('rev')">Receitas</button>
+        <button class="sub-tab"        id="btab-cost" onclick="switchBTab('cost')">Custos</button>
+        <button class="sub-tab"        id="btab-exp"  onclick="switchBTab('exp')">Despesas</button>
+      </div>
+      <div id="btbl-rev"></div>
+      <div id="btbl-cost" style="display:none"></div>
+      <div id="btbl-exp"  style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ═══ REALIZADO ═══ -->
+  <div id="panel-actuals" class="panel">
+    <div class="budget-wrap">
+      <div class="budget-toolbar">
+        <div>
+          <div class="section-title">Realizado <span id="act-year-label" style="color:#90EE90"></span></div>
+          <div class="section-sub">Insira os valores reais de cada mês conforme forem fechando.</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="exportActualsCSV()">⬇ CSV</button>
+      </div>
+      <div class="sub-tabs-row">
+        <button class="sub-tab active" id="atab-rev"  onclick="switchATab('rev')">Receitas</button>
+        <button class="sub-tab"        id="atab-cost" onclick="switchATab('cost')">Custos</button>
+        <button class="sub-tab"        id="atab-exp"  onclick="switchATab('exp')">Despesas</button>
+      </div>
+      <div id="atbl-rev"></div>
+      <div id="atbl-cost" style="display:none"></div>
+      <div id="atbl-exp"  style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ═══ ANÁLISE ═══ -->
+  <div id="panel-analysis" class="panel">
+    <div class="q-tabs">
+      <button class="q-tab active" onclick="switchQTab(0,this)">Q1 — Jan/Mar</button>
+      <button class="q-tab" onclick="switchQTab(1,this)">Q2 — Abr/Jun</button>
+      <button class="q-tab" onclick="switchQTab(2,this)">Q3 — Jul/Set</button>
+      <button class="q-tab" onclick="switchQTab(3,this)">Q4 — Out/Dez</button>
+      <button class="q-tab" onclick="switchQTab(4,this)">Resumo Anual</button>
+    </div>
+    <div id="q0" class="q-panel active"></div>
+    <div id="q1" class="q-panel"></div>
+    <div id="q2" class="q-panel"></div>
+    <div id="q3" class="q-panel"></div>
+    <div id="q4" class="q-panel"></div>
+  </div>
+
+  <!-- ═══ REVISÕES ═══ -->
+  <div id="panel-revisions" class="panel">
+    <div class="section-header">
+      <div><div class="section-title">Histórico de Revisões</div><div class="section-sub">Registre revisões trimestrais e ajuste o orçamento para os meses futuros.</div></div>
+      <button class="btn btn-primary" onclick="openRevModal()">+ Nova Revisão Trimestral</button>
+    </div>
+    <div id="rev-list"></div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- MODAL AUTO-FILL -->
+<div class="modal-overlay" id="modal-autofill">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-autofill')">✕</button>
+    <div class="modal-title">⚡ Auto-preenchimento</div>
+    <div class="modal-sub" id="af-sub">Informe o valor base mensal. Os meses com sazonalidade ativa receberão um valor proporcionalmente maior.</div>
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Valor Base Mensal (R$)</label>
+      <input type="number" id="af-base" placeholder="Ex: 10000" min="0" step="0.01" oninput="previewAutoFill()">
+    </div>
+    <div id="af-preview" style="font-size:12px;color:rgba(228,213,163,.45);margin-bottom:4px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-autofill')">Cancelar</button>
+      <button class="btn btn-primary" onclick="applyAutoFill()">Aplicar Sazonalidade</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REVISÃO -->
+<div class="modal-overlay" id="modal-rev">
+  <div class="modal modal-wide">
+    <button class="modal-close" onclick="closeModal('modal-rev')">✕</button>
+    <div class="modal-title">📋 Nova Revisão Trimestral</div>
+    <div class="modal-sub">Registre a avaliação do trimestre concluído e ajuste as projeções para os próximos meses.</div>
+    <div class="form-grid" style="margin-bottom:14px">
+      <div class="form-group">
+        <label>Trimestre Avaliado</label>
+        <select id="rev-q">
+          <option value="Q1">Q1 — Jan/Mar (revisar Q2-Q4)</option>
+          <option value="Q2">Q2 — Abr/Jun (revisar Q3-Q4)</option>
+          <option value="Q3">Q3 — Jul/Set (revisar Q4)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Data da Revisão</label>
+        <input type="date" id="rev-date">
+      </div>
+      <div class="form-group full">
+        <label>Notas e Justificativas</label>
+        <textarea id="rev-notes" placeholder="Descreva o desempenho do trimestre e os motivos dos ajustes..."></textarea>
+      </div>
+    </div>
+    <div style="font-size:11px;color:rgba(228,213,163,.45);margin-bottom:8px">
+      💡 Após salvar, vá até a aba <strong style="color:var(--dourado-claro)">Orçamento</strong> e atualize os valores dos meses futuros. Salve uma nova versão com 📸 para registrar o ajuste.
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-rev')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveRevision()">Salvar Revisão</button>
+    </div>
+  </div>
+</div>
+
+<div id="tc"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════
+const MONTHS     = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const MONTHS_F   = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const QS         = [[0,1,2],[3,4,5],[6,7,8],[9,10,11]];
+
+const DEF_SEASONS = [
+  {id:'carnaval',   name:'Carnaval',          month:1,  pct:15, active:false, icon:'🎭'},
+  {id:'pascoa',     name:'Páscoa',            month:3,  pct:20, active:false, icon:'🐣'},
+  {id:'maes',       name:'Dia das Mães',      month:4,  pct:25, active:false, icon:'💐'},
+  {id:'namorados',  name:'Dia dos Namorados', month:5,  pct:20, active:false, icon:'❤️'},
+  {id:'juninas',    name:'Festas Juninas',    month:5,  pct:15, active:false, icon:'🎪'},
+  {id:'pais',       name:'Dia dos Pais',      month:7,  pct:20, active:false, icon:'👔'},
+  {id:'criancas',   name:'Dia das Crianças',  month:9,  pct:15, active:false, icon:'🧸'},
+  {id:'blackfriday',name:'Black Friday',      month:10, pct:30, active:false, icon:'🛒'},
+  {id:'natal',      name:'Natal / Festas',    month:11, pct:40, active:false, icon:'🎄'},
+];
+
+const REV_SUGS = {
+  varejo:     ['Vendas Balcão','Vendas Online','Atacado','Outros'],
+  servicos:   ['Serviços Recorrentes','Projetos Avulsos','Consultoria','Assinaturas'],
+  alimentacao:['Salão / Presencial','Delivery','Eventos','Catering'],
+  industria:  ['Produto Principal','Produto Secundário','Exportação','Serviços'],
+  outros:     ['Receita Principal','Receita Secundária','Outras'],
+};
+
+const COST_SUGS = {
+  varejo:[
+    {name:'Custo de Mercadorias (CMV)', type:'pct', pct:45, hint:'40–60%'},
+    {name:'Frete e Logística',          type:'pct', pct:4,  hint:'2–6%'},
+    {name:'Embalagens',                 type:'pct', pct:2,  hint:'1–3%'},
+    {name:'Comissões de Vendas',        type:'pct', pct:3,  hint:'2–5%'},
+  ],
+  servicos:[
+    {name:'Mão de Obra Direta',  type:'pct', pct:40, hint:'30–50%'},
+    {name:'Materiais e Insumos', type:'pct', pct:8,  hint:'5–15%'},
+    {name:'Subcontratações',     type:'pct', pct:10, hint:'5–20%'},
+  ],
+  alimentacao:[
+    {name:'Custo de Alimentos e Bebidas',  type:'pct', pct:30, hint:'25–38%'},
+    {name:'Embalagens e Descartáveis',     type:'pct', pct:3,  hint:'2–5%'},
+    {name:'Mão de Obra de Produção',       type:'pct', pct:20, hint:'15–25%'},
+  ],
+  industria:[
+    {name:'Matéria-prima',          type:'pct', pct:40, hint:'30–55%'},
+    {name:'Mão de Obra Industrial', type:'pct', pct:15, hint:'10–20%'},
+    {name:'Insumos de Produção',    type:'pct', pct:8,  hint:'5–12%'},
+    {name:'Frete e Logística',      type:'pct', pct:5,  hint:'3–8%'},
+  ],
+  outros:[
+    {name:'Custo Principal',    type:'pct', pct:40, hint:'Ajuste'},
+    {name:'Custo Secundário',   type:'fixed', pct:0, hint:'Fixo'},
+  ],
+};
+
+const EXP_SUGS = [
+  {name:'Aluguel',                     type:'fixed', pct:0, hint:'Fixo mensal'},
+  {name:'Folha de Pagamento Admin.',   type:'fixed', pct:0, hint:'Salários + encargos'},
+  {name:'Marketing e Publicidade',     type:'pct',   pct:6, hint:'4–10%'},
+  {name:'Energia Elétrica',            type:'fixed', pct:0, hint:'Média 3 meses'},
+  {name:'Telefone e Internet',         type:'fixed', pct:0, hint:'Fixo mensal'},
+  {name:'Sistemas e Software',         type:'fixed', pct:0, hint:'Assinaturas'},
+  {name:'Contabilidade / BPO',         type:'fixed', pct:0, hint:'Honorários'},
+  {name:'Manutenção e Reparos',        type:'fixed', pct:0, hint:'Provisão'},
+  {name:'Seguros',                     type:'fixed', pct:0, hint:'Rateio anual'},
+  {name:'Pró-labore (Sócios)',         type:'fixed', pct:0, hint:'Remuneração'},
+];
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let STATE = null;
+let _currentYear = new Date().getFullYear() + 1;
+
+function storeKey(yr){ return 'iae_bud_' + yr; }
+
+function initState(yr){
+  return {
+    meta:{ year:parseInt(yr), company:'', sector:'varejo' },
+    config:{ revCats:[], costCats:[], expCats:[], seasons: DEF_SEASONS.map(s=>({...s})) },
+    budget:{ rev:{}, cost:{}, exp:{} },
+    actuals:{ rev:{}, cost:{}, exp:{} },
+    revisions:[],
+    snapshots:[],
+  };
+}
+
+function loadState(yr){
+  const raw = localStorage.getItem(storeKey(yr));
+  if(raw){ try{ STATE = JSON.parse(raw); return true; }catch{} }
+  STATE = initState(yr);
+  return false;
+}
+
+function save(){ localStorage.setItem(storeKey(STATE.meta.year), JSON.stringify(STATE)); }
+
+function getAvailableYears(){
+  const base = new Date().getFullYear();
+  const found = [];
+  for(let y = base - 1; y <= base + 3; y++){
+    if(localStorage.getItem(storeKey(y))) found.push(y);
+  }
+  if(!found.includes(base+1)) found.push(base+1);
+  if(!found.includes(base)) found.push(base);
+  return [...new Set(found)].sort();
+}
+
+function uuid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+
+// ═══════════════════════════════════════════════════════════
+// SEASONALITY
+// ═══════════════════════════════════════════════════════════
+function seasonMultiplier(mi){
+  let extra = 0;
+  STATE.config.seasons.forEach(s=>{ if(s.active && s.month===mi) extra+=s.pct; });
+  return 1 + extra/100;
+}
+
+function seasonIconsForMonth(mi){
+  return STATE.config.seasons.filter(s=>s.active&&s.month===mi).map(s=>s.icon).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// CATEGORY HELPERS
+// ═══════════════════════════════════════════════════════════
+function addCat(type, name, opts={}){
+  const cat = { id:uuid(), name, type: opts.type||'fixed', pct: opts.pct||0 };
+  STATE.config[type+'Cats'].push(cat);
+  save();
+  renderCatList(type);
+}
+
+function removeCat(type, id){
+  STATE.config[type+'Cats'] = STATE.config[type+'Cats'].filter(c=>c.id!==id);
+  delete STATE.budget[type==='rev'?'rev':type][id];
+  delete STATE.actuals[type==='rev'?'rev':type][id];
+  save();
+  renderCatList(type);
+}
+
+function updateCatName(type, id, val){
+  const c = STATE.config[type+'Cats'].find(x=>x.id===id);
+  if(c){ c.name=val; save(); }
+}
+
+function updateCatPct(type, id, val){
+  const c = STATE.config[type+'Cats'].find(x=>x.id===id);
+  if(c){ c.pct=parseFloat(val)||0; save(); renderBudgetTable(type); }
+}
+
+function toggleCatType(type, id){
+  const c = STATE.config[type+'Cats'].find(x=>x.id===id);
+  if(c){ c.type = c.type==='pct'?'fixed':'pct'; save(); renderCatList(type); renderBudgetTable(type); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// VALUE ACCESSORS
+// ═══════════════════════════════════════════════════════════
+function budVal(type, catId, mi){ return (STATE.budget[type][catId]||[])[mi]||0; }
+function actVal(type, catId, mi){ return (STATE.actuals[type][catId]||[])[mi]||0; }
+
+function monthRevBudget(mi){ return STATE.config.revCats.reduce((s,c)=>s+budVal('rev',c.id,mi),0); }
+function monthRevActual(mi){ return STATE.config.revCats.reduce((s,c)=>s+actVal('rev',c.id,mi),0); }
+
+function costBudget(cat, mi){
+  return cat.type==='pct' ? monthRevBudget(mi)*(cat.pct/100) : budVal('cost',cat.id,mi);
+}
+function costActual(cat, mi){
+  return cat.type==='pct' ? monthRevActual(mi)*(cat.pct/100) : actVal('cost',cat.id,mi);
+}
+function expBudget(cat, mi){
+  return cat.type==='pct' ? monthRevBudget(mi)*(cat.pct/100) : budVal('exp',cat.id,mi);
+}
+function expActual(cat, mi){
+  return cat.type==='pct' ? monthRevActual(mi)*(cat.pct/100) : actVal('exp',cat.id,mi);
+}
+
+function setBudCell(type, catId, mi, v){
+  if(!STATE.budget[type][catId]) STATE.budget[type][catId]=new Array(12).fill(0);
+  STATE.budget[type][catId][mi]=parseFloat(v)||0;
+  save();
+  refreshTableTotals(type);
+}
+
+function setActCell(type, catId, mi, v){
+  if(!STATE.actuals[type][catId]) STATE.actuals[type][catId]=new Array(12).fill(0);
+  STATE.actuals[type][catId][mi]=parseFloat(v)||0;
+  save();
+  refreshActTotals(type);
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUTO-FILL
+// ═══════════════════════════════════════════════════════════
+let _afType, _afCatId;
+
+function openAutoFill(type, catId){
+  const cats = STATE.config[type+'Cats'];
+  const cat  = cats.find(c=>c.id===catId);
+  _afType   = type; _afCatId = catId;
+  document.getElementById('af-sub').textContent =
+    `Categoria: "${cat.name}". Informe o valor base mensal. Meses com sazonalidade ativa serão automaticamente aumentados.`;
+  document.getElementById('af-base').value = '';
+  document.getElementById('af-preview').textContent = '';
+  openModal('modal-autofill');
+}
+
+function previewAutoFill(){
+  const base = parseFloat(document.getElementById('af-base').value)||0;
+  if(!base){ document.getElementById('af-preview').textContent=''; return; }
+  const parts = MONTHS.map((m,i)=>{
+    const mul = _afType==='rev' ? seasonMultiplier(i) : 1;
+    const v   = Math.round(base*mul);
+    const icons = seasonIconsForMonth(i);
+    return `${m}: ${fmt(v)}${icons?' '+icons:''}`;
+  });
+  document.getElementById('af-preview').textContent = parts.join('  ·  ');
+}
+
+function applyAutoFill(){
+  const base = parseFloat(document.getElementById('af-base').value)||0;
+  if(!base){ showToast('Informe um valor base.','warning'); return; }
+  const vals = [];
+  for(let m=0;m<12;m++){
+    const mul = _afType==='rev' ? seasonMultiplier(m) : 1;
+    vals.push(Math.round(base*mul));
+  }
+  STATE.budget[_afType][_afCatId] = vals;
+  save();
+  renderBudgetTable(_afType);
+  closeModal('modal-autofill');
+  showToast('Auto-preenchimento aplicado!','success');
+}
+
+// ═══════════════════════════════════════════════════════════
+// QUARTERLY ANALYSIS COMPUTATION
+// ═══════════════════════════════════════════════════════════
+function computeQ(q){
+  const months = q<4 ? QS[q] : [0,1,2,3,4,5,6,7,8,9,10,11];
+  let bRev=0,aRev=0,bCost=0,aCost=0,bExp=0,aExp=0;
+  months.forEach(mi=>{
+    STATE.config.revCats.forEach(c=>{ bRev+=budVal('rev',c.id,mi); aRev+=actVal('rev',c.id,mi); });
+    STATE.config.costCats.forEach(c=>{ bCost+=costBudget(c,mi); aCost+=costActual(c,mi); });
+    STATE.config.expCats.forEach(c=>{ bExp+=expBudget(c,mi); aExp+=expActual(c,mi); });
+  });
+  return {
+    revenue:{bud:bRev, act:aRev},
+    costs:{bud:bCost, act:aCost},
+    expenses:{bud:bExp, act:aExp},
+    grossProfit:{bud:bRev-bCost, act:aRev-aCost},
+    ebitda:{bud:bRev-bCost-bExp, act:aRev-aCost-aExp},
+    gm:{bud: bRev>0?(bRev-bCost)/bRev:0, act: aRev>0?(aRev-aCost)/aRev:0},
+    months,
+  };
+}
+
+function tlClass(act, bud, type='rev'){
+  if(!bud) return 'tl-g';
+  const r = act/bud;
+  if(type==='rev') return r>=0.95?'tl-g':r>=0.85?'tl-y':'tl-r';
+  return r<=1.05?'tl-g':r<=1.15?'tl-y':'tl-r';
+}
+
+function devClass(act, bud, type='rev'){
+  if(!bud) return 'd-neu';
+  const d = (act-bud)/Math.abs(bud);
+  if(type==='rev') return d>=0?'d-pos':d>=-0.05?'d-neu':'d-neg';
+  return d<=0?'d-pos':d<=0.05?'d-neu':'d-neg';
+}
+
+function pctDev(act, bud){ if(!bud) return '—'; const v=((act-bud)/Math.abs(bud))*100; return (v>=0?'+':'')+v.toFixed(1)+'%'; }
+
+function generateInsights(d){
+  const ins=[];
+  const rVar = d.revenue.bud?((d.revenue.act-d.revenue.bud)/Math.abs(d.revenue.bud))*100:0;
+  const cVar = d.costs.bud?((d.costs.act-d.costs.bud)/Math.abs(d.costs.bud))*100:0;
+  const eVar = d.expenses.bud?((d.expenses.act-d.expenses.bud)/Math.abs(d.expenses.bud))*100:0;
+
+  if(d.revenue.act===0 && d.revenue.bud===0) return [{type:'info',msg:'Nenhum dado lançado para este período. Insira o realizado na aba Realizado.'}];
+
+  if(rVar>=10) ins.push({type:'ok',   msg:`🎉 Receita ${rVar.toFixed(1)}% acima do orçado. Excelente desempenho! Verifique se os custos acompanharam proporcionalmente.`});
+  else if(rVar<=-15) ins.push({type:'alert', msg:`⚠️ Receita ${Math.abs(rVar).toFixed(1)}% abaixo do orçado. Considere ações de marketing, revisão de preços ou prospecção de novos clientes.`});
+  else if(rVar<-5) ins.push({type:'warn',  msg:`📉 Receita ${Math.abs(rVar).toFixed(1)}% abaixo do orçado. Monitore as categorias com maior desvio.`});
+  else if(d.revenue.act>0) ins.push({type:'ok', msg:`✅ Receita dentro do orçado (${rVar>=0?'+':''}${rVar.toFixed(1)}%). Bom trabalho!`});
+
+  if(d.revenue.act>0 && d.gm.act<0.20) ins.push({type:'alert', msg:`Margem bruta ${(d.gm.act*100).toFixed(1)}% — abaixo de 20%. Revise fornecedores, CMV ou considere reajuste de preços.`});
+  else if(d.revenue.act>0 && d.gm.act<d.gm.bud*0.9) ins.push({type:'warn', msg:`Margem bruta (${(d.gm.act*100).toFixed(1)}%) abaixo da meta (${(d.gm.bud*100).toFixed(1)}%).`});
+
+  if(d.ebitda.act<0) ins.push({type:'crit', msg:`🚨 EBITDA negativo (${fmt(d.ebitda.act)}). Prioridade máxima: redução de custos ou captação de receita adicional.`});
+  else if(d.ebitda.bud>0 && d.ebitda.act>=d.ebitda.bud*1.1) ins.push({type:'ok', msg:`EBITDA ${((d.ebitda.act/d.ebitda.bud-1)*100).toFixed(1)}% acima do planejado. Ótima eficiência operacional!`});
+
+  if(cVar>=15) ins.push({type:'alert', msg:`Custos ${cVar.toFixed(1)}% acima do orçado. Identifique as categorias com maior desvio e negocie com fornecedores.`});
+  else if(cVar>=8) ins.push({type:'warn', msg:`Custos ${cVar.toFixed(1)}% acima do orçado. Monitore e busque eficiências.`});
+
+  if(eVar>=15) ins.push({type:'alert', msg:`Despesas ${eVar.toFixed(1)}% acima do orçado. Revise gastos desnecessários.`});
+
+  return ins;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER HELPERS
+// ═══════════════════════════════════════════════════════════
+const fmt = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const pct = v => (v*100).toFixed(1)+'%';
+
+function renderCatList(type){
+  const cats = STATE.config[type+'Cats'];
+  const el   = document.getElementById(type+'-cat-list');
+  if(!el) return;
+  if(!cats.length){
+    el.innerHTML = '<div style="font-size:12px;color:rgba(228,213,163,.3);padding:8px">Nenhuma categoria adicionada.</div>';
+    return;
+  }
+  el.innerHTML = cats.map(c=>`
+    <div class="cat-row">
+      <input type="text" value="${c.name}" placeholder="Nome" style="flex:1;padding:5px 9px;font-size:12px"
+             onchange="updateCatName('${type}','${c.id}',this.value)">
+      ${type!=='rev'?`
+        <button class="cat-badge ${c.type==='pct'?'pct':''}" onclick="toggleCatType('${type}','${c.id}')" title="Clique para alternar Fixo/%">
+          ${c.type==='pct'?'% Receita':'Fixo'}
+        </button>
+        ${c.type==='pct'?`<input type="number" class="cat-pct" value="${c.pct}" placeholder="%" min="0" max="100" step="0.1"
+               onchange="updateCatPct('${type}','${c.id}',this.value)">
+               <span style="font-size:11px;color:rgba(228,213,163,.35)">%</span>`:''}
+      `:''}
+      <button class="btn btn-danger btn-sm btn-icon" onclick="removeCat('${type}','${c.id}')">🗑</button>
+    </div>
+  `).join('');
+}
+
+function renderSectorChips(){
+  const sector = STATE.meta.sector;
+  const revEl  = document.getElementById('rev-chips');
+  if(revEl){
+    const revSugs = REV_SUGS[sector]||REV_SUGS.outros;
+    const existing = STATE.config.revCats.map(c=>c.name);
+    revEl.innerHTML = revSugs.map(s=>`
+      <button class="chip chip-sug ${existing.includes(s)?'active':''}" onclick="addCatFromChip('rev','${s}','fixed',0)">+ ${s}</button>
+    `).join('');
+  }
+  const costEl = document.getElementById('cost-chips');
+  if(costEl){
+    const costSugs = COST_SUGS[sector]||COST_SUGS.outros;
+    costEl.innerHTML = costSugs.map(s=>`
+      <button class="chip chip-sug" onclick="addCatFromChip('cost','${s.name}','${s.type}',${s.pct})" title="${s.hint}">
+        + ${s.name} <span style="opacity:.55">${s.type==='pct'?s.pct+'%':''}</span>
+      </button>
+    `).join('');
+  }
+  const expEl  = document.getElementById('exp-chips');
+  if(expEl){
+    expEl.innerHTML = EXP_SUGS.map(s=>`
+      <button class="chip chip-sug" onclick="addCatFromChip('exp','${s.name}','${s.type}',${s.pct})" title="${s.hint}">
+        + ${s.name} ${s.type==='pct'?'<span style="opacity:.55">'+s.pct+'%</span>':''}
+      </button>
+    `).join('');
+  }
+}
+
+function addCatFromChip(type, name, ctype, cpct){
+  if(STATE.config[type+'Cats'].find(c=>c.name===name)){ showToast('Categoria já adicionada.','warning'); return; }
+  addCat(type, name, {type:ctype, pct:cpct});
+  renderSectorChips();
+  if(type==='rev') renderBudgetTable('rev');
+  if(type==='cost') renderBudgetTable('cost');
+  if(type==='exp') renderBudgetTable('exp');
+}
+
+function renderSeasonGrid(){
+  const el = document.getElementById('season-grid');
+  if(!el) return;
+  el.innerHTML = STATE.config.seasons.map(s=>`
+    <div class="season-card ${s.active?'on':''}" id="sc-${s.id}">
+      <div class="season-top">
+        <div class="season-left">
+          <div class="season-icon">${s.icon}</div>
+          <div>
+            <div class="season-name">${s.name}</div>
+            <div class="season-month">${MONTHS_F[s.month]}</div>
+          </div>
+        </div>
+        <div class="season-toggle ${s.active?'on':''}" onclick="toggleSeason('${s.id}')"></div>
+      </div>
+      ${s.active?`<div class="season-pct-row">
+        <span>Crescimento:</span>
+        <input type="number" class="season-pct-input" value="${s.pct}" min="1" max="500"
+               onchange="updateSeasonPct('${s.id}',this.value)">
+        <span>%</span>
+      </div>`:''}
+      ${s.custom?`<button class="btn btn-danger btn-sm" style="margin-top:6px" onclick="removeSeason('${s.id}')">Remover</button>`:''}
+    </div>
+  `).join('');
+}
+
+function toggleSeason(id){
+  const s = STATE.config.seasons.find(x=>x.id===id);
+  if(s){ s.active=!s.active; save(); renderSeasonGrid(); renderBudgetTable('rev'); }
+}
+function updateSeasonPct(id, v){
+  const s = STATE.config.seasons.find(x=>x.id===id);
+  if(s){ s.pct=parseFloat(v)||0; save(); renderBudgetTable('rev'); }
+}
+function addCustomSeason(){
+  const name = document.getElementById('cs-name').value.trim();
+  const month= parseInt(document.getElementById('cs-month').value);
+  const pct  = parseFloat(document.getElementById('cs-pct').value)||10;
+  if(!name){ showToast('Informe o nome do período.','warning'); return; }
+  STATE.config.seasons.push({id:uuid(),name,month,pct,active:true,icon:'⭐',custom:true});
+  save(); renderSeasonGrid();
+  document.getElementById('cs-name').value='';
+  document.getElementById('cs-pct').value='';
+}
+function removeSeason(id){
+  STATE.config.seasons = STATE.config.seasons.filter(s=>s.id!==id);
+  save(); renderSeasonGrid();
+}
+
+// ═══════════════════════════════════════════════════════════
+// BUDGET TABLE
+// ═══════════════════════════════════════════════════════════
+let _bTab='rev', _aTab='rev';
+
+function switchBTab(t){
+  _bTab=t;
+  ['rev','cost','exp'].forEach(x=>{
+    document.getElementById('btbl-'+x).style.display = x===t?'block':'none';
+    document.getElementById('btab-'+x).classList.toggle('active',x===t);
+  });
+  renderBudgetTable(t);
+}
+
+function switchATab(t){
+  _aTab=t;
+  ['rev','cost','exp'].forEach(x=>{
+    document.getElementById('atbl-'+x).style.display = x===t?'block':'none';
+    document.getElementById('atab-'+x).classList.toggle('active',x===t);
+  });
+  renderActualsTable(t);
+}
+
+function buildTableHTML(cats, getVal, setFnStr, seasonalCols, isPct){
+  if(!cats.length) return `<div class="empty-state"><div class="ei">📋</div>Nenhuma categoria configurada. Acesse Configuração para adicionar.</div>`;
+
+  const ths = MONTHS.map((m,i)=>{
+    const icons = seasonIconsForMonth(i);
+    return `<th class="th-${icons?'season':'month'}" style="min-width:90px">
+      <div>${m}</div><div class="month-icons">${icons||''}</div>
+    </th>`;
+  }).join('');
+
+  const rows = cats.map(cat=>{
+    const isComp = isPct && cat.type==='pct';
+    const cells = MONTHS.map((_,mi)=>{
+      const v = getVal(cat,mi);
+      const icons = seasonIconsForMonth(mi);
+      if(isComp){
+        return `<td><input class="ci comp" type="number" value="${v.toFixed(2)}" readonly tabindex="-1"></td>`;
+      }
+      return `<td><input class="ci ${icons?'seas':''}" type="number" value="${v||''}"
+        data-cat="${cat.id}" data-mi="${mi}"
+        onchange="${setFnStr}" placeholder="0"></td>`;
+    }).join('');
+
+    const annual = MONTHS.reduce((_,__,mi)=>_+getVal(cat,mi),0);
+    const sub = cat.type==='pct'?`${cat.pct}% receita`:'';
+    return `<tr>
+      <td class="td-cat">
+        <div class="cat-name-cell">${cat.name}</div>
+        ${sub?`<div class="cat-sub-cell">${sub}</div>`:''}
+      </td>
+      ${cells}
+      <td class="td-total" id="cat-total-${setFnStr.includes('Bud')?'b':'a'}-${cat.id}">${fmt(annual)}</td>
+      ${setFnStr.includes('Bud')?`<td><button class="btn btn-ghost btn-icon btn-sm" onclick="openAutoFill('${isPct?'cost':'rev'}','${cat.id}')" title="Auto-preenchimento">⚡</button></td>`:'<td></td>'}
+    </tr>`;
+  }).join('');
+
+  const totals = MONTHS.map((_,mi)=>{
+    const t = cats.reduce((s,c)=>s+getVal(c,mi),0);
+    return `<td class="td-total" id="col-total-${setFnStr.includes('Bud')?'b':'a'}-${mi}">${fmt(t)}</td>`;
+  }).join('');
+
+  const annual = cats.reduce((s,c)=>s+MONTHS.reduce((_,__,mi)=>_+getVal(c,mi),0),0);
+
+  return `<div class="tbl-wrap"><table class="tbl">
+    <thead><tr>
+      <th class="th-cat">Categoria</th>
+      ${ths}
+      <th class="th-total">Total Anual</th>
+      <th style="width:40px"></th>
+    </tr></thead>
+    <tbody>
+      ${rows}
+      <tr class="tbl-total">
+        <td class="td-cat">TOTAL</td>
+        ${totals}
+        <td class="td-total">${fmt(annual)}</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table></div>`;
+}
+
+function renderBudgetTable(type){
+  const el = document.getElementById('btbl-'+type);
+  if(!el) return;
+  let cats, getVal, setFn;
+  if(type==='rev'){
+    cats   = STATE.config.revCats;
+    getVal = (c,mi)=>budVal('rev',c.id,mi);
+    setFn  = "setBudCell('rev',this.dataset.cat,+this.dataset.mi,this.value)";
+    el.innerHTML = buildTableHTML(cats,getVal,setFn,true,false);
+  } else if(type==='cost'){
+    cats   = STATE.config.costCats;
+    getVal = (c,mi)=>costBudget(c,mi);
+    setFn  = "setBudCell('cost',this.dataset.cat,+this.dataset.mi,this.value)";
+    el.innerHTML = buildTableHTML(cats,getVal,setFn,false,true);
+  } else {
+    cats   = STATE.config.expCats;
+    getVal = (c,mi)=>expBudget(c,mi);
+    setFn  = "setBudCell('exp',this.dataset.cat,+this.dataset.mi,this.value)";
+    el.innerHTML = buildTableHTML(cats,getVal,setFn,false,true);
+  }
+}
+
+function renderActualsTable(type){
+  const el = document.getElementById('atbl-'+type);
+  if(!el) return;
+  let cats, getVal, setFn;
+  if(type==='rev'){
+    cats   = STATE.config.revCats;
+    getVal = (c,mi)=>actVal('rev',c.id,mi);
+    setFn  = "setActCell('rev',this.dataset.cat,+this.dataset.mi,this.value)";
+  } else if(type==='cost'){
+    cats   = STATE.config.costCats;
+    getVal = (c,mi)=>costActual(c,mi);
+    setFn  = "setActCell('cost',this.dataset.cat,+this.dataset.mi,this.value)";
+  } else {
+    cats   = STATE.config.expCats;
+    getVal = (c,mi)=>expActual(c,mi);
+    setFn  = "setActCell('exp',this.dataset.cat,+this.dataset.mi,this.value)";
+  }
+  el.innerHTML = buildTableHTML(cats,getVal,setFn,true,type!=='rev');
+}
+
+function refreshTableTotals(type){ renderBudgetTable(type); }
+function refreshActTotals(type){ renderActualsTable(type); }
+
+// ═══════════════════════════════════════════════════════════
+// ANALYSIS RENDER
+// ═══════════════════════════════════════════════════════════
+let _qTab = 0;
+
+function switchQTab(q, btn){
+  _qTab = q;
+  document.querySelectorAll('.q-tab').forEach((b,i)=>b.classList.toggle('active',i===q));
+  document.querySelectorAll('.q-panel').forEach((p,i)=>p.classList.toggle('active',i===q));
+  renderQPanel(q);
+}
+
+function renderQPanel(q){
+  const el = document.getElementById('q'+q);
+  if(!el) return;
+  const label = q<4 ? `Q${q+1} — ${MONTHS_F[QS[q][0]]} a ${MONTHS_F[QS[q][2]]}` : 'Resumo Anual';
+  const d = computeQ(q);
+
+  // Category detail rows
+  const revRows = STATE.config.revCats.map(c=>{
+    const months = q<4?QS[q]:[0,1,2,3,4,5,6,7,8,9,10,11];
+    const b = months.reduce((s,mi)=>s+budVal('rev',c.id,mi),0);
+    const a = months.reduce((s,mi)=>s+actVal('rev',c.id,mi),0);
+    return `<tr><td style="padding-left:28px;font-weight:400;font-size:12px">${c.name}</td>
+      <td>${fmt(b)}</td><td>${fmt(a)}</td>
+      <td class="${devClass(a,b,'rev')}">${pctDev(a,b)}</td></tr>`;
+  }).join('');
+
+  const costRows = STATE.config.costCats.map(c=>{
+    const months = q<4?QS[q]:[0,1,2,3,4,5,6,7,8,9,10,11];
+    const b = months.reduce((s,mi)=>s+costBudget(c,mi),0);
+    const a = months.reduce((s,mi)=>s+costActual(c,mi),0);
+    const badge = c.type==='pct'?`<span style="font-size:9px;opacity:.5"> (${c.pct}%)</span>`:'';
+    return `<tr><td style="padding-left:28px;font-weight:400;font-size:12px">${c.name}${badge}</td>
+      <td>${fmt(b)}</td><td>${fmt(a)}</td>
+      <td class="${devClass(a,b,'cost')}">${pctDev(a,b)}</td></tr>`;
+  }).join('');
+
+  const expRows = STATE.config.expCats.map(c=>{
+    const months = q<4?QS[q]:[0,1,2,3,4,5,6,7,8,9,10,11];
+    const b = months.reduce((s,mi)=>s+expBudget(c,mi),0);
+    const a = months.reduce((s,mi)=>s+expActual(c,mi),0);
+    const badge = c.type==='pct'?`<span style="font-size:9px;opacity:.5"> (${c.pct}%)</span>`:'';
+    return `<tr><td style="padding-left:28px;font-weight:400;font-size:12px">${c.name}${badge}</td>
+      <td>${fmt(b)}</td><td>${fmt(a)}</td>
+      <td class="${devClass(a,b,'exp')}">${pctDev(a,b)}</td></tr>`;
+  }).join('');
+
+  const ins = generateInsights(d);
+  const insHTML = ins.map(i=>`
+    <div class="insight ins-${i.type}">
+      <div>${i.msg}</div>
+    </div>
+  `).join('');
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px">
+      <div>
+        <div class="section-header"><div class="section-title">${label}</div></div>
+        <div class="card">
+          <div class="tbl-wrap"><table class="an-tbl">
+            <thead><tr><th>Linha</th><th>Orçado</th><th>Realizado</th><th>Desvio</th></tr></thead>
+            <tbody>
+              <tr class="sec-hdr"><td colspan="4">RECEITAS</td></tr>
+              ${revRows}
+              <tr class="sum-row">
+                <td><span class="tl ${tlClass(d.revenue.act,d.revenue.bud,'rev')}"></span>Receita Total</td>
+                <td>${fmt(d.revenue.bud)}</td>
+                <td>${fmt(d.revenue.act)}</td>
+                <td class="${devClass(d.revenue.act,d.revenue.bud,'rev')}">${pctDev(d.revenue.act,d.revenue.bud)}</td>
+              </tr>
+              <tr class="sec-hdr"><td colspan="4">CUSTOS</td></tr>
+              ${costRows}
+              <tr class="sum-row">
+                <td><span class="tl ${tlClass(d.costs.act,d.costs.bud,'cost')}"></span>Custos Totais</td>
+                <td>${fmt(d.costs.bud)}</td>
+                <td>${fmt(d.costs.act)}</td>
+                <td class="${devClass(d.costs.act,d.costs.bud,'cost')}">${pctDev(d.costs.act,d.costs.bud)}</td>
+              </tr>
+              <tr class="sum-row">
+                <td><span class="tl ${tlClass(d.grossProfit.act,d.grossProfit.bud,'rev')}"></span>Lucro Bruto</td>
+                <td>${fmt(d.grossProfit.bud)}</td>
+                <td>${fmt(d.grossProfit.act)}</td>
+                <td class="${devClass(d.grossProfit.act,d.grossProfit.bud,'rev')}">${pctDev(d.grossProfit.act,d.grossProfit.bud)}</td>
+              </tr>
+              <tr style="font-size:11px;color:rgba(228,213,163,.35)">
+                <td style="padding-left:28px">Margem Bruta</td>
+                <td>${pct(d.gm.bud)}</td>
+                <td>${pct(d.gm.act)}</td><td></td>
+              </tr>
+              <tr class="sec-hdr"><td colspan="4">DESPESAS</td></tr>
+              ${expRows}
+              <tr class="sum-row">
+                <td><span class="tl ${tlClass(d.expenses.act,d.expenses.bud,'exp')}"></span>Despesas Totais</td>
+                <td>${fmt(d.expenses.bud)}</td>
+                <td>${fmt(d.expenses.act)}</td>
+                <td class="${devClass(d.expenses.act,d.expenses.bud,'exp')}">${pctDev(d.expenses.act,d.expenses.bud)}</td>
+              </tr>
+              <tr class="sum-row" style="font-size:14px">
+                <td><span class="tl ${tlClass(d.ebitda.act,d.ebitda.bud,'rev')}"></span><strong>EBITDA</strong></td>
+                <td><strong>${fmt(d.ebitda.bud)}</strong></td>
+                <td><strong>${fmt(d.ebitda.act)}</strong></td>
+                <td class="${devClass(d.ebitda.act,d.ebitda.bud,'rev')}"><strong>${pctDev(d.ebitda.act,d.ebitda.bud)}</strong></td>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-header"><div class="section-title">Análise e Sugestões</div></div>
+        <div>${insHTML||'<div class="empty-state"><div class="ei">💡</div>Sem alertas para este período.</div>'}</div>
+        <div style="margin-top:16px">
+          <div class="card" style="padding:16px 18px">
+            <div style="font-size:10px;color:rgba(228,213,163,.38);letter-spacing:.08em;font-weight:700;margin-bottom:10px">SEMÁFORO</div>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:rgba(228,213,163,.7)">
+              <div><span class="tl tl-g"></span> Verde — dentro do planejado</div>
+              <div><span class="tl tl-y"></span> Amarelo — atenção (5–15% desvio)</div>
+              <div><span class="tl tl-r"></span> Vermelho — ação necessária (&gt;15% desvio)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// REVISIONS
+// ═══════════════════════════════════════════════════════════
+function openRevModal(){
+  document.getElementById('rev-date').value = new Date().toISOString().slice(0,10);
+  openModal('modal-rev');
+}
+
+function saveRevision(){
+  const q     = document.getElementById('rev-q').value;
+  const date  = document.getElementById('rev-date').value;
+  const notes = document.getElementById('rev-notes').value.trim();
+  STATE.revisions.push({ id:uuid(), quarter:q, date, notes, createdAt:new Date().toISOString() });
+  save();
+  closeModal('modal-rev');
+  renderRevisions();
+  showToast('Revisão registrada. Atualize o orçamento na aba Orçamento e salve uma nova versão.','success');
+  document.getElementById('rev-notes').value='';
+}
+
+function snapshotBudget(){
+  const rev = STATE.revisions;
+  const q   = rev.length ? rev[rev.length-1].quarter : 'Original';
+  const name = STATE.snapshots.length===0 ? `Orçamento Original ${STATE.meta.year}` : `Revisão ${q} — ${new Date().toLocaleDateString('pt-BR')}`;
+  STATE.snapshots.push({
+    id:uuid(), name, date:new Date().toISOString(),
+    budget: JSON.parse(JSON.stringify(STATE.budget)),
+  });
+  save();
+  showToast(`Versão "${name}" salva.`,'success');
+  renderRevisions();
+}
+
+function renderRevisions(){
+  const el = document.getElementById('rev-list');
+  if(!el) return;
+  const snaps = STATE.snapshots||[];
+  const revs  = STATE.revisions||[];
+
+  if(!snaps.length && !revs.length){
+    el.innerHTML = `<div class="empty-state"><div class="ei">📋</div>
+      Nenhuma versão salva. Acesse a aba Orçamento e clique em 📸 Salvar versão para registrar o orçamento original.</div>`;
+    return;
+  }
+
+  let html = '<div class="rev-timeline">';
+
+  snaps.forEach(s=>{
+    html += `<div class="rev-item">
+      <div class="rev-dot orig"></div>
+      <div style="flex:1">
+        <div class="rev-q">📸 VERSÃO SALVA</div>
+        <div class="rev-date">${new Date(s.date).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</div>
+        <div class="rev-notes">${s.name}</div>
+      </div>
+    </div>`;
+  });
+
+  revs.forEach(r=>{
+    html += `<div class="rev-item">
+      <div class="rev-dot"></div>
+      <div style="flex:1">
+        <div class="rev-q">REVISÃO ${r.quarter}</div>
+        <div class="rev-date">${new Date(r.date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</div>
+        ${r.notes?`<div class="rev-notes">${r.notes}</div>`:''}
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteRevision('${r.id}')">Remover</button>
+    </div>`;
+  });
+
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function deleteRevision(id){
+  if(!confirm('Remover este registro de revisão?')) return;
+  STATE.revisions = STATE.revisions.filter(r=>r.id!==id);
+  save(); renderRevisions();
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
+function renderDashboard(){
+  const yr = STATE.meta.year;
+  document.getElementById('dash-kpis').innerHTML = buildDashKPIs();
+  document.getElementById('dash-months').innerHTML = buildMonthGrid();
+  document.getElementById('dash-seasons').innerHTML = buildUpcomingSeasons();
+  document.getElementById('dash-alerts').innerHTML = buildAlerts();
+}
+
+function buildDashKPIs(){
+  const d = computeQ(4);
+  const gm = d.revenue.bud>0?(d.revenue.bud-d.costs.bud)/d.revenue.bud:0;
+  const actGm = d.revenue.act>0?(d.revenue.act-d.costs.act)/d.revenue.act:0;
+  const company = STATE.meta.company || 'Minha Empresa';
+
+  return `
+    <div class="kpi-card"><div class="kpi-label">Receita Anual Orçada</div>
+      <div class="kpi-value warn">${fmt(d.revenue.bud)}</div>
+      <div class="kpi-sub">${STATE.config.revCats.length} categorias — ${company}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Custos + Despesas Orçados</div>
+      <div class="kpi-value">${fmt(d.costs.bud+d.expenses.bud)}</div>
+      <div class="kpi-sub">Custo: ${fmt(d.costs.bud)} · Desp: ${fmt(d.expenses.bud)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Margem Bruta Orçada</div>
+      <div class="kpi-value ${gm>=0.3?'ok':gm>=0.2?'warn':'bad'}">${pct(gm)}</div>
+      <div class="kpi-sub">Realizado: ${pct(actGm)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">EBITDA Orçado</div>
+      <div class="kpi-value ${d.ebitda.bud>=0?'ok':'bad'}">${fmt(d.ebitda.bud)}</div>
+      <div class="kpi-sub">Realizado: ${fmt(d.ebitda.act)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Receita Realizada</div>
+      <div class="kpi-value ok">${fmt(d.revenue.act)}</div>
+      <div class="kpi-sub">${d.revenue.bud>0?pct(d.revenue.act/d.revenue.bud)+' do orçado':''}</div></div>
+  `;
+}
+
+function buildMonthGrid(){
+  const now = new Date();
+  const curMi = STATE.meta.year===now.getFullYear() ? now.getMonth() : -1;
+  return MONTHS.map((m,mi)=>{
+    const hasBud = STATE.config.revCats.some(c=>budVal('rev',c.id,mi)>0);
+    const hasAct = STATE.config.revCats.some(c=>actVal('rev',c.id,mi)>0);
+    const icons  = seasonIconsForMonth(mi);
+    let cls = '';
+    if(mi===curMi) cls='cur';
+    else if(hasAct) cls='has-act';
+    else if(hasBud) cls='has-bud';
+    return `<div class="m-cell ${cls}">
+      ${m}<div class="m-dot ${icons?'s':''}"></div>
+    </div>`;
+  }).join('');
+}
+
+function buildUpcomingSeasons(){
+  const now   = new Date();
+  const curMi = STATE.meta.year===now.getFullYear() ? now.getMonth() : 0;
+  const active = STATE.config.seasons.filter(s=>s.active && s.month>=curMi).slice(0,4);
+  if(!active.length) return `<div class="empty-state" style="padding:20px"><div class="ei">📅</div>Nenhuma sazonalidade ativa configurada.</div>`;
+  return active.map(s=>`
+    <div class="rev-item" style="margin-bottom:8px">
+      <div style="font-size:22px">${s.icon}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;color:var(--bege);font-weight:700">${s.name}</div>
+        <div style="font-size:11px;color:rgba(228,213,163,.4)">${MONTHS_F[s.month]} · +${s.pct}% de crescimento esperado</div>
+      </div>
+    </div>`).join('');
+}
+
+function buildAlerts(){
+  const alerts = [];
+  const d = computeQ(4);
+  if(STATE.config.revCats.length===0) alerts.push({t:'warn',m:'Configure as categorias de receita na aba Configuração.'});
+  if(d.ebitda.bud<0) alerts.push({t:'crit',m:`EBITDA anual orçado é negativo (${fmt(d.ebitda.bud)}). Revise custos e despesas.`});
+  if(d.gm.bud<0.20 && d.revenue.bud>0) alerts.push({t:'warn',m:`Margem bruta orçada (${pct(d.gm.bud)}) abaixo de 20%.`});
+  if(!alerts.length) return `<div class="empty-state" style="padding:20px"><div class="ei">✅</div>Sem alertas no momento.</div>`;
+  return alerts.map(a=>`<div class="insight ins-${a.t==='crit'?'crit':a.t==='warn'?'warn':'alert'}"><div>${a.m}</div></div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// TABS / NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    const tabs=['dashboard','config','budget','actuals','analysis','revisions'];
+    b.classList.toggle('active',tabs[i]===name);
+  });
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+
+  if(name==='dashboard'){ renderDashboard(); }
+  if(name==='config'){
+    renderStepsRow();
+    renderSectorChips();
+    renderCatList('rev'); renderCatList('cost'); renderCatList('exp');
+    renderSeasonGrid();
+    const y = document.getElementById('cfg-year');
+    if(y) y.value = STATE.meta.year;
+    document.getElementById('cfg-company').value = STATE.meta.company||'';
+    document.getElementById('cfg-sector').value  = STATE.meta.sector||'varejo';
+  }
+  if(name==='budget'){
+    document.getElementById('bud-year-label').textContent = STATE.meta.year;
+    renderBudgetTable(_bTab);
+  }
+  if(name==='actuals'){
+    document.getElementById('act-year-label').textContent = STATE.meta.year;
+    renderActualsTable(_aTab);
+  }
+  if(name==='analysis'){ renderQPanel(_qTab); }
+  if(name==='revisions'){ renderRevisions(); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONFIG WIZARD
+// ═══════════════════════════════════════════════════════════
+let _step = 0;
+
+function renderStepsRow(){
+  const steps = ['Empresa','Receitas','Sazonalidade','Custos','Despesas'];
+  document.getElementById('steps-row').innerHTML = steps.map((s,i)=>`
+    <button class="step-btn ${i===_step?'active':i<_step?'done':''}" onclick="goStep(${i})">
+      <span class="step-num">${i<_step?'✓':i+1}</span> ${s}
+    </button>`).join('');
+}
+
+function goStep(n){
+  _step=n;
+  document.querySelectorAll('.step-content').forEach((el,i)=>el.classList.toggle('active',i===n));
+  renderStepsRow();
+}
+
+function updateMeta(key,val){
+  STATE.meta[key]=val;
+  save();
+  if(key==='sector') renderSectorChips();
+}
+
+function updateYearFromConfig(yr){
+  const newYr = parseInt(yr);
+  if(newYr===STATE.meta.year) return;
+  loadState(newYr);
+  _currentYear=newYr;
+  updateYearUI();
+  switchTab('config');
+}
+
+function finishConfig(){
+  save();
+  showToast('Configuração salva! Preenchendo orçamento…','success');
+  switchTab('budget');
+}
+
+// ═══════════════════════════════════════════════════════════
+// YEAR SELECTOR
+// ═══════════════════════════════════════════════════════════
+function updateYearUI(){
+  const sel = document.getElementById('year-sel');
+  const years = getAvailableYears();
+  if(!years.includes(_currentYear)) years.push(_currentYear);
+  years.sort();
+  sel.innerHTML = years.map(y=>`<option value="${y}" ${y===STATE.meta.year?'selected':''}>${y}</option>`).join('');
+
+  const cfgYear = document.getElementById('cfg-year');
+  if(cfgYear){
+    cfgYear.innerHTML = years.map(y=>`<option value="${y}" ${y===STATE.meta.year?'selected':''}>${y}</option>`).join('');
+    // allow creating new year options
+    const nextYear = Math.max(...years)+1;
+    cfgYear.innerHTML += `<option value="${nextYear}">Criar ${nextYear}...</option>`;
+  }
+  const yLabel = document.getElementById('bud-year-label');
+  if(yLabel) yLabel.textContent = STATE.meta.year;
+  const aLabel = document.getElementById('act-year-label');
+  if(aLabel) aLabel.textContent = STATE.meta.year;
+}
+
+function changeYear(yr){
+  _currentYear=parseInt(yr);
+  loadState(_currentYear);
+  updateYearUI();
+  switchTab('dashboard');
+}
+
+// ═══════════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════════
+function exportBudgetCSV(){
+  let csv='Tipo;Categoria;'+MONTHS.join(';')+';Total\n';
+  ['rev','cost','exp'].forEach(type=>{
+    const cats = STATE.config[type+'Cats'];
+    const label = type==='rev'?'Receita':type==='cost'?'Custo':'Despesa';
+    cats.forEach(c=>{
+      const vals = MONTHS.map((_,mi)=>{
+        if(type==='rev') return budVal('rev',c.id,mi);
+        if(type==='cost') return costBudget(c,mi);
+        return expBudget(c,mi);
+      });
+      const total = vals.reduce((s,v)=>s+v,0);
+      csv += `${label};${c.name};${vals.map(v=>v.toFixed(2)).join(';')};${total.toFixed(2)}\n`;
+    });
+  });
+  downloadCSV(csv, `orcamento_${STATE.meta.year}.csv`);
+}
+
+function exportActualsCSV(){
+  let csv='Tipo;Categoria;'+MONTHS.join(';')+';Total\n';
+  ['rev','cost','exp'].forEach(type=>{
+    const cats = STATE.config[type+'Cats'];
+    const label = type==='rev'?'Receita':type==='cost'?'Custo':'Despesa';
+    cats.forEach(c=>{
+      const vals = MONTHS.map((_,mi)=>{
+        if(type==='rev') return actVal('rev',c.id,mi);
+        if(type==='cost') return costActual(c,mi);
+        return expActual(c,mi);
+      });
+      const total = vals.reduce((s,v)=>s+v,0);
+      csv += `${label};${c.name};${vals.map(v=>v.toFixed(2)).join(';')};${total.toFixed(2)}\n`;
+    });
+  });
+  downloadCSV(csv, `realizado_${STATE.meta.year}.csv`);
+}
+
+function downloadCSV(csv, fname){
+  const blob = new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=fname; a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODALS & TOAST
+// ═══════════════════════════════════════════════════════════
+function openModal(id)  { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(o=>
+  o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('show'); }));
+
+function showToast(msg,type='success'){
+  const icons={success:'✅',error:'❌',warning:'⚠️'};
+  const el=document.createElement('div');
+  el.className='toast '+type;
+  el.innerHTML=`<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  document.getElementById('tc').appendChild(el);
+  setTimeout(()=>el.remove(),3600);
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+(function init(){
+  const nextYear = new Date().getFullYear()+1;
+  _currentYear = nextYear;
+  loadState(_currentYear);
+
+  // Populate year selector
+  const sel = document.getElementById('year-sel');
+  const cfgY = document.getElementById('cfg-year');
+  const years = getAvailableYears();
+  if(!years.includes(nextYear)) years.push(nextYear);
+  years.sort();
+  sel.innerHTML = years.map(y=>`<option value="${y}" ${y===STATE.meta.year?'selected':''}>${y}</option>`).join('');
+  if(cfgY) cfgY.innerHTML = years.map(y=>`<option value="${y}" ${y===STATE.meta.year?'selected':''}>${y}</option>`).join('')
+    + `<option value="${Math.max(...years)+1}">Criar ${Math.max(...years)+1}...</option>`;
+
+  document.getElementById('rev-date').value = new Date().toISOString().slice(0,10);
+  renderDashboard();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IAê Financeiro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --verde:    #1B3B28;
+      --verde2:   #2D5A3D;
+      --dourado:  #C49A3C;
+      --dourado2: #E0B84A;
+      --bege:     #E8D5A3;
+      --bege2:    #F5EDD5;
+      --bg:       #0A180F;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--bege2);
+      min-height: 100vh;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(160deg, #060F09 0%, #0E1F12 45%, #1B3B28 100%);
+      padding: 56px 24px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(196,154,60,.08) 0%, transparent 65%);
+      top: -200px; right: -150px; pointer-events: none;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--dourado);
+      background: rgba(196,154,60,.12);
+      border: 1px solid rgba(196,154,60,.3);
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+    }
+
+    .emblem {
+      width: 72px; height: 72px;
+      background: linear-gradient(145deg, var(--verde), var(--verde2));
+      border: 2px solid rgba(196,154,60,.5);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.9rem;
+      margin: 0 auto 24px;
+      box-shadow: 0 8px 28px rgba(196,154,60,.2);
+    }
+
+    .hero-titulo {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 8vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--bege2);
+      margin-bottom: 6px;
+    }
+    .hero-titulo span {
+      background: linear-gradient(135deg, var(--dourado), var(--dourado2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: .95rem;
+      color: rgba(232,213,163,.55);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .hero-destaque {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.15rem, 4.5vw, 1.45rem);
+      font-weight: 600;
+      font-style: italic;
+      color: var(--bege2);
+      background: rgba(27,59,40,.55);
+      border-left: 3px solid var(--dourado);
+      border-radius: 0 12px 12px 0;
+      padding: 16px 20px;
+      text-align: left;
+      margin: 0 auto 40px;
+      max-width: 520px;
+      line-height: 1.5;
+    }
+
+    /* ── STATS ── */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .stat {
+      flex: 1;
+      text-align: center;
+      padding: 0 12px;
+      border-right: 1px solid rgba(196,154,60,.2);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-n {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--dourado);
+      display: block;
+      line-height: 1;
+    }
+    .stat-l {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: rgba(232,213,163,.45);
+      display: block;
+      margin-top: 5px;
+    }
+
+    /* ── SEÇÕES ── */
+    .section {
+      padding: 44px 24px;
+    }
+    .section-dark { background: rgba(6,15,9,.6); }
+
+    .sec-label {
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--dourado);
+      opacity: .7;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .sec-titulo {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.4rem, 5vw, 1.9rem);
+      font-weight: 700;
+      color: var(--bege2);
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+    .sec-titulo em { font-style: italic; color: var(--dourado2); }
+    .sec-desc {
+      font-size: .9rem;
+      color: rgba(232,213,163,.55);
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+    .gold-bar {
+      width: 44px; height: 2px;
+      background: linear-gradient(90deg, var(--dourado), transparent);
+      border-radius: 2px;
+      margin-bottom: 16px;
+    }
+
+    /* ── FERRAMENTAS ── */
+    .ferramentas {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .ferr {
+      background: rgba(27,59,40,.4);
+      border: 1px solid rgba(196,154,60,.18);
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: border-color .25s;
+    }
+    .ferr:hover { border-color: rgba(196,154,60,.45); }
+    .ferr-ico {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      width: 40px; height: 40px;
+      background: rgba(27,59,40,.6);
+      border: 1px solid rgba(196,154,60,.2);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ferr-info {}
+    .ferr-nome {
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--bege);
+      display: block;
+    }
+    .ferr-desc {
+      font-size: .78rem;
+      color: rgba(232,213,163,.45);
+      line-height: 1.5;
+      display: block;
+      margin-top: 2px;
+    }
+    .ferr-tag {
+      font-size: .6rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--dourado);
+      background: rgba(196,154,60,.1);
+      border: 1px solid rgba(196,154,60,.2);
+      padding: 2px 8px;
+      border-radius: 100px;
+      margin-left: auto;
+      flex-shrink: 0;
+      align-self: flex-start;
+    }
+
+    /* ── DIFERENCIAIS ── */
+    .diferenciais {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .dif {
+      background: rgba(27,59,40,.35);
+      border: 1px solid rgba(196,154,60,.15);
+      border-radius: 14px;
+      padding: 20px 16px;
+      text-align: center;
+    }
+    .dif-icon { font-size: 1.6rem; margin-bottom: 8px; display: block; }
+    .dif-titulo {
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--bege);
+      margin-bottom: 5px;
+    }
+    .dif-desc {
+      font-size: .72rem;
+      color: rgba(232,213,163,.45);
+      line-height: 1.5;
+    }
+
+    /* ── DEPOIMENTO ── */
+    .depoimento {
+      background: linear-gradient(135deg, rgba(27,59,40,.5), rgba(45,90,61,.2));
+      border: 1px solid rgba(196,154,60,.25);
+      border-radius: 16px;
+      padding: 24px 20px;
+      position: relative;
+    }
+    .depoimento::before {
+      content: '"';
+      font-family: 'Playfair Display', serif;
+      font-size: 5rem;
+      color: rgba(196,154,60,.15);
+      position: absolute;
+      top: -10px; left: 16px;
+      line-height: 1;
+    }
+    .dep-texto {
+      font-size: .9rem;
+      font-style: italic;
+      color: rgba(232,213,163,.75);
+      line-height: 1.7;
+      margin-bottom: 16px;
+      padding-top: 8px;
+    }
+    .dep-autor {
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--dourado);
+    }
+    .dep-cargo {
+      font-size: .72rem;
+      color: rgba(232,213,163,.4);
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* ── CTA DEMO ── */
+    .cta-demo {
+      background: linear-gradient(160deg, #060F09 0%, #0E1F12 100%);
+      padding: 48px 24px;
+      text-align: center;
+    }
+
+    .cta-titulo {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 6vw, 2rem);
+      font-weight: 700;
+      color: var(--bege2);
+      margin-bottom: 10px;
+      line-height: 1.25;
+    }
+    .cta-titulo em { color: var(--dourado2); font-style: italic; }
+
+    .cta-desc {
+      font-size: .9rem;
+      color: rgba(232,213,163,.5);
+      max-width: 400px;
+      margin: 0 auto 32px;
+      line-height: 1.7;
+    }
+
+    .btn-demo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--dourado), var(--dourado2));
+      color: #060F09;
+      font-weight: 800;
+      font-size: 1rem;
+      padding: 16px 36px;
+      border-radius: 100px;
+      text-decoration: none;
+      box-shadow: 0 6px 24px rgba(196,154,60,.4);
+      transition: transform .25s, box-shadow .25s;
+      margin-bottom: 20px;
+    }
+    .btn-demo:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(196,154,60,.55);
+    }
+    .btn-demo-arrow { font-size: 1.1rem; }
+
+    .btn-contato {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(196,154,60,.7);
+      font-size: .85rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid rgba(196,154,60,.25);
+      padding: 11px 24px;
+      border-radius: 100px;
+      margin-left: 12px;
+      transition: border-color .25s, color .25s;
+    }
+    .btn-contato:hover {
+      border-color: rgba(196,154,60,.6);
+      color: var(--dourado);
+    }
+
+    .cta-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* ── RODAPÉ ── */
+    footer {
+      background: #040C07;
+      border-top: 1px solid rgba(196,154,60,.1);
+      padding: 24px;
+      text-align: center;
+    }
+    .footer-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: rgba(196,154,60,.5);
+      display: block;
+      margin-bottom: 6px;
+    }
+    .footer-copy {
+      font-size: .72rem;
+      color: rgba(232,213,163,.2);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HERO ────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="badge">Novidade · IAê Financeiro</div>
+
+  <div class="emblem">💰</div>
+
+  <h1 class="hero-titulo">IAê <span>Financeiro</span></h1>
+  <p class="hero-sub">Inteligência artificial para a gestão financeira da sua empresa</p>
+
+  <div class="hero-destaque">
+    Imagine ter um analista financeiro disponível 24h — sem contratar ninguém.
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-n">6</span>
+      <span class="stat-l">Ferramentas</span>
+    </div>
+    <div class="stat">
+      <span class="stat-n">0</span>
+      <span class="stat-l">Instalação</span>
+    </div>
+    <div class="stat">
+      <span class="stat-n">IA</span>
+      <span class="stat-l">Integrada</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── FERRAMENTAS ──────────────────────────────────────────── -->
+<section class="section">
+  <div class="gold-bar"></div>
+  <span class="sec-label">O que está incluído</span>
+  <h2 class="sec-titulo">6 ferramentas prontas<br>para <em>usar agora.</em></h2>
+  <p class="sec-desc">Cada ferramenta abre direto no navegador e já traz análise automática por IA — sem planilha, sem sistema caro, sem TI.</p>
+
+  <div class="ferramentas">
+    <div class="ferr">
+      <div class="ferr-ico">💸</div>
+      <div class="ferr-info">
+        <span class="ferr-nome">Fluxo de Caixa</span>
+        <span class="ferr-desc">Projeções automáticas e alertas de saldo crítico</span>
+      </div>
+      <span class="ferr-tag">Planej.</span>
+    </div>
+
+    <div class="ferr">
+      <div class="ferr-ico">📈</div>
+      <div class="ferr-info">
+        <span class="ferr-nome">DRE Mensal</span>
+        <span class="ferr-desc">Resultado do mês com análise de margens e tendências</span>
+      </div>
+      <span class="ferr-tag">Resultado</span>
+    </div>
+
+    <div class="ferr">
+      <div class="ferr-ico">🔄</div>
+      <div class="ferr-info">
+        <span class="ferr-nome">Contas a Pagar e Receber</span>
+        <span class="ferr-desc">Calendário de vencimentos e controle de inadimplência</span>
+      </div>
+      <span class="ferr-tag">Operac.</span>
+    </div>
+
+    <div class="ferr">
+      <div class="ferr-ico">🎯</div>
+      <div class="ferr-info">
+        <span class="ferr-nome">Planejamento Orçamentário</span>
+        <span class="ferr-desc">Orçado vs. realizado com recomendações automáticas</span>
+      </div>
+      <span class="ferr-tag">Estratégia</span>
+    </div>
+
+    <div class="ferr">
+      <div class="ferr-ico">📦</div>
+      <div class="ferr-info">
+        <span class="ferr-nome">Controle de Estoque</span>
+        <span class="ferr-desc">Giro por item e ponto de reposição inteligente</span>
+      </div>
+      <span class="ferr-tag">Operac.</span>
+    </div>
+
+    <div class="ferr">
+      <div class="ferr-ico">🏠</div>
+      <div class="ferr-info">
+        <span class="ferr-nome">Central Financeira</span>
+        <span class="ferr-desc">Visão executiva consolidada de todos os módulos</span>
+      </div>
+      <span class="ferr-tag">Visão Geral</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── DIFERENCIAIS ─────────────────────────────────────────── -->
+<section class="section section-dark">
+  <div class="gold-bar"></div>
+  <span class="sec-label">Por que é diferente</span>
+  <h2 class="sec-titulo">Simples para usar.<br><em>Poderoso para decidir.</em></h2>
+  <p class="sec-desc">Feito para empresários que precisam de resposta rápida, não de mais um sistema para aprender.</p>
+
+  <div class="diferenciais">
+    <div class="dif">
+      <span class="dif-icon">⚡</span>
+      <div class="dif-titulo">Abre no navegador</div>
+      <p class="dif-desc">Nenhuma instalação ou configuração necessária</p>
+    </div>
+    <div class="dif">
+      <span class="dif-icon">🧠</span>
+      <div class="dif-titulo">IA embutida</div>
+      <p class="dif-desc">Análises automáticas geradas em segundos</p>
+    </div>
+    <div class="dif">
+      <span class="dif-icon">🔐</span>
+      <div class="dif-titulo">Dados privados</div>
+      <p class="dif-desc">Nenhuma informação sai do seu dispositivo</p>
+    </div>
+    <div class="dif">
+      <span class="dif-icon">💚</span>
+      <div class="dif-titulo">Zero custo fixo</div>
+      <p class="dif-desc">Sem mensalidade, sem servidor, sem surpresa</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── DEPOIMENTO ────────────────────────────────────────────── -->
+<section class="section">
+  <div class="gold-bar"></div>
+  <span class="sec-label">Na prática</span>
+  <h2 class="sec-titulo" style="margin-bottom: 24px;">Quem já usa,<br><em>não volta para planilha.</em></h2>
+
+  <div class="depoimento">
+    <p class="dep-texto">
+      Em menos de 10 minutos eu tinha o DRE do mês pronto, com análise de margem e tudo. Antes levava dois dias de planilha para ter metade disso.
+    </p>
+    <span class="dep-autor">— Empresário do setor de varejo</span>
+    <span class="dep-cargo">Empresa com 15 funcionários</span>
+  </div>
+</section>
+
+<!-- ── CTA DEMO ─────────────────────────────────────────────── -->
+<section class="cta-demo">
+  <h2 class="cta-titulo">Experimente agora.<br><em>É gratuito.</em></h2>
+  <p class="cta-desc">
+    Acesse a demonstração completa e veja as ferramentas funcionando com dados reais — sem cadastro, sem cartão.
+  </p>
+
+  <div class="cta-btns">
+    <!--
+      LINK DA DEMO
+      Substitua o href abaixo pela URL onde a demo está hospedada.
+      Enquanto os arquivos estiverem locais, este link abre a Central de Ferramentas.
+    -->
+    <a href="VID_20261029_161317_057_bsl.mp4" class="btn-demo">
+      Ver demonstração
+      <span class="btn-demo-arrow">→</span>
+    </a>
+
+    <a href="mailto:dcmfinance2026@gmail.com" class="btn-contato">
+      ✉ Falar com a equipe
+    </a>
+  </div>
+</section>
+
+<!-- ── RODAPÉ ────────────────────────────────────────────────── -->
+<footer>
+  <span class="footer-brand">IAê Financeiro</span>
+  <span class="footer-copy">dcmfinance2026@gmail.com</span>
+</footer>
+
+</body>
+</html>

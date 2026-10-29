@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IAê Financeiro — Apresentação Executiva</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── DESIGN TOKENS ────────────────────────────────────────── */
+    :root {
+      --verde-escuro:  #1B3B28;
+      --verde-medio:   #2D5A3D;
+      --verde-claro:   #4A7A5A;
+      --dourado:       #C49A3C;
+      --dourado-claro: #E0B84A;
+      --bege:          #E8D5A3;
+      --bege-claro:    #F5EDD5;
+      --creme:         #FEFBF3;
+      --texto:         #2C1A0E;
+      --texto-suave:   #7A5C3E;
+      --bg-escuro:     #0A180F;
+      --sombra:        rgba(27,59,40,.14);
+      --sombra-f:      rgba(27,59,40,.30);
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg-escuro);
+      color: var(--creme);
+      overflow-x: hidden;
+    }
+
+    /* ── NAVEGAÇÃO DE SLIDES ──────────────────────────────────── */
+    .slide-nav {
+      position: fixed;
+      right: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .slide-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: rgba(196,154,60,.35);
+      border: 1.5px solid rgba(196,154,60,.5);
+      cursor: pointer;
+      transition: all .3s;
+    }
+    .slide-dot.active,
+    .slide-dot:hover {
+      background: var(--dourado);
+      transform: scale(1.4);
+    }
+
+    /* ── SLIDE BASE ───────────────────────────────────────────── */
+    .slide {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 80px 64px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── SLIDE 1 — CAPA ───────────────────────────────────────── */
+    #s1 {
+      background: linear-gradient(160deg, #060F09 0%, #0E1F12 35%, #132B1C 60%, #1B3B28 100%);
+      text-align: center;
+    }
+    #s1::before {
+      content: '';
+      position: absolute;
+      width: 900px; height: 900px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(196,154,60,.06) 0%, transparent 65%);
+      top: -350px; right: -250px; pointer-events: none;
+    }
+    #s1::after {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(45,90,61,.18) 0%, transparent 70%);
+      bottom: -200px; left: -150px; pointer-events: none;
+    }
+
+    .capa-badge {
+      display: inline-block;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--dourado);
+      background: rgba(196,154,60,.12);
+      border: 1px solid rgba(196,154,60,.3);
+      padding: 7px 18px;
+      border-radius: 100px;
+      margin-bottom: 36px;
+    }
+
+    .capa-emblem {
+      width: 88px; height: 88px;
+      background: linear-gradient(145deg, #1B3B28, #2D5A3D);
+      border: 2px solid rgba(196,154,60,.45);
+      border-radius: 22px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 32px;
+      box-shadow: 0 8px 32px rgba(196,154,60,.18), 0 2px 8px var(--sombra-f);
+      font-size: 2.2rem;
+    }
+
+    .capa-titulo {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.8rem, 5vw, 4.2rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--bege-claro);
+      margin-bottom: 10px;
+    }
+    .capa-titulo span {
+      background: linear-gradient(135deg, var(--dourado), var(--dourado-claro));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .capa-subtitulo {
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: rgba(232,213,163,.55);
+      margin-bottom: 52px;
+      letter-spacing: .04em;
+    }
+
+    .capa-divider {
+      width: 72px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--dourado), transparent);
+      margin: 0 auto 52px;
+    }
+
+    .capa-stats {
+      display: flex;
+      gap: 64px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--dourado);
+      display: block;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: rgba(232,213,163,.55);
+      display: block;
+      margin-top: 6px;
+    }
+
+    /* ── SLIDE 2 — DESAFIO ────────────────────────────────────── */
+    #s2 {
+      background: linear-gradient(180deg, #0E1F12 0%, #091508 100%);
+    }
+
+    .slide-label {
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--dourado);
+      opacity: .7;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .slide-titulo {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 700;
+      color: var(--bege-claro);
+      margin-bottom: 18px;
+      line-height: 1.2;
+    }
+    .slide-titulo em {
+      font-style: italic;
+      color: var(--dourado-claro);
+    }
+    .slide-desc {
+      font-size: 1.05rem;
+      color: rgba(232,213,163,.6);
+      max-width: 560px;
+      line-height: 1.75;
+      margin-bottom: 48px;
+    }
+
+    .desafio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 1000px;
+    }
+    .desafio-card {
+      background: rgba(27,59,40,.35);
+      border: 1px solid rgba(196,154,60,.18);
+      border-radius: 16px;
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .3s, transform .3s;
+    }
+    .desafio-card:hover {
+      border-color: rgba(196,154,60,.4);
+      transform: translateY(-3px);
+    }
+    .desafio-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--dourado), transparent);
+      opacity: .5;
+    }
+    .desafio-icon {
+      font-size: 1.8rem;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .desafio-titulo {
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--bege);
+      margin-bottom: 8px;
+    }
+    .desafio-texto {
+      font-size: .85rem;
+      color: rgba(232,213,163,.5);
+      line-height: 1.6;
+    }
+
+    /* ── SLIDE 3 — SOLUÇÃO ────────────────────────────────────── */
+    #s3 {
+      background: linear-gradient(160deg, #091508 0%, #0E1F12 50%, #132B1C 100%);
+      text-align: center;
+    }
+
+    .solucao-wrapper {
+      max-width: 900px;
+      width: 100%;
+    }
+    .solucao-desc {
+      font-size: 1.1rem;
+      color: rgba(232,213,163,.6);
+      max-width: 640px;
+      margin: 0 auto 56px;
+      line-height: 1.75;
+    }
+
+    .pilares {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 700px) { .pilares { grid-template-columns: 1fr; } }
+
+    .pilar {
+      background: linear-gradient(160deg, rgba(27,59,40,.45), rgba(45,90,61,.2));
+      border: 1px solid rgba(196,154,60,.2);
+      border-radius: 20px;
+      padding: 36px 24px;
+      text-align: center;
+      transition: all .3s;
+    }
+    .pilar:hover {
+      border-color: rgba(196,154,60,.45);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(196,154,60,.1);
+    }
+    .pilar-icon {
+      font-size: 2.4rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .pilar-nome {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--dourado-claro);
+      margin-bottom: 10px;
+    }
+    .pilar-desc {
+      font-size: .85rem;
+      color: rgba(232,213,163,.5);
+      line-height: 1.65;
+    }
+
+    /* ── SLIDE 4 — FERRAMENTAS ────────────────────────────────── */
+    #s4 {
+      background: linear-gradient(180deg, #0A180F 0%, #0E2018 100%);
+    }
+
+    .ferramentas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      max-width: 1080px;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .ferramenta-card {
+      background: linear-gradient(145deg, rgba(27,59,40,.5), rgba(15,35,20,.6));
+      border: 1px solid rgba(196,154,60,.2);
+      border-radius: 18px;
+      padding: 28px 24px;
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      transition: all .3s;
+      cursor: default;
+    }
+    .ferramenta-card:hover {
+      border-color: rgba(196,154,60,.5);
+      background: linear-gradient(145deg, rgba(27,59,40,.65), rgba(45,90,61,.3));
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(196,154,60,.1);
+    }
+    .ferr-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: rgba(196,154,60,.3);
+      line-height: 1;
+      flex-shrink: 0;
+      min-width: 36px;
+    }
+    .ferr-body {}
+    .ferr-icon { font-size: 1.4rem; margin-bottom: 8px; display: block; }
+    .ferr-nome {
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--bege);
+      margin-bottom: 6px;
+    }
+    .ferr-desc {
+      font-size: .82rem;
+      color: rgba(232,213,163,.5);
+      line-height: 1.6;
+    }
+    .ferr-tag {
+      display: inline-block;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--dourado);
+      background: rgba(196,154,60,.12);
+      border: 1px solid rgba(196,154,60,.25);
+      padding: 3px 10px;
+      border-radius: 100px;
+      margin-top: 10px;
+    }
+
+    /* ── SLIDE 5 — DEMO ───────────────────────────────────────── */
+    #s5 {
+      background: linear-gradient(160deg, #060F09 0%, #0E1F12 60%, #132B1C 100%);
+    }
+
+    .demo-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 56px;
+      max-width: 1080px;
+      width: 100%;
+      align-items: start;
+    }
+    @media (max-width: 850px) { .demo-layout { grid-template-columns: 1fr; } }
+
+    .demo-info { padding-top: 8px; }
+    .demo-info .slide-desc { max-width: 400px; }
+
+    .demo-checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .demo-checklist li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: .88rem;
+      color: rgba(232,213,163,.65);
+    }
+    .demo-checklist li::before {
+      content: '';
+      width: 18px; height: 18px; flex-shrink: 0;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--verde-claro), var(--verde-medio));
+      border: 1.5px solid rgba(196,154,60,.3);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 5l2.5 2.5L8 3' stroke='%23E0B84A' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    /* ─ ÁREA DO VÍDEO ─ */
+    .video-area {
+      position: relative;
+    }
+    .video-container {
+      background: rgba(10,24,15,.7);
+      border: 2px dashed rgba(196,154,60,.35);
+      border-radius: 20px;
+      aspect-ratio: 16/9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .3s, background .3s;
+    }
+    .video-container:hover {
+      border-color: rgba(196,154,60,.7);
+      background: rgba(10,24,15,.85);
+    }
+
+    /* Quando o vídeo for inserido, oculta o placeholder */
+    .video-container video {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: contain;
+      border-radius: 18px;
+    }
+    .video-container iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      border-radius: 18px;
+      border: none;
+    }
+
+    .video-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 32px;
+      text-align: center;
+    }
+    .video-play-btn {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, rgba(196,154,60,.2), rgba(196,154,60,.08));
+      border: 2px solid rgba(196,154,60,.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+    }
+    .video-placeholder-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--bege);
+      font-weight: 600;
+    }
+    .video-placeholder-sub {
+      font-size: .8rem;
+      color: rgba(232,213,163,.4);
+      line-height: 1.6;
+      max-width: 280px;
+    }
+    .video-instr {
+      margin-top: 14px;
+      font-size: .72rem;
+      color: rgba(196,154,60,.5);
+      font-style: italic;
+      text-align: center;
+    }
+
+    /* ── SLIDE 6 — IMPACTO ────────────────────────────────────── */
+    #s6 {
+      background: linear-gradient(180deg, #091508 0%, #0A180F 100%);
+    }
+
+    .impacto-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      max-width: 1000px;
+      width: 100%;
+      margin-top: 8px;
+    }
+    .impacto-card {
+      background: linear-gradient(160deg, rgba(27,59,40,.4), rgba(10,24,15,.5));
+      border: 1px solid rgba(196,154,60,.2);
+      border-radius: 18px;
+      padding: 30px 22px;
+      text-align: center;
+      transition: all .3s;
+    }
+    .impacto-card:hover {
+      border-color: rgba(196,154,60,.45);
+      transform: translateY(-4px);
+    }
+    .impacto-big {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--dourado), var(--dourado-claro));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+    .impacto-label {
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--bege);
+      margin-bottom: 8px;
+    }
+    .impacto-desc {
+      font-size: .78rem;
+      color: rgba(232,213,163,.45);
+      line-height: 1.6;
+    }
+
+    /* ── SLIDE 7 — PRÓXIMOS PASSOS ────────────────────────────── */
+    #s7 {
+      background: linear-gradient(160deg, #060F09 0%, #0E1F12 50%, #1B3B28 100%);
+      text-align: center;
+    }
+
+    .passos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      max-width: 900px;
+      width: 100%;
+      margin: 44px auto 0;
+    }
+    .passo {
+      background: rgba(27,59,40,.3);
+      border: 1px solid rgba(196,154,60,.18);
+      border-radius: 16px;
+      padding: 28px 20px;
+      position: relative;
+    }
+    .passo-num {
+      position: absolute;
+      top: -14px; left: 50%;
+      transform: translateX(-50%);
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--verde-medio), var(--verde-claro));
+      border: 2px solid rgba(196,154,60,.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem;
+      font-weight: 800;
+      color: var(--dourado);
+    }
+    .passo-icon { font-size: 1.6rem; margin-bottom: 10px; display: block; }
+    .passo-titulo {
+      font-size: .92rem;
+      font-weight: 700;
+      color: var(--bege);
+      margin-bottom: 6px;
+    }
+    .passo-desc {
+      font-size: .78rem;
+      color: rgba(232,213,163,.45);
+      line-height: 1.6;
+    }
+
+    .cta-section {
+      margin-top: 60px;
+      padding: 40px 48px;
+      background: linear-gradient(135deg, rgba(27,59,40,.5), rgba(45,90,61,.25));
+      border: 1px solid rgba(196,154,60,.3);
+      border-radius: 20px;
+      max-width: 680px;
+      width: 100%;
+    }
+    .cta-titulo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--bege-claro);
+      margin-bottom: 10px;
+    }
+    .cta-sub {
+      font-size: .88rem;
+      color: rgba(232,213,163,.5);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+    .cta-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--dourado), var(--dourado-claro));
+      color: var(--bg-escuro);
+      font-weight: 800;
+      font-size: .88rem;
+      letter-spacing: .05em;
+      padding: 13px 32px;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: transform .25s, box-shadow .25s;
+      box-shadow: 0 4px 18px rgba(196,154,60,.35);
+    }
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(196,154,60,.5);
+    }
+
+    /* ── RODAPÉ SLIDES ─────────────────────────────────────────── */
+    .slide-footer {
+      position: absolute;
+      bottom: 28px; left: 64px; right: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: .7rem;
+      color: rgba(196,154,60,.3);
+      letter-spacing: .08em;
+    }
+    .slide-footer .brand {
+      font-weight: 700;
+      font-family: 'Playfair Display', serif;
+    }
+    .slide-footer .confidencial {
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* ── UTILITÁRIOS ───────────────────────────────────────────── */
+    .content-block {
+      max-width: 1080px;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .section-header {
+      margin-bottom: 44px;
+    }
+
+    .gold-line {
+      width: 56px; height: 2px;
+      background: linear-gradient(90deg, var(--dourado), transparent);
+      margin-bottom: 20px;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVEGAÇÃO POR PONTOS ──────────────────────────────────── -->
+<nav class="slide-nav" id="dotNav">
+  <div class="slide-dot active" onclick="goTo('s1')" title="Capa"></div>
+  <div class="slide-dot" onclick="goTo('s2')" title="Desafio"></div>
+  <div class="slide-dot" onclick="goTo('s3')" title="Solução"></div>
+  <div class="slide-dot" onclick="goTo('s4')" title="Ferramentas"></div>
+  <div class="slide-dot" onclick="goTo('s5')" title="Demo"></div>
+  <div class="slide-dot" onclick="goTo('s6')" title="Impacto"></div>
+  <div class="slide-dot" onclick="goTo('s7')" title="Próximos Passos"></div>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════════
+     SLIDE 1 — CAPA
+     ════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s1">
+  <div style="text-align:center; position:relative; z-index:2;">
+    <div class="capa-badge">Apresentação Executiva · Confidencial</div>
+
+    <div class="capa-emblem">💰</div>
+
+    <h1 class="capa-titulo">
+      IAê <span>Financeiro</span>
+    </h1>
+    <p class="capa-subtitulo">Inteligência Artificial a serviço da saúde financeira da sua empresa</p>
+
+    <div class="capa-divider"></div>
+
+    <div class="capa-stats">
+      <div class="stat-item">
+        <span class="stat-num">6</span>
+        <span class="stat-label">Ferramentas</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">100%</span>
+        <span class="stat-label">Standalone</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">IA</span>
+        <span class="stat-label">Nativa</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">Zero</span>
+        <span class="stat-label">Instalação</span>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <span class="brand">IAê Financeiro</span>
+    <span>2026</span>
+    <span class="confidencial">Confidencial</span>
+  </footer>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     SLIDE 2 — DESAFIO
+     ════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s2">
+  <div class="content-block">
+    <div class="section-header">
+      <div class="gold-line"></div>
+      <span class="slide-label">O Problema</span>
+      <h2 class="slide-titulo">Gestão financeira é <em>complexa</em>,<br>mas não precisa ser cara.</h2>
+      <p class="slide-desc">
+        PMEs e times financeiros enfrentam diariamente a fricção de ferramentas isoladas, planilhas fragmentadas e a ausência de inteligência analítica integrada ao fluxo de trabalho.
+      </p>
+    </div>
+
+    <div class="desafio-grid">
+      <div class="desafio-card">
+        <span class="desafio-icon">📊</span>
+        <div class="desafio-titulo">Dados fragmentados</div>
+        <p class="desafio-texto">Fluxo de caixa, DRE e contas vivem em planilhas separadas, sem visão integrada do negócio.</p>
+      </div>
+      <div class="desafio-card">
+        <span class="desafio-icon">🤖</span>
+        <div class="desafio-titulo">IA fora do alcance</div>
+        <p class="desafio-texto">Ferramentas com inteligência artificial são caras ou exigem infraestrutura técnica complexa para PMEs.</p>
+      </div>
+      <div class="desafio-card">
+        <span class="desafio-icon">⏱️</span>
+        <div class="desafio-titulo">Tempo perdido</div>
+        <p class="desafio-texto">Profissionais gastam horas consolidando dados manualmente em vez de analisar e decidir.</p>
+      </div>
+      <div class="desafio-card">
+        <span class="desafio-icon">🔒</span>
+        <div class="desafio-titulo">Dependência de TI</div>
+        <p class="desafio-texto">Qualquer atualização ou nova funcionalidade depende de tickets e ciclos de desenvolvimento longos.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <span class="brand">IAê Financeiro</span>
+    <span>O Desafio</span>
+    <span class="confidencial">Confidencial</span>
+  </footer>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     SLIDE 3 — SOLUÇÃO
+     ════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s3">
+  <div class="content-block" style="text-align:center;">
+    <div class="section-header">
+      <div class="gold-line" style="margin: 0 auto 20px;"></div>
+      <span class="slide-label">A Solução</span>
+      <h2 class="slide-titulo">Uma plataforma financeira<br><em>completa, inteligente e autônoma.</em></h2>
+      <p class="solucao-desc">
+        O IAê Financeiro entrega 6 ferramentas financeiras standalone — cada uma roda direto no navegador, com análise por IA embutida, sem servidores, sem instalação e sem dependência de TI.
+      </p>
+    </div>
+
+    <div class="pilares">
+      <div class="pilar">
+        <span class="pilar-icon">⚡</span>
+        <div class="pilar-nome">Pronto para usar</div>
+        <p class="pilar-desc">Arquivos HTML autônomos. Abre no navegador, funciona imediatamente. Zero configuração.</p>
+      </div>
+      <div class="pilar">
+        <span class="pilar-icon">🧠</span>
+        <div class="pilar-nome">IA integrada</div>
+        <p class="pilar-desc">Cada ferramenta traz análise inteligente embutida — insights automáticos sobre os dados inseridos.</p>
+      </div>
+      <div class="pilar">
+        <span class="pilar-icon">🔐</span>
+        <div class="pilar-nome">Dados locais</div>
+        <p class="pilar-desc">Nenhum dado sai do dispositivo. Privacidade e compliance nativos, sem infraestrutura adicional.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <span class="brand">IAê Financeiro</span>
+    <span>A Solução</span>
+    <span class="confidencial">Confidencial</span>
+  </footer>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     SLIDE 4 — FERRAMENTAS
+     ════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s4">
+  <div class="content-block">
+    <div class="section-header">
+      <div class="gold-line"></div>
+      <span class="slide-label">As Ferramentas</span>
+      <h2 class="slide-titulo">6 módulos. Uma plataforma completa.</h2>
+    </div>
+
+    <div class="ferramentas-grid">
+      <div class="ferramenta-card">
+        <span class="ferr-num">01</span>
+        <div class="ferr-body">
+          <span class="ferr-icon">💸</span>
+          <div class="ferr-nome">Fluxo de Caixa</div>
+          <p class="ferr-desc">Controle de entradas e saídas com projeções automáticas e alertas de saldo crítico.</p>
+          <span class="ferr-tag">Planejamento</span>
+        </div>
+      </div>
+
+      <div class="ferramenta-card">
+        <span class="ferr-num">02</span>
+        <div class="ferr-body">
+          <span class="ferr-icon">📈</span>
+          <div class="ferr-nome">DRE Mensal</div>
+          <p class="ferr-desc">Demonstrativo de Resultado do Exercício gerado automaticamente com análise de margens.</p>
+          <span class="ferr-tag">Resultado</span>
+        </div>
+      </div>
+
+      <div class="ferramenta-card">
+        <span class="ferr-num">03</span>
+        <div class="ferr-body">
+          <span class="ferr-icon">🔄</span>
+          <div class="ferr-nome">Contas a Pagar e Receber</div>
+          <p class="ferr-desc">Gestão do ciclo financeiro com calendário de vencimentos e aging de inadimplência.</p>
+          <span class="ferr-tag">Operacional</span>
+        </div>
+      </div>
+
+      <div class="ferramenta-card">
+        <span class="ferr-num">04</span>
+        <div class="ferr-body">
+          <span class="ferr-icon">🎯</span>
+          <div class="ferr-nome">Planejamento Orçamentário</div>
+          <p class="ferr-desc">Orçamento vs. realizado com análise de desvios e recomendações de ajuste automáticas.</p>
+          <span class="ferr-tag">Estratégia</span>
+        </div>
+      </div>
+
+      <div class="ferramenta-card">
+        <span class="ferr-num">05</span>
+        <div class="ferr-body">
+          <span class="ferr-icon">📦</span>
+          <div class="ferr-nome">Controle de Estoque</div>
+          <p class="ferr-desc">Gestão de inventário com ponto de reposição inteligente e análise de giro por item.</p>
+          <span class="ferr-tag">Operacional</span>
+        </div>
+      </div>
+
+      <div class="ferramenta-card">
+        <span class="ferr-num">06</span>
+        <div class="ferr-body">
+          <span class="ferr-icon">🏠</span>
+          <div class="ferr-nome">Central de Ferramentas</div>
+          <p class="ferr-desc">Hub unificado com visão executiva consolidada e acesso rápido a todos os módulos.</p>
+          <span class="ferr-tag">Visão Geral</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <span class="brand">IAê Financeiro</span>
+    <span>As Ferramentas</span>
+    <span class="confidencial">Confidencial</span>
+  </footer>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     SLIDE 5 — DEMO
+     ════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s5">
+  <div class="content-block">
+    <div class="demo-layout">
+
+      <!-- Lado esquerdo: info -->
+      <div class="demo-info">
+        <div class="gold-line"></div>
+        <span class="slide-label">Demonstração</span>
+        <h2 class="slide-titulo">Veja as<br><em>ferramentas em ação.</em></h2>
+        <p class="slide-desc">
+          Uma demonstração completa das 6 ferramentas com casos de uso reais do dia a dia financeiro.
+        </p>
+
+        <ul class="demo-checklist">
+          <li>Interface intuitiva, sem curva de aprendizado</li>
+          <li>Entrada de dados simples e rápida</li>
+          <li>Análise por IA gerada em segundos</li>
+          <li>Relatórios prontos para exportar</li>
+          <li>Funciona 100% offline no navegador</li>
+        </ul>
+      </div>
+
+      <!-- Lado direito: vídeo -->
+      <div class="video-area">
+
+        <!-- ══════════════════════════════════════════════════════
+             ÁREA DO VÍDEO DE DEMO
+             ══════════════════════════════════════════════════════
+
+             OPÇÃO 1 — Vídeo local (coloque o .mp4 na mesma pasta):
+             Substitua TODO o bloco <div class="video-container">
+             pelo seguinte:
+
+               <div class="video-container">
+                 <video controls poster="thumbnail.jpg">
+                   <source src="demo-iaefinanceiro.mp4" type="video/mp4">
+                 </video>
+               </div>
+
+             ──────────────────────────────────────────────────────
+
+             OPÇÃO 2 — YouTube (vídeo não listado ou público):
+             Substitua TODO o bloco <div class="video-container">
+             pelo seguinte (troque SEU_VIDEO_ID):
+
+               <div class="video-container">
+                 <iframe
+                   src="https://www.youtube.com/embed/SEU_VIDEO_ID"
+                   allow="accelerometer; autoplay; clipboard-write;
+                          encrypted-media; gyroscope; picture-in-picture"
+                   allowfullscreen>
+                 </iframe>
+               </div>
+
+             ──────────────────────────────────────────────────────
+
+             OPÇÃO 3 — Vimeo (troque SEU_VIDEO_ID):
+
+               <div class="video-container">
+                 <iframe
+                   src="https://player.vimeo.com/video/SEU_VIDEO_ID"
+                   allow="autoplay; fullscreen; picture-in-picture"
+                   allowfullscreen>
+                 </iframe>
+               </div>
+
+             ══════════════════════════════════════════════════════ -->
+
+        <div class="video-container" id="videoContainer">
+          <video controls>
+            <source src="VID_20261029_161317_057_bsl.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <span class="brand">IAê Financeiro</span>
+    <span>Demonstração</span>
+    <span class="confidencial">Confidencial</span>
+  </footer>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     SLIDE 6 — IMPACTO
+     ════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s6">
+  <div class="content-block">
+    <div class="section-header">
+      <div class="gold-line"></div>
+      <span class="slide-label">Proposta de Valor</span>
+      <h2 class="slide-titulo">O que muda com o IAê Financeiro.</h2>
+    </div>
+
+    <div class="impacto-grid">
+      <div class="impacto-card">
+        <span class="impacto-big">−70%</span>
+        <div class="impacto-label">Tempo de consolidação</div>
+        <p class="impacto-desc">Relatórios que levavam horas são gerados em minutos com dados em tempo real.</p>
+      </div>
+
+      <div class="impacto-card">
+        <span class="impacto-big">R$0</span>
+        <div class="impacto-label">Custo de infraestrutura</div>
+        <p class="impacto-desc">Ferramentas standalone sem servidor, sem SaaS e sem licença recorrente.</p>
+      </div>
+
+      <div class="impacto-card">
+        <span class="impacto-big">100%</span>
+        <div class="impacto-label">Privacidade de dados</div>
+        <p class="impacto-desc">Dados nunca saem do dispositivo do usuário. Conformidade nativa com LGPD.</p>
+      </div>
+
+      <div class="impacto-card">
+        <span class="impacto-big">+6x</span>
+        <div class="impacto-label">Cobertura financeira</div>
+        <p class="impacto-desc">Seis dimensões financeiras cobertas com inteligência analítica em cada uma.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <span class="brand">IAê Financeiro</span>
+    <span>Proposta de Valor</span>
+    <span class="confidencial">Confidencial</span>
+  </footer>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     SLIDE 7 — PRÓXIMOS PASSOS
+     ════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s7">
+  <div class="content-block" style="text-align:center;">
+    <div class="gold-line" style="margin: 0 auto 20px;"></div>
+    <span class="slide-label">Próximos Passos</span>
+    <h2 class="slide-titulo">Pronto para <em>começar.</em></h2>
+
+    <div class="passos-grid">
+      <div class="passo">
+        <div class="passo-num">1</div>
+        <span class="passo-icon">🎯</span>
+        <div class="passo-titulo">Piloto com time financeiro</div>
+        <p class="passo-desc">Implantação das 6 ferramentas para o time financeiro avaliar no dia a dia real.</p>
+      </div>
+      <div class="passo">
+        <div class="passo-num">2</div>
+        <span class="passo-icon">📊</span>
+        <div class="passo-titulo">Coleta de feedback</div>
+        <p class="passo-desc">Sessões de uso acompanhado para identificar ajustes e prioridades de evolução.</p>
+      </div>
+      <div class="passo">
+        <div class="passo-num">3</div>
+        <span class="passo-icon">🔧</span>
+        <div class="passo-titulo">Customização</div>
+        <p class="passo-desc">Adaptação das ferramentas ao vocabulário, KPIs e fluxos específicos da empresa.</p>
+      </div>
+      <div class="passo">
+        <div class="passo-num">4</div>
+        <span class="passo-icon">🚀</span>
+        <div class="passo-titulo">Rollout completo</div>
+        <p class="passo-desc">Distribuição para toda a equipe com treinamento e documentação de uso.</p>
+      </div>
+    </div>
+
+    <div class="cta-section">
+      <div class="cta-titulo">Vamos conversar sobre implementação?</div>
+      <p class="cta-sub">
+        O IAê Financeiro pode ser implantado em qualquer empresa em questão de horas — sem TI, sem contrato e sem risco.
+      </p>
+      <a href="mailto:dcmfinance2026@gmail.com" class="cta-btn">Entrar em contato →</a>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <span class="brand">IAê Financeiro</span>
+    <span>Próximos Passos</span>
+    <span class="confidencial">Confidencial</span>
+  </footer>
+</section>
+
+<!-- ── SCRIPT DE NAVEGAÇÃO ──────────────────────────────────── -->
+<script>
+  const slides = ['s1','s2','s3','s4','s5','s6','s7'];
+  const dots = document.querySelectorAll('.slide-dot');
+
+  function goTo(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = slides.indexOf(entry.target.id);
+        if (idx !== -1) {
+          dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        }
+      }
+    });
+  }, { threshold: 0.5 });
+
+  slides.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+</script>
+
+</body>
+</html>

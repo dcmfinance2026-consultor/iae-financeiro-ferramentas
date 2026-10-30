@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banner — Palestra Planejamento Financeiro 2027</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Nunito:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --verde:    #1B3B28;
+      --verde2:   #2D5A3D;
+      --verde3:   #4A7A5A;
+      --dourado:  #C49A3C;
+      --dourado2: #E0B84A;
+      --dourado3: #F0CC6A;
+      --bege:     #E8D5A3;
+      --bege2:    #F5EDD5;
+      --bg:       #0A180F;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #1a1a1a;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+
+    /* ══ BANNER ════════════════════════════════════════════ */
+    .banner {
+      width: 100%;
+      max-width: 680px;
+      background: linear-gradient(175deg, #060F09 0%, #0E1F12 30%, #132B1C 60%, #1B3B28 100%);
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 32px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(196,154,60,.15);
+    }
+
+    /* decorações de fundo */
+    .banner::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 700px 500px at 110% -10%, rgba(196,154,60,.09) 0%, transparent 60%),
+        radial-gradient(ellipse 500px 600px at -10% 110%, rgba(45,90,61,.18) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* grid de linhas decorativas */
+    .banner-grid {
+      position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+    }
+    .banner-grid::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(196,154,60,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(196,154,60,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .banner-inner { position: relative; z-index: 1; }
+
+    /* ── FAIXA TOPO ── */
+    .faixa-topo {
+      background: linear-gradient(90deg, var(--dourado), var(--dourado2));
+      padding: 9px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .faixa-texto {
+      font-size: .68rem; font-weight: 900; letter-spacing: .2em;
+      text-transform: uppercase; color: #060F09;
+    }
+    .faixa-ano {
+      font-family: 'Playfair Display', serif;
+      font-size: .85rem; font-weight: 700; color: rgba(6,15,9,.6);
+      letter-spacing: .1em;
+    }
+
+    /* ── HEADER ── */
+    .header { padding: 40px 36px 0; }
+
+    .evento-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: .65rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--dourado); background: rgba(196,154,60,.1);
+      border: 1px solid rgba(196,154,60,.28); padding: 6px 14px; border-radius: 100px;
+      margin-bottom: 24px;
+    }
+    .evento-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--dourado2); animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .5; transform: scale(.75); }
+    }
+
+    .tema-label {
+      font-size: .65rem; font-weight: 800; letter-spacing: .2em; text-transform: uppercase;
+      color: rgba(196,154,60,.55); display: block; margin-bottom: 10px;
+    }
+
+    .tema-titulo {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.85rem, 5.5vw, 2.7rem);
+      font-weight: 900; line-height: 1.1; color: var(--bege2);
+      margin-bottom: 6px;
+    }
+    .tema-titulo em {
+      font-style: italic;
+      background: linear-gradient(135deg, var(--dourado), var(--dourado3));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .tema-sub {
+      font-size: .95rem; color: rgba(232,213,163,.5); line-height: 1.6; margin-bottom: 28px;
+      max-width: 480px;
+    }
+
+    .divisor {
+      height: 1px;
+      background: linear-gradient(90deg, var(--dourado), rgba(196,154,60,.1), transparent);
+      margin-bottom: 32px;
+    }
+
+    /* ── CORPO: 2 colunas ── */
+    .corpo {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 0;
+      padding: 0 0 36px;
+    }
+
+    /* coluna tópicos */
+    .col-topicos { padding: 0 28px 0 36px; }
+
+    .topicos-titulo {
+      font-size: .65rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
+      color: rgba(196,154,60,.55); display: block; margin-bottom: 16px;
+    }
+
+    .topicos { display: flex; flex-direction: column; gap: 11px; }
+    .topico {
+      display: flex; align-items: flex-start; gap: 11px;
+    }
+    .topico-icon {
+      width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+      background: rgba(27,59,40,.6); border: 1px solid rgba(196,154,60,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .95rem; margin-top: 1px;
+    }
+    .topico-body {}
+    .topico-titulo {
+      font-size: .82rem; font-weight: 700; color: var(--bege); line-height: 1.3;
+      display: block; margin-bottom: 2px;
+    }
+    .topico-desc {
+      font-size: .73rem; color: rgba(232,213,163,.42); line-height: 1.45;
+    }
+
+    /* coluna consultor */
+    .col-consultor {
+      padding: 0 32px 0 0;
+      display: flex; flex-direction: column; align-items: center;
+    }
+
+    .foto-moldura {
+      position: relative; width: 100%; max-width: 200px; margin-bottom: 18px;
+    }
+    .foto-moldura::before {
+      content: ''; position: absolute; inset: -4px; border-radius: 20px;
+      background: linear-gradient(145deg, var(--dourado), rgba(196,154,60,.1), var(--verde2));
+      z-index: 0;
+    }
+    .foto-moldura img {
+      position: relative; z-index: 1; width: 100%;
+      aspect-ratio: 3/4; object-fit: cover; object-position: top center;
+      border-radius: 16px;
+      box-shadow: 0 12px 36px rgba(0,0,0,.5);
+    }
+
+    .consultor-nome {
+      font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700;
+      color: var(--bege2); text-align: center; margin-bottom: 3px;
+    }
+    .consultor-cargo {
+      font-size: .65rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--dourado); text-align: center; margin-bottom: 10px; display: block;
+    }
+    .consultor-bio {
+      font-size: .73rem; color: rgba(232,213,163,.45); line-height: 1.6; text-align: center;
+    }
+    .consultor-bio strong { color: var(--bege); }
+
+    /* ── RODAPÉ BANNER ── */
+    .faixa-rodape {
+      background: rgba(6,15,9,.65);
+      border-top: 1px solid rgba(196,154,60,.15);
+      padding: 14px 36px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      flex-wrap: wrap;
+    }
+    .rodape-info {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .rodape-icon { font-size: 1rem; }
+    .rodape-txt {
+      font-size: .72rem; color: rgba(232,213,163,.4);
+    }
+    .rodape-txt strong { color: var(--dourado); }
+    .rodape-marca {
+      font-family: 'Playfair Display', serif; font-size: .85rem; font-weight: 700;
+      color: rgba(196,154,60,.4);
+    }
+
+    /* ── RESPONSIVO ── */
+    @media (max-width: 520px) {
+      .corpo { grid-template-columns: 1fr; }
+      .col-consultor { padding: 28px 36px 0; flex-direction: row; align-items: flex-start; gap: 20px; }
+      .foto-moldura { max-width: 110px; margin-bottom: 0; }
+      .consultor-nome, .consultor-cargo, .consultor-bio { text-align: left; }
+      .col-topicos { padding: 0 36px; margin-top: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="banner">
+  <div class="banner-grid"></div>
+  <div class="banner-inner">
+
+    <!-- faixa topo -->
+    <div class="faixa-topo">
+      <span class="faixa-texto">Palestra · Planejamento Financeiro</span>
+      <span class="faixa-ano">2027</span>
+    </div>
+
+    <!-- header -->
+    <div class="header">
+      <div class="evento-badge">
+        <span class="evento-badge-dot"></span>
+        Evento exclusivo para PMEs
+      </div>
+
+      <span class="tema-label">O tema desta edição</span>
+      <h1 class="tema-titulo">
+        Como a IA vai te ajudar<br><em>no ano que vem?</em>
+      </h1>
+      <p class="tema-sub">
+        Uma sessão prática e direta sobre como a inteligência artificial pode transformar a gestão financeira da sua empresa já em 2027.
+      </p>
+
+      <div class="divisor"></div>
+    </div>
+
+    <!-- corpo -->
+    <div class="corpo">
+
+      <!-- tópicos -->
+      <div class="col-topicos">
+        <span class="topicos-titulo">O que será apresentado</span>
+        <div class="topicos">
+
+          <div class="topico">
+            <div class="topico-icon">🔭</div>
+            <div class="topico-body">
+              <span class="topico-titulo">Cenário financeiro para 2027</span>
+              <span class="topico-desc">Tendências e desafios que as PMEs vão enfrentar no próximo ano</span>
+            </div>
+          </div>
+
+          <div class="topico">
+            <div class="topico-icon">🧠</div>
+            <div class="topico-body">
+              <span class="topico-titulo">IA aplicada às finanças</span>
+              <span class="topico-desc">Como ferramentas de inteligência artificial já estão sendo usadas na gestão financeira</span>
+            </div>
+          </div>
+
+          <div class="topico">
+            <div class="topico-icon">💸</div>
+            <div class="topico-body">
+              <span class="topico-titulo">Fluxo de caixa inteligente</span>
+              <span class="topico-desc">Projeções automáticas e alertas que antecipam problemas antes de acontecerem</span>
+            </div>
+          </div>
+
+          <div class="topico">
+            <div class="topico-icon">🎯</div>
+            <div class="topico-body">
+              <span class="topico-titulo">Orçamento vs. realizado com IA</span>
+              <span class="topico-desc">Como monitorar desvios e receber recomendações automáticas de ajuste</span>
+            </div>
+          </div>
+
+          <div class="topico">
+            <div class="topico-icon">🏦</div>
+            <div class="topico-body">
+              <span class="topico-titulo">Crédito e capital para crescer</span>
+              <span class="topico-desc">Como se preparar financeiramente para buscar crédito em 2027</span>
+            </div>
+          </div>
+
+          <div class="topico">
+            <div class="topico-icon">🚀</div>
+            <div class="topico-body">
+              <span class="topico-titulo">Primeiros passos práticos</span>
+              <span class="topico-desc">O que fazer na segunda-feira depois da palestra para começar a mudança</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- consultor -->
+      <div class="col-consultor">
+        <div class="foto-moldura">
+          <img src="danilo-monteiro.png" alt="Danilo Monteiro">
+        </div>
+        <div class="consultor-nome">Danilo Monteiro</div>
+        <span class="consultor-cargo">Consultor Financeiro</span>
+        <p class="consultor-bio">
+          <strong>+15 anos</strong> na área financeira em multinacionais e PMEs.<br>
+          Especialista em <strong>IA aplicada às finanças</strong> e criador de ferramentas próprias de análise financeira com inteligência artificial.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- rodapé -->
+    <div class="faixa-rodape">
+      <div class="rodape-info">
+        <span class="rodape-icon">✉</span>
+        <span class="rodape-txt"><strong>dcmfinance2026@gmail.com</strong></span>
+      </div>
+      <div class="rodape-info">
+        <span class="rodape-icon">📅</span>
+        <span class="rodape-txt">Planejamento Financeiro <strong>2027</strong></span>
+      </div>
+      <span class="rodape-marca">IAê Financeiro</span>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

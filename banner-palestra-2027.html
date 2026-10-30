@@ -12,19 +12,19 @@
       --verde:    #1B3B28;
       --verde2:   #2D5A3D;
       --verde3:   #4A7A5A;
-      --dourado:  #C49A3C;
-      --dourado2: #E0B84A;
-      --dourado3: #F0CC6A;
-      --bege:     #E8D5A3;
-      --bege2:    #F5EDD5;
-      --bg:       #0A180F;
+      --dourado:  #9B7520;
+      --dourado2: #B8891A;
+      --dourado3: #C49A3C;
+      --bege:     #4A3520;
+      --bege2:    #2C1A0E;
+      --bg:       #F0EBE0;
     }
 
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Nunito', sans-serif;
-      background: #1a1a1a;
+      background: #DDD5C8;
       display: flex;
       justify-content: center;
       align-items: flex-start;
@@ -36,11 +36,11 @@
     .banner {
       width: 100%;
       max-width: 680px;
-      background: linear-gradient(175deg, #060F09 0%, #0E1F12 30%, #132B1C 60%, #1B3B28 100%);
+      background: linear-gradient(175deg, #FEFCF7 0%, #F7F1E6 40%, #F0EAD8 100%);
       border-radius: 24px;
       overflow: hidden;
       position: relative;
-      box-shadow: 0 32px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(196,154,60,.15);
+      box-shadow: 0 32px 80px rgba(0,0,0,.18), 0 0 0 1px rgba(155,117,32,.2);
     }
 
     /* decorações de fundo */
@@ -48,8 +48,8 @@
       content: '';
       position: absolute; inset: 0;
       background:
-        radial-gradient(ellipse 700px 500px at 110% -10%, rgba(196,154,60,.09) 0%, transparent 60%),
-        radial-gradient(ellipse 500px 600px at -10% 110%, rgba(45,90,61,.18) 0%, transparent 60%);
+        radial-gradient(ellipse 700px 500px at 110% -10%, rgba(155,117,32,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 500px 600px at -10% 110%, rgba(27,59,40,.07) 0%, transparent 60%);
       pointer-events: none; z-index: 0;
     }
 
@@ -61,8 +61,8 @@
       content: '';
       position: absolute; inset: 0;
       background-image:
-        linear-gradient(rgba(196,154,60,.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(196,154,60,.04) 1px, transparent 1px);
+        linear-gradient(rgba(155,117,32,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(155,117,32,.05) 1px, transparent 1px);
       background-size: 48px 48px;
     }
 
@@ -70,17 +70,17 @@
 
     /* ── FAIXA TOPO ── */
     .faixa-topo {
-      background: linear-gradient(90deg, var(--dourado), var(--dourado2));
+      background: linear-gradient(90deg, var(--verde), var(--verde2));
       padding: 9px 32px;
       display: flex; align-items: center; justify-content: space-between;
     }
     .faixa-texto {
       font-size: .68rem; font-weight: 900; letter-spacing: .2em;
-      text-transform: uppercase; color: #060F09;
+      text-transform: uppercase; color: rgba(240,234,216,.9);
     }
     .faixa-ano {
       font-family: 'Playfair Display', serif;
-      font-size: .85rem; font-weight: 700; color: rgba(6,15,9,.6);
+      font-size: .85rem; font-weight: 700; color: rgba(240,234,216,.65);
       letter-spacing: .1em;
     }
 
@@ -90,13 +90,13 @@
     .evento-badge {
       display: inline-flex; align-items: center; gap: 8px;
       font-size: .65rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase;
-      color: var(--dourado); background: rgba(196,154,60,.1);
-      border: 1px solid rgba(196,154,60,.28); padding: 6px 14px; border-radius: 100px;
+      color: var(--verde); background: rgba(27,59,40,.08);
+      border: 1px solid rgba(27,59,40,.2); padding: 6px 14px; border-radius: 100px;
       margin-bottom: 24px;
     }
     .evento-badge-dot {
       width: 6px; height: 6px; border-radius: 50%;
-      background: var(--dourado2); animation: pulse 2s infinite;
+      background: var(--verde2); animation: pulse 2s infinite;
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
@@ -105,13 +105,13 @@
 
     .tema-label {
       font-size: .65rem; font-weight: 800; letter-spacing: .2em; text-transform: uppercase;
-      color: rgba(196,154,60,.55); display: block; margin-bottom: 10px;
+      color: rgba(155,117,32,.7); display: block; margin-bottom: 10px;
     }
 
     .tema-titulo {
       font-family: 'Playfair Display', serif;
       font-size: clamp(1.85rem, 5.5vw, 2.7rem);
-      font-weight: 900; line-height: 1.1; color: var(--bege2);
+      font-weight: 900; line-height: 1.1; color: #1C110A;
       margin-bottom: 6px;
     }
     .tema-titulo em {
@@ -121,13 +121,13 @@
     }
 
     .tema-sub {
-      font-size: .95rem; color: rgba(232,213,163,.5); line-height: 1.6; margin-bottom: 28px;
+      font-size: .95rem; color: rgba(44,26,14,.55); line-height: 1.6; margin-bottom: 28px;
       max-width: 480px;
     }
 
     .divisor {
       height: 1px;
-      background: linear-gradient(90deg, var(--dourado), rgba(196,154,60,.1), transparent);
+      background: linear-gradient(90deg, var(--dourado), rgba(155,117,32,.15), transparent);
       margin-bottom: 32px;
     }
 
@@ -144,7 +144,7 @@
 
     .topicos-titulo {
       font-size: .65rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
-      color: rgba(196,154,60,.55); display: block; margin-bottom: 16px;
+      color: rgba(155,117,32,.65); display: block; margin-bottom: 16px;
     }
 
     .topicos { display: flex; flex-direction: column; gap: 11px; }
@@ -153,17 +153,17 @@
     }
     .topico-icon {
       width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
-      background: rgba(27,59,40,.6); border: 1px solid rgba(196,154,60,.2);
+      background: rgba(27,59,40,.08); border: 1px solid rgba(27,59,40,.15);
       display: flex; align-items: center; justify-content: center;
       font-size: .95rem; margin-top: 1px;
     }
     .topico-body {}
     .topico-titulo {
-      font-size: .82rem; font-weight: 700; color: var(--bege); line-height: 1.3;
+      font-size: .82rem; font-weight: 700; color: #1C110A; line-height: 1.3;
       display: block; margin-bottom: 2px;
     }
     .topico-desc {
-      font-size: .73rem; color: rgba(232,213,163,.42); line-height: 1.45;
+      font-size: .73rem; color: rgba(44,26,14,.5); line-height: 1.45;
     }
 
     /* coluna consultor */
@@ -177,33 +177,33 @@
     }
     .foto-moldura::before {
       content: ''; position: absolute; inset: -4px; border-radius: 20px;
-      background: linear-gradient(145deg, var(--dourado), rgba(196,154,60,.1), var(--verde2));
+      background: linear-gradient(145deg, var(--dourado3), rgba(155,117,32,.15), var(--verde2));
       z-index: 0;
     }
     .foto-moldura img {
       position: relative; z-index: 1; width: 100%;
       aspect-ratio: 3/4; object-fit: cover; object-position: top center;
       border-radius: 16px;
-      box-shadow: 0 12px 36px rgba(0,0,0,.5);
+      box-shadow: 0 12px 36px rgba(0,0,0,.18);
     }
 
     .consultor-nome {
       font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700;
-      color: var(--bege2); text-align: center; margin-bottom: 3px;
+      color: #1C110A; text-align: center; margin-bottom: 3px;
     }
     .consultor-cargo {
       font-size: .65rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
       color: var(--dourado); text-align: center; margin-bottom: 10px; display: block;
     }
     .consultor-bio {
-      font-size: .73rem; color: rgba(232,213,163,.45); line-height: 1.6; text-align: center;
+      font-size: .73rem; color: rgba(44,26,14,.5); line-height: 1.6; text-align: center;
     }
-    .consultor-bio strong { color: var(--bege); }
+    .consultor-bio strong { color: #1C110A; }
 
     /* ── RODAPÉ BANNER ── */
     .faixa-rodape {
-      background: rgba(6,15,9,.65);
-      border-top: 1px solid rgba(196,154,60,.15);
+      background: rgba(27,59,40,.07);
+      border-top: 1px solid rgba(27,59,40,.12);
       padding: 14px 36px;
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
       flex-wrap: wrap;
@@ -213,12 +213,12 @@
     }
     .rodape-icon { font-size: 1rem; }
     .rodape-txt {
-      font-size: .72rem; color: rgba(232,213,163,.4);
+      font-size: .72rem; color: rgba(44,26,14,.45);
     }
     .rodape-txt strong { color: var(--dourado); }
     .rodape-marca {
       font-family: 'Playfair Display', serif; font-size: .85rem; font-weight: 700;
-      color: rgba(196,154,60,.4);
+      color: rgba(155,117,32,.55);
     }
 
     /* ── RESPONSIVO ── */

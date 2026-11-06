@@ -430,6 +430,226 @@
             .form-grid { grid-template-columns:1fr; }
             .header-client { display:none; }
         }
+
+        /* Toggle inline no filter bar */
+        .toggle-filter {
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; user-select: none;
+            padding: 7px 12px;
+            border: 1.5px solid var(--bege); border-radius: 8px;
+            background: var(--bege-claro);
+            transition: border-color .2s, background .2s;
+        }
+        .toggle-filter:has(input:checked) {
+            border-color: var(--entrada); background: var(--entrada-bg);
+        }
+        .toggle-filter input { display: none; }
+        .tfilter-slider {
+            position: relative; width: 32px; height: 18px;
+            background: #ccc; border-radius: 18px; flex-shrink: 0;
+            transition: background .25s;
+        }
+        .tfilter-slider::before {
+            content: ''; position: absolute;
+            width: 12px; height: 12px; border-radius: 50%; background: #fff;
+            top: 3px; left: 3px; transition: transform .25s;
+        }
+        .toggle-filter input:checked ~ .tfilter-slider { background: var(--entrada); }
+        .toggle-filter input:checked ~ .tfilter-slider::before { transform: translateX(14px); }
+        .tfilter-label { font-size: 11px; font-weight: 700; color: var(--texto-suave); transition: color .2s; }
+        .toggle-filter:has(input:checked) .tfilter-label { color: var(--entrada); }
+
+        /* KPI saldo com CF ativo */
+        .kpi-card.k-saldo.cf-ativo::before { background: linear-gradient(90deg, var(--marrom), var(--saida)); }
+
+        /* ── DIAGNÓSTICO ─────────────────────────────────────── */
+        .diag-setup {
+            background: linear-gradient(135deg, var(--verde-escuro) 0%, #1a3d2a 100%);
+            border-radius: 16px; padding: 32px 36px; margin-bottom: 24px;
+            border: 1px solid rgba(196,154,60,.2);
+            box-shadow: 0 4px 20px rgba(27,59,40,.3);
+        }
+        .diag-setup-title {
+            font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700;
+            color: #FAF0D8; margin-bottom: 6px; display: flex; align-items: center; gap: 10px;
+        }
+        .diag-setup-sub { font-size: 12px; color: rgba(245,240,216,.55); margin-bottom: 24px; letter-spacing: .4px; }
+        .diag-select-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 16px; }
+        .diag-fg { display: flex; flex-direction: column; gap: 6px; }
+        .diag-fg label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(196,154,60,.8); }
+        .diag-fg select {
+            padding: 10px 14px; border: 1.5px solid rgba(196,154,60,.3); border-radius: 10px;
+            background: rgba(255,255,255,.07); color: #FAF0D8;
+            font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: border-color .2s, background .2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%23C49A3C' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 12px center;
+            padding-right: 32px;
+        }
+        .diag-fg select:focus { outline: none; border-color: var(--dourado); background-color: rgba(255,255,255,.1); }
+        .diag-fg select option { background: #1B3B28; color: #FAF0D8; }
+        .btn-diag-run {
+            align-self: flex-end; padding: 11px 28px; border: none; border-radius: 10px;
+            background: linear-gradient(135deg, var(--dourado), #a07828);
+            color: var(--verde-escuro); font-family: 'Nunito', sans-serif;
+            font-size: 13px; font-weight: 800; cursor: pointer; letter-spacing: .4px;
+            box-shadow: 0 3px 14px rgba(196,154,60,.4); transition: all .2s;
+        }
+        .btn-diag-run:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(196,154,60,.55); }
+
+        .diag-results { display: none; }
+        .diag-results.visible { display: block; }
+
+        .diag-header-strip {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 22px; flex-wrap: wrap; gap: 12px;
+        }
+        .diag-context-pill {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--creme); border: 1px solid rgba(196,154,60,.25);
+            border-radius: 30px; padding: 6px 16px;
+            font-size: 12px; font-weight: 700; color: var(--verde-escuro);
+        }
+        .diag-context-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dourado); }
+
+        /* Perguntas reflexivas */
+        .diag-perguntas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px; margin-bottom: 26px; }
+
+        .pergunta-card {
+            background: var(--creme); border-radius: 14px; padding: 20px 22px;
+            border: 1.5px solid var(--bege); box-shadow: 0 2px 12px var(--sombra);
+            position: relative; overflow: hidden; transition: box-shadow .2s, transform .2s;
+        }
+        .pergunta-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--sombra-f); }
+        .pergunta-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--verde-escuro), var(--dourado));
+        }
+        .pergunta-num {
+            font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--dourado); margin-bottom: 8px;
+        }
+        .pergunta-texto {
+            font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 600;
+            color: var(--verde-escuro); line-height: 1.55; margin-bottom: 12px;
+        }
+        .pergunta-insight {
+            font-size: 11px; color: var(--texto-suave); line-height: 1.5;
+            padding-top: 10px; border-top: 1px solid var(--bege);
+        }
+        .pergunta-insight strong { color: var(--marrom); }
+
+        /* Ações de melhoria */
+        .acoes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px,1fr)); gap: 16px; margin-bottom: 26px; }
+
+        .acao-card {
+            background: var(--creme); border-radius: 14px; padding: 20px 22px;
+            border: 1.5px solid var(--bege); box-shadow: 0 2px 12px var(--sombra);
+            display: flex; gap: 16px; align-items: flex-start; transition: box-shadow .2s;
+        }
+        .acao-card:hover { box-shadow: 0 4px 18px var(--sombra-f); }
+        .acao-icon-wrap {
+            width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; background: rgba(45,90,61,.1);
+        }
+        .acao-icon-wrap.urgente { background: rgba(160,52,30,.1); }
+        .acao-icon-wrap.oportunidade { background: rgba(196,154,60,.15); }
+        .acao-body { flex: 1; }
+        .acao-prioridade {
+            font-size: 9px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1.2px; margin-bottom: 5px;
+        }
+        .acao-prioridade.alta { color: var(--saida); }
+        .acao-prioridade.media { color: var(--dourado); }
+        .acao-prioridade.baixa { color: var(--entrada); }
+        .acao-titulo {
+            font-size: 13px; font-weight: 700; color: var(--verde-escuro);
+            margin-bottom: 5px; line-height: 1.3;
+        }
+        .acao-desc { font-size: 11px; color: var(--texto-suave); line-height: 1.5; }
+        .acao-prazo {
+            display: inline-block; margin-top: 8px;
+            font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 20px;
+            background: var(--bege); color: var(--marrom-esc);
+        }
+
+        /* KPIs do setor */
+        .kpi-setor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 14px; margin-bottom: 26px; }
+        .kpi-setor-card {
+            background: var(--creme); border-radius: 12px; padding: 16px 18px;
+            border: 1px solid rgba(196,154,60,.18); box-shadow: 0 1px 8px var(--sombra);
+            display: flex; gap: 12px; align-items: center;
+        }
+        .kpi-setor-icon { font-size: 26px; opacity: .7; }
+        .kpi-setor-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--texto-suave); }
+        .kpi-setor-value { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: var(--verde-escuro); }
+        .kpi-setor-ref { font-size: 10px; color: var(--texto-suave); }
+
+        /* Alertas sazonais */
+        .alerta-sazonalidade {
+            background: linear-gradient(135deg, #FFF8E6, #FFF2CC);
+            border: 1.5px solid rgba(196,154,60,.35); border-radius: 14px;
+            padding: 20px 22px; margin-bottom: 26px;
+        }
+        .alerta-sazonalidade .alerta-titulo {
+            font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700;
+            color: var(--marrom-esc); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .sazon-list { display: flex; flex-direction: column; gap: 8px; }
+        .sazon-item { display: flex; gap: 12px; align-items: flex-start; }
+        .sazon-mes {
+            min-width: 80px; font-size: 11px; font-weight: 800; color: var(--marrom);
+            text-transform: uppercase; letter-spacing: .5px;
+        }
+        .sazon-desc { font-size: 12px; color: var(--texto); line-height: 1.5; }
+
+        /* Consideração regional */
+        .regional-box {
+            background: linear-gradient(135deg, var(--verde-escuro), #1a3d2a);
+            border-radius: 14px; padding: 22px 26px; color: #FAF0D8;
+        }
+        .regional-box .rb-titulo {
+            font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700;
+            color: var(--bege); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+        }
+        .regional-item { display: flex; gap: 10px; margin-bottom: 10px; }
+        .regional-item:last-child { margin-bottom: 0; }
+        .rb-bullet { color: var(--dourado); font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+        .rb-text { font-size: 12px; color: rgba(245,240,216,.8); line-height: 1.5; }
+        .rb-text strong { color: var(--bege); }
+
+        .diag-fonte {
+            text-align: right; font-size: 10px; color: var(--texto-suave);
+            margin-top: 18px; letter-spacing: .3px; font-style: italic;
+        }
+
+        .diag-score-bar {
+            background: var(--creme); border-radius: 14px; padding: 22px 24px;
+            border: 1.5px solid var(--bege); margin-bottom: 24px;
+            box-shadow: 0 2px 12px var(--sombra);
+        }
+        .diag-score-title {
+            font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600;
+            color: var(--verde-escuro); margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .score-items { display: flex; flex-direction: column; gap: 12px; }
+        .score-row { display: flex; align-items: center; gap: 14px; }
+        .score-label { min-width: 180px; font-size: 12px; font-weight: 600; color: var(--texto); }
+        .score-track { flex: 1; height: 8px; background: var(--bege); border-radius: 20px; overflow: hidden; }
+        .score-fill { height: 100%; border-radius: 20px; transition: width .8s ease; }
+        .score-fill.fill-green { background: linear-gradient(90deg, #1F6B42, #52A878); }
+        .score-fill.fill-yellow { background: linear-gradient(90deg, var(--dourado), #e8b840); }
+        .score-fill.fill-red { background: linear-gradient(90deg, var(--saida), #e06050); }
+        .score-pct { min-width: 40px; font-size: 12px; font-weight: 800; text-align: right; }
+
+        @media(max-width:900px) {
+            .diag-setup { padding: 22px 18px; }
+            .diag-perguntas-grid, .acoes-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -481,6 +701,7 @@
         <button class="nav-tab" data-tab="lancamentos">💰 Lançamentos</button>
         <button class="nav-tab" data-tab="custos-fixos">📌 Custos Fixos</button>
         <button class="nav-tab" data-tab="projecoes">📈 Projeções</button>
+        <button class="nav-tab" data-tab="diagnostico">🩺 Diagnóstico</button>
     </nav>
 </header>
 
@@ -546,6 +767,14 @@
                 <option value="entrada">Entradas</option>
                 <option value="saida">Saídas</option>
             </select>
+        </div>
+        <div class="fg" style="min-width:auto;">
+            <label>Resultado c/ Custos Fixos</label>
+            <label class="toggle-filter" title="Deduzir custos fixos do mês do resultado do período">
+                <input type="checkbox" id="dIncludeFC" onchange="refreshDashboard()">
+                <span class="tfilter-slider"></span>
+                <span class="tfilter-label" id="dIncludeFCLabel">Desativado</span>
+            </label>
         </div>
         <button class="btn btn-filter" onclick="refreshDashboard()">Aplicar Filtros</button>
         <button class="btn btn-ghost" onclick="resetDash()">Limpar</button>
@@ -815,6 +1044,106 @@
     </div>
 </section>
 
+<!-- ══ DIAGNÓSTICO ══════════════════════════════════════════ -->
+<section id="diagnostico" class="section">
+    <div class="page-title"><span class="ornament">✦</span> Diagnóstico de Saúde do Fluxo de Caixa</div>
+
+    <!-- Setup -->
+    <div class="diag-setup">
+        <div class="diag-setup-title">🩺 Configurar Diagnóstico</div>
+        <div class="diag-setup-sub">Selecione o setor de atuação e a região do cliente para gerar perguntas reflexivas e recomendações personalizadas com base nas melhores práticas do mercado.</div>
+        <div class="diag-select-grid">
+            <div class="diag-fg">
+                <label>Setor de Atuação</label>
+                <select id="diagSetor">
+                    <option value="">Selecione o setor...</option>
+                    <option value="comercio">🛍️ Comércio / Varejo</option>
+                    <option value="servicos">🤝 Serviços (Consultoria, Saúde, Educação)</option>
+                    <option value="industria">🏭 Indústria / Manufatura</option>
+                    <option value="alimentacao">🍽️ Alimentação (Restaurante, Delivery)</option>
+                    <option value="construcao">🏗️ Construção Civil</option>
+                    <option value="tecnologia">💻 Tecnologia / Software / SaaS</option>
+                </select>
+            </div>
+            <div class="diag-fg">
+                <label>Região do Brasil</label>
+                <select id="diagRegiao">
+                    <option value="">Selecione a região...</option>
+                    <option value="sudeste">🌆 Sudeste (SP, RJ, MG, ES)</option>
+                    <option value="sul">🌿 Sul (RS, SC, PR)</option>
+                    <option value="nordeste">☀️ Nordeste (BA, CE, PE e demais)</option>
+                    <option value="norte">🌳 Norte (AM, PA e demais)</option>
+                    <option value="centro-oeste">🌾 Centro-Oeste (GO, MT, MS, DF)</option>
+                </select>
+            </div>
+            <div class="diag-fg">
+                <label>Porte da Empresa</label>
+                <select id="diagPorte">
+                    <option value="mei">MEI (até R$ 81k/ano)</option>
+                    <option value="me">ME / Pequena (até R$ 4,8M/ano)</option>
+                    <option value="media">Média (até R$ 300M/ano)</option>
+                    <option value="grande">Grande (acima R$ 300M/ano)</option>
+                </select>
+            </div>
+            <div class="diag-fg" style="align-self:flex-end;">
+                <button class="btn-diag-run" onclick="gerarDiagnostico()">✦ Gerar Diagnóstico</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="diag-results" id="diagResults">
+
+        <!-- Contexto selecionado -->
+        <div class="diag-header-strip">
+            <div class="page-title" style="margin:0;font-size:18px;">Relatório de Diagnóstico</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <div class="diag-context-pill"><div class="dot"></div><span id="diagPillSetor">—</span></div>
+                <div class="diag-context-pill"><div class="dot"></div><span id="diagPillRegiao">—</span></div>
+                <div class="diag-context-pill"><div class="dot"></div><span id="diagPillPorte">—</span></div>
+            </div>
+        </div>
+
+        <!-- Score de saúde calculado -->
+        <div class="diag-score-bar">
+            <div class="diag-score-title">📊 Indicadores Calculados do Caixa Atual</div>
+            <div class="score-items" id="diagScoreItems"></div>
+        </div>
+
+        <!-- Perguntas reflexivas -->
+        <div class="card mb20">
+            <div class="card-title">💭 Perguntas Reflexivas para o Cliente</div>
+            <div class="diag-perguntas-grid" id="diagPerguntas"></div>
+        </div>
+
+        <!-- Ações recomendadas -->
+        <div class="card mb20">
+            <div class="card-title">🎯 Plano de Ação — Melhoria da Saúde Financeira</div>
+            <div class="acoes-grid" id="diagAcoes"></div>
+        </div>
+
+        <!-- KPIs do setor -->
+        <div class="card mb20">
+            <div class="card-title">📐 KPIs de Referência para o Setor</div>
+            <div class="kpi-setor-grid" id="diagKpis"></div>
+        </div>
+
+        <!-- Sazonalidade -->
+        <div class="alerta-sazonalidade" id="diagSazonalidade">
+            <div class="alerta-titulo">📅 Alertas de Sazonalidade do Setor</div>
+            <div class="sazon-list" id="diagSazonList"></div>
+        </div>
+
+        <!-- Consideração regional -->
+        <div class="regional-box" id="diagRegionalBox">
+            <div class="rb-titulo">📍 Contexto Regional — <span id="diagRegionalTitulo"></span></div>
+            <div id="diagRegionalItems"></div>
+        </div>
+
+        <div class="diag-fonte">Recomendações baseadas em dados do SEBRAE, Banco Central, CFC e práticas de mercado. Atualizado em 2025.</div>
+    </div>
+</section>
+
 </main>
 
 <script>
@@ -901,6 +1230,7 @@ function showTab(name) {
     if(name==='lancamentos')  renderTxList();
     if(name==='custos-fixos') renderFCList();
     if(name==='projecoes')    calcProjections();
+    if(name==='diagnostico')  { /* diagnóstico é gerado sob demanda pelo botão */ }
 }
 
 // ── dashboard ────────────────────────────────────────────────
@@ -913,6 +1243,7 @@ function resetDash() {
     document.getElementById('dPeriod').value = 'this-month';
     document.getElementById('dCat').value = '';
     document.getElementById('dType').value = '';
+    document.getElementById('dIncludeFC').checked = false;
     onPeriodChange();
     refreshDashboard();
 }
@@ -953,25 +1284,46 @@ function refreshDashboard() {
     const {from,to} = getRange();
     const cat  = document.getElementById('dCat').value;
     const type = document.getElementById('dType').value;
+    const includeFC = document.getElementById('dIncludeFC').checked;
     const txs  = filterTx(from,to,cat,type);
 
     const ent = txs.filter(t=>t.type==='entrada');
     const sai = txs.filter(t=>t.type==='saida');
     const totalEnt = sum(ent); const totalSai = sum(sai);
-    const saldo = totalEnt - totalSai;
 
     const actFC = db.fixedCosts.filter(f=>f.active);
     const totalFC = actFC.reduce((s,f)=>s+f.value,0);
+
+    const saldo = includeFC ? (totalEnt - totalSai - totalFC) : (totalEnt - totalSai);
+
+    // Atualiza label do toggle
+    document.getElementById('dIncludeFCLabel').textContent = includeFC ? 'Ativado' : 'Desativado';
 
     setText('kvEntradas', fmtCur(totalEnt));
     setText('ksEntradas', `${ent.length} lançamento${ent.length!==1?'s':''}`);
     setText('kvSaidas',   fmtCur(totalSai));
     setText('ksSaidas',   `${sai.length} lançamento${sai.length!==1?'s':''}`);
 
-    const saldoEl = document.getElementById('kvSaldo');
+    // Saldo — label e subtítulo variam conforme o modo
+    const saldoCard = document.querySelector('.kpi-card.k-saldo');
+    const saldoEl   = document.getElementById('kvSaldo');
+    const saldoLabel = saldoCard.querySelector('.kpi-label');
+
+    if (includeFC) {
+        saldoLabel.textContent = 'Resultado c/ Custos Fixos';
+        saldoCard.classList.add('cf-ativo');
+        const sub = saldo >= 0
+            ? `Após CF de ${fmtCur(totalFC)} ✓`
+            : `Após CF de ${fmtCur(totalFC)} ⚠`;
+        setText('ksSaldo', sub);
+    } else {
+        saldoLabel.textContent = 'Saldo do Período';
+        saldoCard.classList.remove('cf-ativo');
+        setText('ksSaldo', saldo >= 0 ? 'Resultado positivo ✓' : 'Resultado negativo ⚠');
+    }
+
     saldoEl.textContent = (saldo<0?'-':'')+fmtCur(Math.abs(saldo));
     saldoEl.style.color = saldo>=0?'var(--entrada)':'var(--saida)';
-    setText('ksSaldo', saldo>=0?'Resultado positivo ✓':'Resultado negativo ⚠');
 
     setText('kvFixos', fmtCur(totalFC));
     setText('ksFixos', `${actFC.length} compromisso${actFC.length!==1?'s':''}  ativo${actFC.length!==1?'s':''}`);
@@ -1496,6 +1848,443 @@ function confirmReset() {
 
 // ── boot ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', init);
+
+// ════════════════════════════════════════════════════════════
+//  DIAGNÓSTICO — base de conhecimento por setor
+// ════════════════════════════════════════════════════════════
+
+const DIAG_DB = {
+    comercio: {
+        label: 'Comércio / Varejo',
+        perguntas: [
+            {
+                texto: 'Você conhece com precisão o seu ciclo financeiro? Quantos dias em média passa entre o pagamento ao fornecedor e o recebimento do cliente?',
+                insight: '<strong>Ponto crítico:</strong> No varejo, descasamento entre prazos de pagamento (curto) e recebimento (longo) é a principal causa de crise de liquidez. Ideal: PMP > PMR.'
+            },
+            {
+                texto: 'Qual é o seu índice de inadimplência atual e como ele impacta seu capital de giro mensalmente?',
+                insight: '<strong>Referência SEBRAE:</strong> Inadimplência acima de 5% do faturamento já compromete a saúde do caixa. Monitorar e agir é essencial.'
+            },
+            {
+                texto: 'Você consegue diferenciar claramente o dinheiro da empresa do seu dinheiro pessoal? Há retiradas sem controle de pró-labore?',
+                insight: '<strong>Problema nº 1:</strong> Segundo o SEBRAE, misturar contas pessoais e empresariais é causa de falência em 30% das PMEs brasileiras.'
+            },
+            {
+                texto: 'Nos períodos de sazonalidade alta (Natal, Dia das Mães, Black Friday), você tem reserva suficiente para comprar estoque sem recorrer a empréstimos emergenciais?',
+                insight: '<strong>Estratégia:</strong> Reserve ao menos 2-3 meses de custos fixos para absorver o capital de giro extra em picos sazonais sem comprometer a liquidez.'
+            },
+            {
+                texto: 'Você monitora o giro de estoque por categoria de produto? Há itens parados há mais de 90 dias comprometendo capital?',
+                insight: '<strong>Capital imobilizado:</strong> Estoque parado é dinheiro preso. A meta saudável é girar o estoque pelo menos 4 vezes ao ano para a maioria dos segmentos.'
+            },
+        ],
+        acoes: [
+            { icon: '⏱️', tipo: 'urgente', prioridade: 'alta', titulo: 'Negociar prazos com fornecedores', desc: 'Buscar prazo de pagamento de 30-45 dias com fornecedores enquanto reduz o prazo de recebimento dos clientes para ≤ 30 dias. Esse gap positivo é capital de giro gratuito.', prazo: 'Imediato (30 dias)' },
+            { icon: '💳', tipo: 'urgente', prioridade: 'alta', titulo: 'Implantar política de desconto à vista', desc: 'Oferecer 3-5% de desconto para pagamentos à vista reduz inadimplência e melhora o fluxo imediato. Calcule se o custo do desconto é menor que o custo do capital.', prazo: 'Curto prazo (60 dias)' },
+            { icon: '🏦', tipo: 'oportunidade', prioridade: 'media', titulo: 'Criar reserva de capital de giro', desc: 'Separar mensalmente 5-10% do faturamento em uma conta reserva. Meta: acumular 2-3 meses de custos fixos para cobrir períodos de baixa sazonal sem recorrer a crédito.', prazo: 'Médio prazo (3-6 meses)' },
+            { icon: '📊', tipo: 'oportunidade', prioridade: 'media', titulo: 'Separar contas PJ e PF definitivamente', desc: 'Abrir conta jurídica exclusiva para a empresa. Definir pró-labore fixo mensal para o sócio e nunca mais misturar as contas. É o passo mais simples com maior impacto.', prazo: 'Imediato (7 dias)' },
+            { icon: '📦', tipo: 'oportunidade', prioridade: 'baixa', titulo: 'Análise de curva ABC do estoque', desc: 'Classificar produtos em A (80% receita), B (15%) e C (5%). Liquidar itens C com desconto para liberar capital e focar investimento nos itens A de maior giro.', prazo: 'Médio prazo (90 dias)' },
+        ],
+        kpis: [
+            { icon: '🔄', label: 'Giro de Estoque', value: '≥ 4x / ano', ref: 'Meta ideal para varejo' },
+            { icon: '📥', label: 'Prazo Médio Recebimento', value: '≤ 30 dias', ref: 'PMR saudável' },
+            { icon: '📤', label: 'Prazo Médio Pagamento', value: '> PMR', ref: 'Garante capital de giro' },
+            { icon: '⚠️', label: 'Índice de Inadimplência', value: '< 5%', ref: 'Ref. SEBRAE 2024' },
+            { icon: '💰', label: 'Margem de Contribuição', value: '> 40%', ref: 'Para cobrir custos fixos' },
+            { icon: '🛡️', label: 'Reserva de Caixa', value: '2-3 meses CF', ref: 'Colchão de liquidez' },
+        ],
+        sazonalidade: [
+            { mes: 'Jan / Fev', desc: 'Queda de vendas + IPTU, IPVA e material escolar. Período crítico para o caixa. Planeje com antecedência.' },
+            { mes: 'Maio / Jun', desc: 'Alta sazonal (Dia das Mães, namorados). Exige capital de giro para compra de estoque extra com 60 dias de antecedência.' },
+            { mes: 'Out / Nov', desc: 'Black Friday e preparação para Natal. Maior janela de compra do ano. Planeje o estoque com 90 dias de antecedência.' },
+            { mes: 'Dezembro', desc: 'Pico de vendas, mas também de custos: 13º salário, férias e impostos. Alta receita não significa necessariamente caixa positivo.' },
+        ]
+    },
+    servicos: {
+        label: 'Serviços',
+        perguntas: [
+            {
+                texto: 'Você precifica seus serviços considerando todos os custos indiretos, como horas não faturáveis, capacitação, deslocamentos e overhead administrativo?',
+                insight: '<strong>Subprecificação:</strong> A maioria dos prestadores de serviços ignora 20-35% dos custos reais ao precificar, levando a margens negativas em projetos aparentemente lucrativos.'
+            },
+            {
+                texto: 'Qual é a sua taxa de churn de clientes? Você calcula quanto custa adquirir um novo cliente versus reter um atual?',
+                insight: '<strong>Regra do setor:</strong> Reter um cliente custa 5x menos do que adquirir um novo. Um churn de 10% ao mês significa renovar toda a carteira em menos de um ano.'
+            },
+            {
+                texto: 'Você tem contratos de recorrência (mensalidades, retainers) ou depende exclusivamente de projetos pontuais? Como isso afeta a previsibilidade do seu caixa?',
+                insight: '<strong>Receita previsível:</strong> Negócios com 60%+ da receita recorrente têm 3x mais facilidade de planejamento financeiro e acesso a crédito mais barato.'
+            },
+            {
+                texto: 'Em dezembro e janeiro, como está a saúde do seu caixa? Você consegue honrar todos os compromissos sem fazer novas vendas?',
+                insight: '<strong>Vale da morte:</strong> Jan-Fev é o período mais crítico em serviços B2B. Empresas sem reserva adequada recorrem a empréstimos caros que comprometem o início do ano.'
+            },
+            {
+                texto: 'Você tem cláusula de reajuste nos seus contratos atrelada ao IPCA ou IGP-M para proteger sua margem da inflação?',
+                insight: '<strong>Erosão silenciosa:</strong> Sem reajuste anual, a inflação de ~5% ao ano corrói sua margem e poder de compra. É direito contratual previsto em lei.'
+            },
+        ],
+        acoes: [
+            { icon: '🔁', tipo: 'urgente', prioridade: 'alta', titulo: 'Migrar para receita recorrente', desc: 'Converter projetos pontuais em contratos de mensalidade ou retainer. Mesmo que menor valor, a previsibilidade do caixa compensa amplamente. Ofereça benefícios exclusivos para contratos anuais.', prazo: 'Médio prazo (90 dias)' },
+            { icon: '💵', tipo: 'urgente', prioridade: 'alta', titulo: 'Cobrar sinal de 30-50% no início', desc: 'Padronizar contratos para exigir 30-50% de entrada antes de iniciar qualquer projeto. Reduz risco financeiro e filtra clientes sem comprometimento real.', prazo: 'Imediato (30 dias)' },
+            { icon: '🤖', tipo: 'urgente', prioridade: 'media', titulo: 'Automatizar cobranças e lembretes', desc: 'Implantar cobrança automática por boleto, Pix recorrente ou cartão. Ferramentas como Asaas, Iugu ou Vindi reduzem inadimplência em 60% comparado à cobrança manual.', prazo: 'Curto prazo (30-60 dias)' },
+            { icon: '📋', tipo: 'oportunidade', prioridade: 'media', titulo: 'Criar pacote anual com desconto', desc: 'Oferecer desconto de 10-20% para contratos anuais pagos com antecedência. Garante previsibilidade e injeta caixa imediato para reinvestimento.', prazo: 'Médio prazo (60 dias)' },
+            { icon: '📈', tipo: 'oportunidade', prioridade: 'baixa', titulo: 'Revisar precificação com margem real', desc: 'Mapear todos os custos diretos e indiretos por serviço. Incluir: horas não faturáveis, capacitação (~5% da receita), overhead e margem de lucro desejada de 20-30%.', prazo: 'Curto prazo (45 dias)' },
+        ],
+        kpis: [
+            { icon: '📈', label: 'MRR (Receita Recorrente)', value: 'Crescimento MoM', ref: 'Meta: +5-10%/mês' },
+            { icon: '🔗', label: 'LTV / CAC Ratio', value: '≥ 3:1', ref: 'Sustentabilidade financeira' },
+            { icon: '👥', label: 'Taxa de Ocupação', value: '> 70%', ref: 'Horas faturáveis / totais' },
+            { icon: '📉', label: 'Churn Rate', value: '< 3% / mês', ref: 'Retenção de clientes' },
+            { icon: '🎫', label: 'Ticket Médio', value: 'Monitorar trend', ref: 'Crescimento esperado anual' },
+            { icon: '💼', label: 'Margem Líquida', value: '> 20%', ref: 'Após todos os custos' },
+        ],
+        sazonalidade: [
+            { mes: 'Jan / Fev', desc: 'Mês de baixa contratação B2B. Empresas estão montando budget. Prepare reserva de pelo menos 2 meses de custos fixos.' },
+            { mes: 'Julho', desc: 'Férias escolares reduzem demanda em muitos segmentos de serviços. Período bom para capacitação interna e estruturação.' },
+            { mes: 'Set / Out', desc: 'Melhor período para fechar contratos — empresas estão com budget aprovado para o próximo ano e precisam usar saldo corrente.' },
+            { mes: 'Dezembro', desc: 'Atraso em pagamentos por festas e fechamento de empresas clientes. Antecipar cobranças em novembro.' },
+        ]
+    },
+    industria: {
+        label: 'Indústria / Manufatura',
+        perguntas: [
+            {
+                texto: 'Você calcula o custo real de cada produto fabricado, incluindo mão de obra indireta, energia, depreciação de equipamentos e overhead administrativo?',
+                insight: '<strong>Custeio preciso:</strong> Fábricas que ignoram custos indiretos frequentemente precificam abaixo do custo real, gerando lucro contábil e prejuízo financeiro.'
+            },
+            {
+                texto: 'Como você gerencia o descasamento entre o lead time de compra de matéria-prima e o prazo de recebimento do cliente? Esse intervalo está sendo financiado por quem?',
+                insight: '<strong>Ciclo de conversão:</strong> Na indústria, o Ciclo de Conversão de Caixa (CCC) pode chegar a 90-120 dias. Cada dia a menos no ciclo representa capital liberado.'
+            },
+            {
+                texto: 'Você monitora seu ponto de equilíbrio operacional em tempo real? Sabe exatamente quantas unidades precisa produzir e vender por mês para cobrir todos os custos?',
+                insight: '<strong>Break-even dinâmico:</strong> Com variação de insumos e energia, o ponto de equilíbrio muda mensalmente. Empresas que o ignoram tomam decisões de produção no escuro.'
+            },
+            {
+                texto: 'Qual é o seu plano para reposição de equipamentos? Você está reservando capital mensalmente ou irá recorrer a empréstimos quando um equipamento crítico falhar?',
+                insight: '<strong>Manutenção corretiva:</strong> O custo de uma parada não planejada é 3-10x maior que a manutenção preventiva equivalente. Reserve 2-3% do valor dos equipamentos ao ano.'
+            },
+        ],
+        acoes: [
+            { icon: '📊', tipo: 'urgente', prioridade: 'alta', titulo: 'Implantar custeio por absorção ou ABC', desc: 'Mapear todos os custos diretos e indiretos por produto. Método ABC (Activity-Based Costing) é mais preciso para indústrias com múltiplos produtos e linhas de produção.', prazo: 'Médio prazo (90 dias)' },
+            { icon: '🏦', tipo: 'urgente', prioridade: 'alta', titulo: 'Negociar antecipação de recebíveis', desc: 'Usar duplicatas como garantia para antecipação com bancos ou fintechs. Com Selic elevada, comparar custo do crédito vs. custo do capital de giro imobilizado no ciclo produtivo.', prazo: 'Curto prazo (30 dias)' },
+            { icon: '🔧', tipo: 'urgente', prioridade: 'media', titulo: 'Criar fundo de reposição de equipamentos', desc: 'Separar mensalmente 2-3% do valor dos equipamentos em conta reserva. Evita surpresas de caixa quando um equipamento crítico para. Registre como provisão contábil.', prazo: 'Imediato (30 dias)' },
+            { icon: '📦', tipo: 'oportunidade', prioridade: 'media', titulo: 'Reduzir ciclo de conversão de caixa', desc: 'Analisar estoque de matéria-prima (comprar mais próximo da produção), produção em andamento (reduzir gargalos) e prazo de entrega (cobrar mais rápido do cliente).', prazo: 'Médio prazo (60-90 dias)' },
+            { icon: '💱', tipo: 'oportunidade', prioridade: 'baixa', titulo: 'Proteção cambial para insumos importados', desc: 'Se mais de 15% dos insumos são importados, avaliar hedge cambial (NDF, opções de câmbio) para proteger o custo de produção de variações abruptas do dólar.', prazo: 'Médio prazo (90 dias)' },
+        ],
+        kpis: [
+            { icon: '⚙️', label: 'OEE (Eficiência Global)', value: '> 65%', ref: 'Produtividade dos ativos' },
+            { icon: '🔄', label: 'Ciclo de Conversão (CCC)', value: '< 90 dias', ref: 'Indústria de manufatura' },
+            { icon: '📉', label: 'Índice de Rejeição', value: '< 2%', ref: 'Qualidade e retrabalho' },
+            { icon: '💰', label: 'Margem Bruta / Produto', value: '> 35%', ref: 'Após custos diretos' },
+            { icon: '🏭', label: 'Custo Fixo / Receita', value: '< 30%', ref: 'Alavancagem operacional' },
+            { icon: '🛠️', label: 'Manutenção Corretiva', value: '< 25% do total', ref: 'Preventiva deve dominar' },
+        ],
+        sazonalidade: [
+            { mes: 'Mar / Abr', desc: 'Dissídios coletivos de muitas categorias. Aumento de folha pode variar 5-15% sem aviso prévio no planejamento.' },
+            { mes: 'Jun / Jul', desc: 'Reajuste de tarifas de energia elétrica (Bandeira Vermelha frequente no inverno). Custo de energia impacta diretamente o CMV.' },
+            { mes: 'Out / Nov', desc: 'Alta demanda de fim de ano exige aumento de produção com 2-3 meses de antecedência. Planeje capital de giro para estoque.' },
+            { mes: 'Jan / Fev', desc: 'Férias coletivas, dissídios e inventário. Menor produtividade com custos fixos integrais. Reserve caixa para este período.' },
+        ]
+    },
+    alimentacao: {
+        label: 'Alimentação',
+        perguntas: [
+            {
+                texto: 'Você conhece o CMV (Custo de Mercadoria Vendida) de cada item do seu cardápio? Compara semanalmente com a meta máxima de 35% da receita?',
+                insight: '<strong>CMV é lei:</strong> No setor de alimentação, CMV acima de 40% compromete toda a rentabilidade. O controle semanal é a diferença entre lucro e prejuízo.'
+            },
+            {
+                texto: 'Qual é o seu ticket médio atual e quantos clientes/pedidos você precisa atender por dia para cobrir todos os custos fixos?',
+                insight: '<strong>Ponto de equilíbrio diário:</strong> Todo restaurante deve saber quantos "covers" ou pedidos precisa fazer por dia apenas para pagar as contas. Você sabe o seu?'
+            },
+            {
+                texto: 'Você controla o desperdício de alimentos? Qual é a sua taxa de perdas atual e como ela aparece no resultado mensal?',
+                insight: '<strong>Impacto do desperdício:</strong> A média brasileira de desperdício alimentar em restaurantes é de 15-20% da compra. Cada 5% de redução pode adicionar 2-3% à margem líquida.'
+            },
+            {
+                texto: 'Nos aplicativos de delivery, você conhece exatamente sua margem depois da comissão de 12-30% do iFood/Rappi? O canal é lucrativo ou apenas movimenta caixa?',
+                insight: '<strong>Delivery pode enganar:</strong> Alto volume de pedidos nos apps não significa lucro. Com comissões de até 30%, é fundamental ter preços diferenciados para o canal digital.'
+            },
+            {
+                texto: 'Você mapeia quais dias e horários geram 80% do seu faturamento? A escala de colaboradores está alinhada a essa demanda real?',
+                insight: '<strong>Otimização de pessoal:</strong> Mão de obra é 25-35% da receita em alimentação. Escalar funcionários baseado em dados de pico e vale pode reduzir esse custo em 15-20%.'
+            },
+        ],
+        acoes: [
+            { icon: '🧮', tipo: 'urgente', prioridade: 'alta', titulo: 'Implantar controle rígido de CMV', desc: 'Fazer ficha técnica de cada prato com custo real. Meta: CMV < 35% da receita. Monitorar semanalmente. Ferramentas simples como planilhas já geram impacto imediato.', prazo: 'Imediato (15 dias)' },
+            { icon: '♻️', tipo: 'urgente', prioridade: 'alta', titulo: 'Programa de redução de desperdício', desc: 'Implementar FIFO (primeiro que entra, primeiro que sai) no estoque. Mapear itens com maior perda. Meta: reduzir desperdício de 15% para menos de 5% das compras em 90 dias.', prazo: 'Curto prazo (30 dias)' },
+            { icon: '📱', tipo: 'urgente', prioridade: 'media', titulo: 'Renegociar contratos com apps de delivery', desc: 'Buscar migração para planos intermediários do iFood (Ex: Básico → Freemium). Criar canal próprio no WhatsApp Business com no máximo 5% de custo vs. 30% nos apps.', prazo: 'Curto prazo (45 dias)' },
+            { icon: '🎁', tipo: 'oportunidade', prioridade: 'media', titulo: 'Criar programa de fidelização', desc: 'Programa de pontos ou cashback digital gera recorrência sem custo de aquisição. Ferramentas como Fidelizi ou Starbucks approach aumentam frequência em 2-3x.', prazo: 'Médio prazo (60 dias)' },
+            { icon: '📅', tipo: 'oportunidade', prioridade: 'baixa', titulo: 'Mapa de sazonalidade semanal', desc: 'Registrar vendas por dia da semana e horário por 3 meses. Usar dados para otimizar: compras (menos estoque nos dias fracos), escala (menos pessoal) e promoções (atrair nos dias baixos).', prazo: 'Médio prazo (90 dias)' },
+        ],
+        kpis: [
+            { icon: '🍽️', label: 'CMV %', value: '< 35%', ref: 'Custo sobre receita bruta' },
+            { icon: '💺', label: 'RevPASH', value: 'Benchmark local', ref: 'Receita por assento/hora' },
+            { icon: '🎫', label: 'Ticket Médio', value: 'Crescimento mensal', ref: 'Comparar vs. mês anterior' },
+            { icon: '♻️', label: 'Índice de Desperdício', value: '< 5%', ref: 'Das compras totais' },
+            { icon: '📲', label: 'Mix de Canal', value: 'Delivery < 50%', ref: 'Dependência de apps' },
+            { icon: '🔁', label: 'Taxa de Retorno', value: '> 30%/mês', ref: 'Clientes que voltam' },
+        ],
+        sazonalidade: [
+            { mes: 'Jan / Fev', desc: 'Queda de movimento pós-festas + 13° pago em dezembro esgota o caixa. Planejar reserva de novembro para cobrir janeiro.' },
+            { mes: 'Carnaval', desc: 'Alta no delivery e queda no presencial (especialmente no interior). Planejar estoques para os dois canais de forma diferente.' },
+            { mes: 'Jun / Jul', desc: 'Festas juninas e inverno aumentam movimento para pratos quentes e comida típica. Oportunidade de cardápio sazonal com margem maior.' },
+            { mes: 'Dez', desc: 'Pico de faturamento, mas com custos adicionais: 13° salário, horas extras, compras de fim de ano. Muito movimento nem sempre significa muito lucro.' },
+        ]
+    },
+    construcao: {
+        label: 'Construção Civil',
+        perguntas: [
+            {
+                texto: 'Você tem o orçamento de cada obra atualizado em tempo real ou descobre os desvios de custo somente ao final, quando já é tarde para corrigir?',
+                insight: '<strong>Desvio de obra:</strong> O desvio médio entre orçamento e custo real na construção civil brasileira é de 15-30%. Acompanhamento mensal limita esse desvio a menos de 5%.'
+            },
+            {
+                texto: 'Como você gerencia o fluxo financeiro entre as medições (recebimento) e os pagamentos de subempreiteiros e materiais? Existe um "vale" de caixa entre os dois?',
+                insight: '<strong>Gap de caixa:</strong> Em obras públicas, o prazo entre a medição e o efetivo pagamento pode chegar a 90 dias. Esse período precisa ser financiado com capital próprio ou crédito barato.'
+            },
+            {
+                texto: 'Você mantém centros de custo separados por obra? Já precisou usar o lucro de uma obra para cobrir o prejuízo de outra sem perceber?',
+                insight: '<strong>Contaminação entre obras:</strong> Misturar resultados de diferentes contratos é um dos maiores riscos financeiros na construção civil e impede a tomada de decisão correta.'
+            },
+            {
+                texto: 'Qual é a sua exposição atual a retenções contratuais e como esse valor impacta seu capital de giro disponível?',
+                insight: '<strong>Retenções:</strong> É comum reter 5-10% do valor de cada medição como garantia. Em obras grandes, isso pode representar 30-50% do lucro esperado imobilizado por meses.'
+            },
+        ],
+        acoes: [
+            { icon: '📁', tipo: 'urgente', prioridade: 'alta', titulo: 'Criar centro de custos por obra', desc: 'Nunca misturar financeiramente diferentes empreendimentos. Cada obra tem sua conta, seu orçamento e seu resultado. Use software específico como Sienge ou planilha dedicada.', prazo: 'Imediato (15 dias)' },
+            { icon: '💵', tipo: 'urgente', prioridade: 'alta', titulo: 'Negociar adiantamento de 20-30%', desc: 'Padronizar contratos com cláusula de mobilização de 20-30% do valor total antes do início. Cobre custos de montagem e primeiros materiais sem comprometer caixa corrente.', prazo: 'Curto prazo (30 dias)' },
+            { icon: '📊', tipo: 'urgente', prioridade: 'media', titulo: 'Cronograma financeiro vs. físico mensal', desc: 'Comparar mensalmente o avanço físico da obra com o financeiro. Desvio > 5% exige análise imediata. Ferramentas: MS Project, Sienge, ou planilha de curva S.', prazo: 'Curto prazo (30 dias)' },
+            { icon: '🛡️', tipo: 'oportunidade', prioridade: 'media', titulo: 'Reserva de 10% por contrato', desc: 'Separar 10% do valor de cada contrato como reserva para imprevistos, retrabalho e retenções. É o "buffer" que evita que uma obra comprometa a saúde financeira da empresa toda.', prazo: 'Imediato (aplicar ao próximo contrato)' },
+            { icon: '📋', tipo: 'oportunidade', prioridade: 'baixa', titulo: 'Antecipação de recebíveis de medições', desc: 'Usar certificados de medição ou NFs aprovadas como lastro para antecipação de crédito em bancos ou fintechs. Taxa média de 1,5-2,5% ao mês para obras privadas com bom histórico.', prazo: 'Médio prazo (60 dias)' },
+        ],
+        kpis: [
+            { icon: '📐', label: 'Desvio Orçado vs. Real', value: '< 5% por obra', ref: 'Meta de controle' },
+            { icon: '⏱️', label: 'PMR (Medições)', value: '< 45 dias', ref: 'Prazo médio de recebimento' },
+            { icon: '🔒', label: 'Retenção Contratual', value: '< 15% do contrato', ref: 'Capital imobilizado' },
+            { icon: '💼', label: 'Margem por Obra', value: '> 15%', ref: 'Após todos os custos diretos' },
+            { icon: '📅', label: 'Cronograma (Desvio)', value: '< 10% do prazo', ref: 'Atraso em dias' },
+            { icon: '💰', label: 'Capital de Giro / Obra', value: '10-15% do contrato', ref: 'Necessidade mínima' },
+        ],
+        sazonalidade: [
+            { mes: 'Out — Mar', desc: 'Período de chuvas no Sudeste e Centro-Oeste paralisa obras externas, aumenta custo e gera atraso nos cronogramas. Planeje folga de 20% no prazo.' },
+            { mes: 'Jan / Fev', desc: 'Férias de verão provocam escassez de mão de obra qualificada e aumento de salários por demanda. Negociar contratos antes de dezembro.' },
+            { mes: 'Mar / Abr', desc: 'Retomada de obras após férias e chuvas. Período de maior demanda por crédito de construção — antecipar aprovações com 60 dias de antecedência.' },
+            { mes: 'Set / Out', desc: 'Revisão orçamentária do governo (obras públicas) e lançamentos imobiliários. Melhor período para fechar contratos com preço favorável.' },
+        ]
+    },
+    tecnologia: {
+        label: 'Tecnologia / SaaS',
+        perguntas: [
+            {
+                texto: 'Você tem clareza sobre o Burn Rate mensal e quantos meses de runway o caixa atual da empresa representa? Esse número está crescendo ou diminuindo?',
+                insight: '<strong>Sobrevivência financeira:</strong> Para startups e empresas de tecnologia, o runway de caixa deve ser sempre monitorado. Ideal: manter 12+ meses de runway para operar sem pressão de curto prazo.'
+            },
+            {
+                texto: 'Sua estratégia de precificação considera o custo de infraestrutura cloud que cresce automaticamente com a escala? Qual é o seu custo de AWS/GCP/Azure como percentual da receita?',
+                insight: '<strong>Infrastructure Cost %:</strong> Custos de cloud acima de 20% da receita são insustentáveis. Empresas maduras operam com 5-10%. Arquitetura e negociação de contratos são essenciais.'
+            },
+            {
+                texto: 'Qual é o seu Churn Rate mensal? Você calcula qual seria o impacto no ARR anual se o churn atual continuar pelos próximos 12 meses?',
+                insight: '<strong>Matemática do churn:</strong> Um churn de 5% ao mês significa perder 46% da base atual em um ano. Reduzir churn de 5% para 2% ao mês pode dobrar o ARR em 18 meses.'
+            },
+            {
+                texto: 'Você tem contratos anuais ou depende de mensalistas que podem cancelar a qualquer momento? Como está sua relação entre receita anual prepaga e receita mensal?',
+                insight: '<strong>Receita antecipada:</strong> Contratos anuais pagos antecipadamente melhoram o caixa imediatamente e reduzem o churn (clientes anuais cancelam 3-5x menos que mensalistas).'
+            },
+            {
+                texto: 'Você monitora o Net Revenue Retention (NRR)? Seus clientes atuais estão crescendo o gasto com você ou apenas mantendo o plano original?',
+                insight: '<strong>Expansão de receita:</strong> NRR acima de 100% significa que a empresa cresce mesmo sem novos clientes — o que reduz drasticamente a dependência de captação e custo de aquisição.'
+            },
+        ],
+        acoes: [
+            { icon: '📊', tipo: 'urgente', prioridade: 'alta', titulo: 'Dashboard de métricas SaaS em tempo real', desc: 'Monitorar diariamente: MRR, churn, CAC, LTV, burn rate e runway. Ferramentas: ChartMogul, Baremetrics ou planilha integrada ao sistema de cobrança.', prazo: 'Imediato (30 dias)' },
+            { icon: '📅', tipo: 'urgente', prioridade: 'alta', titulo: 'Criar tier de planos anuais com desconto', desc: 'Oferecer 15-20% de desconto para contratos anuais. Injetam caixa imediato, reduzem churn em 60-70% e melhoram o NRR. É a alavanca financeira mais eficiente em SaaS.', prazo: 'Curto prazo (45 dias)' },
+            { icon: '☁️', tipo: 'urgente', prioridade: 'media', titulo: 'Auditoria e otimização de cloud costs', desc: 'Revisar recursos cloud ociosos, redimensionar instâncias, usar reserved instances para cargas previsíveis. Meta: custo de infra < 15% da receita. Economia média: 20-40% após auditoria.', prazo: 'Curto prazo (30 dias)' },
+            { icon: '🔗', tipo: 'oportunidade', prioridade: 'media', titulo: 'Programa de expansão de receita (upsell)', desc: 'Criar jornada estruturada de expansão para clientes existentes: upsell de planos, cross-sell de módulos, serviços profissionais. Expansão de receita é o caminho para NRR > 100%.', prazo: 'Médio prazo (90 dias)' },
+            { icon: '🌍', tipo: 'oportunidade', prioridade: 'baixa', titulo: 'Precificação em dólar para internacionalização', desc: 'Para SaaS com potencial de clientes internacionais, precificar em USD ou EUR protege a receita da desvalorização do real e multiplica o mercado endereçável.', prazo: 'Longo prazo (6-12 meses)' },
+        ],
+        kpis: [
+            { icon: '📈', label: 'ARR / MRR Growth', value: '+10-20% MoM', ref: 'Stage-dependent' },
+            { icon: '🔥', label: 'Burn Rate', value: 'Monitorar', ref: 'Runway > 12 meses' },
+            { icon: '📉', label: 'Churn Rate', value: '< 2% / mês', ref: 'Meta para SaaS B2B' },
+            { icon: '⏱️', label: 'CAC Payback', value: '< 12 meses', ref: 'Ideal < 6 meses' },
+            { icon: '🔗', label: 'NRR (Net Revenue Retention)', value: '> 100%', ref: 'Expansão supera churn' },
+            { icon: '☁️', label: 'Cloud Cost % Receita', value: '< 15%', ref: 'Empresas maduras: 5-8%' },
+        ],
+        sazonalidade: [
+            { mes: 'Jan', desc: 'Concentração de renovações e churn. Clientes cancelam planos anuais que vencem em dezembro/janeiro. Antecipar contato de renovação 60 dias antes.' },
+            { mes: 'Ago / Set', desc: 'Ciclo de decisão de budget corporativo para o próximo ano. Melhor momento para fechar contratos anuais com empresas B2B de grande porte.' },
+            { mes: 'Nov (Black Friday)', desc: 'Alta aquisição de clientes com LTV menor (clientes promocionais têm 2x mais churn). Avaliar se promoções agressivas compensam para o perfil do produto.' },
+            { mes: 'Dez', desc: 'Empresas clientes fecham para férias. Ciclos de compra lentos. Período de planejamento estratégico interno e preparação de roadmap do próximo ano.' },
+        ]
+    }
+};
+
+const DIAG_REGIOES = {
+    sudeste: {
+        label: 'Sudeste (SP, RJ, MG, ES)',
+        itens: [
+            '<strong>Alta concorrência:</strong> Mercado mais disputado do país — margens tendem a ser menores. Diferenciação e eficiência operacional são críticas para sustentabilidade.',
+            '<strong>Custos operacionais elevados:</strong> Aluguel e folha de pagamento em SP e RJ estão entre os mais altos do Brasil. Avaliar coworking, home office e automação.',
+            '<strong>Acesso a crédito e fintechs:</strong> Maior concentração de fintechs e opções de antecipação de recebíveis do país. Use a competição para negociar taxas mais baixas.',
+            '<strong>Selic e macroeconomia:</strong> SP concentra ~40% do PIB. Oscilações de juros e câmbio impactam o caixa mais rapidamente que no restante do país. Monitorar IPCA e Selic mensalmente.',
+        ]
+    },
+    sul: {
+        label: 'Sul (RS, SC, PR)',
+        itens: [
+            '<strong>Mercado mais maduro:</strong> Gestão financeira tende a ser mais profissionalizada na média regional. O benchmark de eficiência é alto — necessário acompanhar indicadores setoriais locais.',
+            '<strong>Dependência de exportações:</strong> RS e SC têm alta participação de empresas exportadoras. Variação cambial impacta custos e receitas. Proteção cambial é recomendada acima de 20% de exposição.',
+            '<strong>Agroindústria e sazonalidade:</strong> Ciclo financeiro ligado às safras de soja, milho, suínos e aves. Planejar capital de giro de acordo com os ciclos de cada commoditie.',
+            '<strong>Riscos climáticos:</strong> Geadas, secas e chuvas extremas afetam agro e geram volatilidade nas cadeias de fornecimento regionais. Reserva estratégica é essencial.',
+        ]
+    },
+    nordeste: {
+        label: 'Nordeste (BA, CE, PE e demais)',
+        itens: [
+            '<strong>Custo logístico maior:</strong> Frete 20-40% acima do Sudeste impacta CMV e prazos de entrega. Estratégias locais de sourcing e armazenagem podem ser diferenciais competitivos.',
+            '<strong>Crédito subsidiado disponível:</strong> Banco do Nordeste (BNB) oferece linhas com taxas abaixo de 6% a.a. para MPEs — oportunidade subutilizada. Vale verificar elegibilidade.',
+            '<strong>Sazonalidade do turismo:</strong> Estados como Ceará, Bahia e Maranhão têm forte sazonalidade turística. Negócios ligados ao turismo devem planejar capital de giro para baixa temporada (Maio-Agosto).',
+            '<strong>Alta informalidade:</strong> Mercado mais informal dificulta acesso a crédito para quem não tem regularidade fiscal. Regularização do CNPJ e DAS em dia são pré-requisitos para financiamento.',
+        ]
+    },
+    norte: {
+        label: 'Norte (AM, PA e demais)',
+        itens: [
+            '<strong>Logística como fator crítico:</strong> Custo de transporte pode comprometer até 30% da margem em alguns setores. Mapear fornecedores locais e estoques estratégicos é essencial.',
+            '<strong>Zona Franca de Manaus:</strong> Para empresas do AM, os incentivos fiscais da ZFM podem representar redução real de 15-30% nos custos. Verificar elegibilidade com contador local.',
+            '<strong>Sazonalidade climática intensa:</strong> Período de cheia (Dez-Abr) impacta logística fluvial e acesso a comunidades. Planejar estoques e pagamentos para períodos de isolamento.',
+            '<strong>Banco da Amazônia (BASA):</strong> Linhas de crédito com taxas subsidiadas para projetos na Amazônia Legal. Verificar FNO (Fundo Constitucional de Financiamento do Norte).',
+        ]
+    },
+    'centro-oeste': {
+        label: 'Centro-Oeste (GO, MT, MS, DF)',
+        itens: [
+            '<strong>Agronegócio e ciclo anual:</strong> Empresas ligadas ao agro têm fluxo de caixa concentrado na época de colheita (Jan-Mar para soja). O resto do ano exige planejamento rigoroso de capital de giro.',
+            '<strong>Expansão imobiliária:</strong> Goiânia e Campo Grande têm mercados imobiliários aquecidos — oportunidade para construção civil e serviços correlatos, com boa perspectiva de demanda nos próximos 3-5 anos.',
+            '<strong>Fundo Constitucional FCO:</strong> Linhas de financiamento com taxas subsidiadas para investimento produtivo no Centro-Oeste. Avaliar antes de contratar crédito bancário convencional.',
+            '<strong>Custo de mão de obra qualificada:</strong> Menor que o Sudeste, mas o mercado de profissionais especializados é escasso em cidades menores. Planejar treinamento e retenção de talentos na estrutura de custos.',
+        ]
+    }
+};
+
+// ── diagnóstico — lógica ──────────────────────────────────────
+function gerarDiagnostico() {
+    const setor   = document.getElementById('diagSetor').value;
+    const regiao  = document.getElementById('diagRegiao').value;
+    const porte   = document.getElementById('diagPorte').value;
+
+    if (!setor) { toast('Selecione o setor de atuação do cliente.', 'err'); return; }
+    if (!regiao) { toast('Selecione a região do cliente.', 'err'); return; }
+
+    const setorData  = DIAG_DB[setor];
+    const regiaoData = DIAG_REGIOES[regiao];
+    const porteLabel = { mei:'MEI', me:'Micro/Pequena Empresa', media:'Média Empresa', grande:'Grande Empresa' }[porte] || porte;
+
+    // Pills
+    document.getElementById('diagPillSetor').textContent  = setorData.label;
+    document.getElementById('diagPillRegiao').textContent = regiaoData.label;
+    document.getElementById('diagPillPorte').textContent  = porteLabel;
+
+    // Score calculado do caixa atual
+    renderDiagScore();
+
+    // Perguntas reflexivas
+    const pGrid = document.getElementById('diagPerguntas');
+    pGrid.innerHTML = setorData.perguntas.map((p, i) => `
+        <div class="pergunta-card">
+            <div class="pergunta-num">Pergunta ${i + 1} de ${setorData.perguntas.length}</div>
+            <div class="pergunta-texto">"${p.texto}"</div>
+            <div class="pergunta-insight">💡 ${p.insight}</div>
+        </div>
+    `).join('');
+
+    // Ações de melhoria
+    const aGrid = document.getElementById('diagAcoes');
+    aGrid.innerHTML = setorData.acoes.map(a => `
+        <div class="acao-card">
+            <div class="acao-icon-wrap ${a.tipo}">${a.icon}</div>
+            <div class="acao-body">
+                <div class="acao-prioridade ${a.prioridade}">● Prioridade ${a.prioridade.charAt(0).toUpperCase() + a.prioridade.slice(1)}</div>
+                <div class="acao-titulo">${a.titulo}</div>
+                <div class="acao-desc">${a.desc}</div>
+                <span class="acao-prazo">⏱ ${a.prazo}</span>
+            </div>
+        </div>
+    `).join('');
+
+    // KPIs do setor
+    const kGrid = document.getElementById('diagKpis');
+    kGrid.innerHTML = setorData.kpis.map(k => `
+        <div class="kpi-setor-card">
+            <div class="kpi-setor-icon">${k.icon}</div>
+            <div>
+                <div class="kpi-setor-label">${k.label}</div>
+                <div class="kpi-setor-value">${k.value}</div>
+                <div class="kpi-setor-ref">${k.ref}</div>
+            </div>
+        </div>
+    `).join('');
+
+    // Sazonalidade
+    document.getElementById('diagSazonList').innerHTML = setorData.sazonalidade.map(s => `
+        <div class="sazon-item">
+            <div class="sazon-mes">${s.mes}</div>
+            <div class="sazon-desc">${s.desc}</div>
+        </div>
+    `).join('');
+
+    // Regional
+    document.getElementById('diagRegionalTitulo').textContent = regiaoData.label;
+    document.getElementById('diagRegionalItems').innerHTML = regiaoData.itens.map(item => `
+        <div class="regional-item">
+            <div class="rb-bullet">◆</div>
+            <div class="rb-text">${item}</div>
+        </div>
+    `).join('');
+
+    // Exibir resultados
+    const results = document.getElementById('diagResults');
+    results.classList.add('visible');
+    setTimeout(() => results.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    toast('Diagnóstico gerado com sucesso!');
+}
+
+function renderDiagScore() {
+    const totalEnt = db.transactions.filter(t => t.type === 'entrada').reduce((s, t) => s + t.value, 0);
+    const totalSai = db.transactions.filter(t => t.type === 'saida').reduce((s, t) => s + t.value, 0);
+    const saldo    = totalEnt - totalSai;
+    const actFC    = db.fixedCosts.filter(f => f.active);
+    const totalFC  = actFC.reduce((s, f) => s + f.value, 0);
+
+    // Métricas derivadas
+    const coberturaFC = totalFC > 0 ? Math.min(100, Math.round((totalEnt / totalFC) * 25)) : 0;
+    const saldoPct    = totalEnt > 0 ? Math.min(100, Math.max(0, Math.round(((saldo / totalEnt) + 0.5) * 100))) : 50;
+    const diversPct   = (() => {
+        const catEntradas = [...new Set(db.transactions.filter(t => t.type === 'entrada').map(t => t.category))];
+        return Math.min(100, catEntradas.length * 20);
+    })();
+    const lancPct = Math.min(100, db.transactions.length * 5);
+
+    const items = [
+        { label: 'Cobertura de Custos Fixos', pct: coberturaFC, color: coberturaFC > 65 ? 'fill-green' : coberturaFC > 35 ? 'fill-yellow' : 'fill-red' },
+        { label: 'Equilíbrio Entradas × Saídas', pct: saldoPct, color: saldoPct > 60 ? 'fill-green' : saldoPct > 40 ? 'fill-yellow' : 'fill-red' },
+        { label: 'Diversificação de Receitas', pct: diversPct, color: diversPct > 60 ? 'fill-green' : diversPct > 30 ? 'fill-yellow' : 'fill-red' },
+        { label: 'Rastreabilidade de Lançamentos', pct: lancPct, color: lancPct > 50 ? 'fill-green' : lancPct > 20 ? 'fill-yellow' : 'fill-red' },
+    ];
+
+    document.getElementById('diagScoreItems').innerHTML = items.map(item => `
+        <div class="score-row">
+            <div class="score-label">${item.label}</div>
+            <div class="score-track"><div class="score-fill ${item.color}" style="width:${item.pct}%"></div></div>
+            <div class="score-pct" style="color:${item.color === 'fill-green' ? 'var(--entrada)' : item.color === 'fill-red' ? 'var(--saida)' : 'var(--dourado)'}">${item.pct}%</div>
+        </div>
+    `).join('');
+}
 </script>
 </body>
 </html>

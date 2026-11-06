@@ -77,6 +77,13 @@
     #relogioHeader { font-family: 'Playfair Display', serif; font-size: 13px; color: rgba(245,240,216,.7); letter-spacing: .5px; }
     .btn-reset-wrap button { font-family: 'Nunito', sans-serif; font-size: 9px; font-weight: 700; padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(196,154,60,.25); background: transparent; color: rgba(196,154,60,.6); cursor: pointer; text-transform: uppercase; letter-spacing: .6px; transition: all .2s; }
     .btn-reset-wrap button:hover { border-color: var(--saida); color: var(--saida); }
+    .btn-backup{font-size:9px;font-weight:700;padding:3px 9px;border-radius:4px;
+      border:1px solid rgba(196,154,60,.25);background:transparent;
+      color:rgba(228,213,163,.5);cursor:pointer;font-family:'Nunito',sans-serif;
+      text-transform:uppercase;letter-spacing:.5px;transition:.2s;white-space:nowrap}
+    .btn-backup:hover{color:var(--dourado-claro);border-color:rgba(196,154,60,.5);background:rgba(196,154,60,.07)}
+    .btn-restore{border-color:rgba(23,165,137,.25);color:rgba(23,165,137,.6)}
+    .btn-restore:hover{color:#4DDBB8;border-color:rgba(23,165,137,.5);background:rgba(23,165,137,.07)}
     .nav-tabs { display: flex; padding: 0 28px; border-top: 1px solid rgba(196,154,60,.15); gap: 2px; }
     .nav-tab { font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; padding: 10px 18px; border: none; background: transparent; color: rgba(245,240,216,.45); cursor: pointer; position: relative; transition: color .2s; }
     .nav-tab::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 2px; background: var(--dourado); border-radius: 2px 2px 0 0; transform: scaleX(0); transition: transform .2s; }
@@ -457,6 +464,11 @@
       <div id="relogioHeader">—</div>
       <div class="btn-reset-wrap">
         <button onclick="abrirModalReset()">⚠ Resetar Dados</button>
+      </div>
+      <div style="display:flex;gap:4px;margin-top:3px">
+        <button class="btn-backup" onclick="exportBackup()">💾 Backup</button>
+        <button class="btn-backup btn-restore" onclick="triggerImport()">📂 Restaurar</button>
+        <input type="file" id="backupFileInput" accept=".json" style="display:none" onchange="importBackup(this)">
       </div>
     </div>
   </div>
@@ -1367,6 +1379,41 @@ function atualizarRelogio() {
   const dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
   document.getElementById('relogioHeader').textContent =
     `${dias[n.getDay()]} ${n.toLocaleDateString('pt-BR')} ${n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+}
+
+// ── BACKUP & RESTAURAR ────────────────────────────────────────────
+function bkpNotify(msg, ok) {
+  var d = document.createElement('div');
+  d.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:99999;padding:11px 18px;border-radius:9px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;color:#fff;background:' + (ok ? 'linear-gradient(135deg,#1A5560,#17A589)' : 'linear-gradient(135deg,#7B1A1A,#C0392B)') + ';box-shadow:0 6px 20px rgba(0,0,0,.3)';
+  d.textContent = msg; document.body.appendChild(d);
+  setTimeout(function() { d.remove(); }, 2800);
+}
+function exportBackup() {
+  var keys = ['ia\xEA_dre_v2','ia\xEA_dre_cats_v2'], dados = {};
+  keys.forEach(function(k) { var v = localStorage.getItem(k); if (v !== null) try { dados[k] = JSON.parse(v); } catch(e) { dados[k] = v; } });
+  if (!Object.keys(dados).length) { bkpNotify('Nenhum dado para exportar.', false); return; }
+  var json = JSON.stringify({ ferramenta:'DRE Mensal', exportadoEm: new Date().toISOString(), dados }, null, 2);
+  var a = document.createElement('a'); a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
+  a.download = 'iae-backup-dre-' + new Date().toISOString().split('T')[0] + '.json'; a.click();
+  bkpNotify('Backup exportado com sucesso!', true);
+}
+function triggerImport() { document.getElementById('backupFileInput').click(); }
+function importBackup(inp) {
+  var file = inp.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var bkp = JSON.parse(e.target.result);
+      if (!bkp.dados) throw new Error();
+      var d = (bkp.exportadoEm||'').split('T')[0]||'?';
+      if (!confirm('Restaurar backup de "' + (bkp.ferramenta||'?') + '" (' + d + ')?\n\nOs dados atuais serão SUBSTITUÍDOS.')) { inp.value=''; return; }
+      Object.entries(bkp.dados).forEach(function(p) { localStorage.setItem(p[0], JSON.stringify(p[1])); });
+      bkpNotify('Backup restaurado! Recarregando...', true);
+      setTimeout(function() { location.reload(); }, 1000);
+    } catch(err) { bkpNotify('Arquivo inválido ou corrompido.', false); }
+    inp.value = '';
+  };
+  reader.readAsText(file);
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────

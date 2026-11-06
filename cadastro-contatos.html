@@ -240,6 +240,13 @@
       transform:translateY(80px);opacity:0;transition:.35s cubic-bezier(.22,1,.36,1);pointer-events:none}
     .toast.show{transform:translateY(0);opacity:1}
     .toast.error{background:linear-gradient(135deg,#7B0F0F,#C0392B)}
+    .btn-backup{font-size:10px;font-weight:700;padding:5px 11px;border-radius:6px;
+      border:1px solid rgba(196,154,60,.25);background:transparent;
+      color:rgba(228,213,163,.5);cursor:pointer;font-family:'Nunito',sans-serif;
+      transition:.2s;white-space:nowrap}
+    .btn-backup:hover{color:var(--dourado-claro);border-color:rgba(196,154,60,.5);background:rgba(196,154,60,.07)}
+    .btn-restore{border-color:rgba(23,165,137,.25);color:rgba(23,165,137,.6)}
+    .btn-restore:hover{color:#4DDBB8;border-color:rgba(23,165,137,.5);background:rgba(23,165,137,.07)}
 
     /* ── CONFIRM MODAL ───────────────────────── */
     .modal-overlay{position:fixed;inset:0;background:rgba(10,24,15,.75);
@@ -289,6 +296,9 @@
   <div class="nav-tool-badge">🤝 Cadastro de Contatos</div>
   <div class="nav-right">
     <button class="btn-nav" onclick="exportCSV()">Exportar CSV</button>
+    <button class="btn-backup" onclick="exportBackup()">💾 Backup</button>
+    <button class="btn-backup btn-restore" onclick="triggerImport()">📂 Restaurar</button>
+    <input type="file" id="backupFileInput" accept=".json" style="display:none" onchange="importBackup(this)">
     <button class="btn-nav" onclick="window.print()">Imprimir</button>
     <button class="btn-nav teal" onclick="openNew()">+ Novo Cadastro</button>
   </div>
@@ -1054,6 +1064,39 @@ function toggleSec(hd) {
   const chev = hd.querySelector('.sec-chevron');
   const collapsed = body.classList.toggle('collapsed');
   chev.classList.toggle('open', !collapsed);
+}
+
+// ── BACKUP & RESTAURAR ────────────────────────────────────────────
+function exportBackup() {
+  const dados = {};
+  ['iae_contatos_v1'].forEach(k => {
+    const v = localStorage.getItem(k);
+    if (v !== null) try { dados[k] = JSON.parse(v); } catch { dados[k] = v; }
+  });
+  if (!Object.keys(dados).length) { showToast('Nenhum dado para exportar.', true); return; }
+  const json = JSON.stringify({ ferramenta:'Cadastro de Contatos', exportadoEm: new Date().toISOString(), dados }, null, 2);
+  const a = document.createElement('a');
+  a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
+  a.download = 'iae-backup-contatos-' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+  showToast('Backup exportado com sucesso!');
+}
+function triggerImport() { document.getElementById('backupFileInput').click(); }
+function importBackup(inp) {
+  const file = inp.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const bkp = JSON.parse(e.target.result);
+      if (!bkp.dados) throw new Error('formato');
+      const data = (bkp.exportadoEm || '').split('T')[0] || '?';
+      if (!confirm('Restaurar backup de "' + (bkp.ferramenta||'?') + '" exportado em ' + data + '?\n\nOs dados atuais serão substituídos.')) { inp.value=''; return; }
+      Object.entries(bkp.dados).forEach(([k,v]) => localStorage.setItem(k, JSON.stringify(v)));
+      location.reload();
+    } catch { showToast('Arquivo inválido ou corrompido.', true); }
+    inp.value = '';
+  };
+  reader.readAsText(file);
 }
 
 // ── INIT ───────────────────────────────────────────────────────────

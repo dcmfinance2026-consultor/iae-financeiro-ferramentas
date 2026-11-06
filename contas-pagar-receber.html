@@ -55,6 +55,13 @@
       transition:.2s;
     }
     .nav-back:hover { color:var(--dourado-claro); border-color:rgba(196,154,60,.5); }
+    .btn-backup{font-size:10px;font-weight:700;padding:5px 11px;border-radius:6px;
+      border:1px solid rgba(196,154,60,.25);background:transparent;
+      color:rgba(228,213,163,.5);cursor:pointer;font-family:'Nunito',sans-serif;
+      transition:.2s;white-space:nowrap}
+    .btn-backup:hover{color:var(--dourado-claro);border-color:rgba(196,154,60,.5);background:rgba(196,154,60,.07)}
+    .btn-restore{border-color:rgba(23,165,137,.25);color:rgba(23,165,137,.6)}
+    .btn-restore:hover{color:#4DDBB8;border-color:rgba(23,165,137,.5);background:rgba(23,165,137,.07)}
 
     /* ── HERO STRIP ── */
     .hero-strip {
@@ -336,7 +343,12 @@
       <div class="nav-sub">Contas a Pagar & Receber · Conciliação Bancária</div>
     </div>
   </div>
-  <a href="Ferramentas financeiras da IAê.html" class="nav-back">← Voltar</a>
+  <div style="display:flex;align-items:center;gap:6px">
+    <button class="btn-backup" onclick="exportBackup()">💾 Backup</button>
+    <button class="btn-backup btn-restore" onclick="triggerImport()">📂 Restaurar</button>
+    <input type="file" id="backupFileInput" accept=".json" style="display:none" onchange="importBackup(this)">
+    <a href="Ferramentas financeiras da IAê.html" class="nav-back">← Voltar</a>
+  </div>
 </nav>
 
 <!-- HERO STRIP -->
@@ -1631,6 +1643,41 @@ function showToast(msg, type='success') {
   populateMonthFilter('month-filter-receber', getReceivables());
   renderDashboard();
 })();
+
+// ── BACKUP & RESTAURAR ────────────────────────────────────────────
+function bkpNotify(msg, ok) {
+  var d = document.createElement('div');
+  d.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:99999;padding:11px 18px;border-radius:9px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;color:#fff;background:' + (ok ? 'linear-gradient(135deg,#1A5560,#17A589)' : 'linear-gradient(135deg,#7B1A1A,#C0392B)') + ';box-shadow:0 6px 20px rgba(0,0,0,.3)';
+  d.textContent = msg; document.body.appendChild(d);
+  setTimeout(function() { d.remove(); }, 2800);
+}
+function exportBackup() {
+  var keys = ['iae_payables','iae_recv','iae_extrato'], dados = {};
+  keys.forEach(function(k) { var v = localStorage.getItem(k); if (v !== null) try { dados[k] = JSON.parse(v); } catch(e) { dados[k] = v; } });
+  if (!Object.keys(dados).length) { bkpNotify('Nenhum dado para exportar.', false); return; }
+  var json = JSON.stringify({ ferramenta:'Contas a Pagar & Receber', exportadoEm: new Date().toISOString(), dados }, null, 2);
+  var a = document.createElement('a'); a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
+  a.download = 'iae-backup-contas-' + new Date().toISOString().split('T')[0] + '.json'; a.click();
+  bkpNotify('Backup exportado com sucesso!', true);
+}
+function triggerImport() { document.getElementById('backupFileInput').click(); }
+function importBackup(inp) {
+  var file = inp.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var bkp = JSON.parse(e.target.result);
+      if (!bkp.dados) throw new Error();
+      var d = (bkp.exportadoEm||'').split('T')[0]||'?';
+      if (!confirm('Restaurar backup de "' + (bkp.ferramenta||'?') + '" (' + d + ')?\n\nOs dados atuais serão SUBSTITUÍDOS.')) { inp.value=''; return; }
+      Object.entries(bkp.dados).forEach(function(p) { localStorage.setItem(p[0], JSON.stringify(p[1])); });
+      bkpNotify('Backup restaurado! Recarregando...', true);
+      setTimeout(function() { location.reload(); }, 1000);
+    } catch(err) { bkpNotify('Arquivo inválido ou corrompido.', false); }
+    inp.value = '';
+  };
+  reader.readAsText(file);
+}
 </script>
 </body>
 </html>

@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IAê Financeiro — Gestão de Projeto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --verde-escuro:#1B3B28; --verde-medio:#2D5A3D; --verde-claro:#4A7A5A;
+      --dourado:#C49A3C; --dourado-claro:#E0B84A;
+      --bege:#E8D5A3; --bege-claro:#F5EDD5; --creme:#FEFBF3;
+      --texto:#2C1A0E; --texto-suave:#7A5C3E;
+      --ok:#27AE60; --ok-bg:rgba(39,174,96,.13);
+      --warn:#E0B84A; --warn-bg:rgba(224,184,74,.12);
+      --bad:#C0392B; --bad-bg:rgba(192,57,43,.12);
+      --sombra:rgba(27,59,40,.12); --sombra-f:rgba(27,59,40,.28);
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Nunito',sans-serif;background:#0E2018;color:var(--texto);min-height:100vh}
+
+    /* ── NAVBAR ──────────────────────────────── */
+    .navbar{display:flex;align-items:center;justify-content:space-between;
+      padding:14px 40px;background:linear-gradient(180deg,#0A180F,#132B1C);
+      border-bottom:1px solid rgba(196,154,60,.18);position:sticky;top:0;z-index:200;gap:14px;flex-wrap:wrap}
+    .nav-brand{display:flex;align-items:center;gap:11px}
+    .nav-emblem{width:40px;height:40px;border-radius:50%;
+      background:radial-gradient(circle at 35% 35%,var(--dourado-claro),var(--dourado));
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Playfair Display',serif;font-size:16px;font-weight:700;
+      color:#0A180F;box-shadow:0 0 14px rgba(196,154,60,.35);flex-shrink:0}
+    .nav-brand-text .brand{font-family:'Playfair Display',serif;color:var(--bege);
+      font-size:17px;font-weight:700;letter-spacing:.06em}
+    .nav-brand-text .brand span{color:var(--dourado)}
+    .nav-brand-text .sub{font-size:10px;color:rgba(228,213,163,.38);letter-spacing:.1em;text-transform:uppercase}
+    .nav-tool-badge{display:flex;align-items:center;gap:7px;background:rgba(196,154,60,.1);
+      border:1px solid rgba(196,154,60,.28);border-radius:20px;padding:5px 14px;
+      font-size:11px;font-weight:700;color:var(--dourado-claro);letter-spacing:.04em}
+    .nav-tool-badge .icon{font-size:14px}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .btn-nav{font-size:11px;font-weight:700;color:rgba(228,213,163,.5);text-decoration:none;
+      border:1px solid rgba(196,154,60,.2);padding:6px 15px;border-radius:20px;
+      cursor:pointer;background:transparent;font-family:'Nunito',sans-serif;transition:.2s}
+    .btn-nav:hover{color:var(--dourado-claro);border-color:rgba(196,154,60,.5)}
+    .btn-nav.primary{background:linear-gradient(135deg,var(--dourado),var(--dourado-claro));
+      color:#0A180F;border-color:transparent}
+    .btn-nav.primary:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(196,154,60,.35)}
+
+    /* ── HERO STRIP ──────────────────────────── */
+    .hero-strip{background:linear-gradient(135deg,#0A180F 0%,#132B1C 55%,#1B3B28 100%);
+      padding:22px 40px 18px;border-bottom:1px solid rgba(196,154,60,.1)}
+    .hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .hero-title{font-family:'Playfair Display',serif;color:var(--bege);font-size:22px;font-weight:700;margin-bottom:4px}
+    .hero-sub{color:rgba(228,213,163,.45);font-size:12px}
+    .proj-name-display{font-family:'Playfair Display',serif;font-size:15px;
+      color:var(--dourado-claro);font-style:italic;margin-top:5px;min-height:22px}
+
+    /* KPI BAR */
+    .kpi-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:16px}
+    .kpi{background:rgba(255,255,255,.04);border:1px solid rgba(196,154,60,.12);
+      border-radius:10px;padding:12px 15px;position:relative;overflow:hidden}
+    .kpi::after{content:'';position:absolute;top:-12px;right:-12px;width:40px;height:40px;
+      border-radius:50%;background:radial-gradient(circle,rgba(196,154,60,.07),transparent 70%)}
+    .kpi-label{font-size:9px;color:rgba(228,213,163,.4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+    .kpi-val{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--bege)}
+    .kpi-val.ok{color:#90EE90}.kpi-val.warn{color:var(--dourado-claro)}.kpi-val.bad{color:#F08080}
+    .kpi-hint{font-size:9px;color:rgba(228,213,163,.3);margin-top:2px}
+
+    /* ── WIZARD STEPS ────────────────────────── */
+    .steps-nav{display:flex;background:#0A180F;padding:0 40px;
+      border-bottom:1px solid rgba(196,154,60,.12);overflow-x:auto}
+    .steps-nav::-webkit-scrollbar{height:2px}
+    .steps-nav::-webkit-scrollbar-thumb{background:rgba(196,154,60,.3)}
+    .step-btn{display:flex;align-items:center;gap:8px;padding:13px 18px;
+      background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;
+      font-size:11px;font-weight:700;color:rgba(228,213,163,.35);
+      border-bottom:2px solid transparent;margin-bottom:-1px;transition:.2s;white-space:nowrap}
+    .step-num{width:22px;height:22px;border-radius:50%;
+      background:rgba(196,154,60,.1);border:1px solid rgba(196,154,60,.2);
+      display:flex;align-items:center;justify-content:center;
+      font-size:10px;font-weight:800;color:rgba(228,213,163,.35);flex-shrink:0;transition:.2s}
+    .step-btn.active{color:var(--dourado-claro);border-bottom-color:var(--dourado)}
+    .step-btn.active .step-num{background:var(--dourado);color:#0A180F;border-color:var(--dourado)}
+    .step-btn.done{color:rgba(228,213,163,.6)}
+    .step-btn.done .step-num{background:rgba(39,174,96,.2);color:#90EE90;border-color:rgba(39,174,96,.35)}
+
+    /* ── MAIN AREA ───────────────────────────── */
+    .main{padding:24px 40px 60px;max-width:1200px;margin:0 auto}
+    .step-panel{display:none}.step-panel.active{display:block}
+
+    /* ── CARD ────────────────────────────────── */
+    .card{background:linear-gradient(135deg,#132B1C,#1B3B28);
+      border:1px solid rgba(196,154,60,.14);border-radius:14px;
+      padding:22px 26px;margin-bottom:16px}
+    .card-hd{display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:18px;flex-wrap:wrap;gap:8px}
+    .card-title{font-family:'Playfair Display',serif;color:var(--dourado-claro);
+      font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+    .card-desc{font-size:11px;color:rgba(228,213,163,.38);margin-top:3px}
+    .section-hd{display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:13px;flex-wrap:wrap;gap:8px}
+    .section-title{font-family:'Playfair Display',serif;color:var(--bege);
+      font-size:15px;font-weight:600;margin-bottom:2px}
+    .section-sub{font-size:11px;color:rgba(228,213,163,.35)}
+
+    /* ── FORMS ───────────────────────────────── */
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:13px}
+    .form-grid.cols2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+    .fg{display:flex;flex-direction:column;gap:4px}
+    .fg.full{grid-column:1/-1}
+    .fg.span2{grid-column:span 2}
+    label{font-size:10px;color:rgba(228,213,163,.5);letter-spacing:.07em;
+      font-weight:700;text-transform:uppercase}
+    input[type=text],input[type=number],input[type=date],select,textarea{
+      background:rgba(255,255,255,.04);border:1px solid rgba(196,154,60,.18);
+      border-radius:8px;padding:9px 12px;color:var(--bege);
+      font-family:'Nunito',sans-serif;font-size:13px;transition:.18s;outline:none;width:100%}
+    input:focus,select:focus,textarea:focus{
+      border-color:rgba(196,154,60,.45);background:rgba(255,255,255,.07);
+      box-shadow:0 0 0 3px rgba(196,154,60,.07)}
+    input::placeholder{color:rgba(228,213,163,.18)}
+    select option{background:#1B3B28;color:var(--bege)}
+    textarea{resize:vertical;min-height:72px}
+
+    /* ── BUTTONS ─────────────────────────────── */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;
+      border-radius:8px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;
+      font-size:12px;font-weight:700;transition:.18s;white-space:nowrap}
+    .btn-primary{background:linear-gradient(135deg,var(--dourado),var(--dourado-claro));
+      color:#0A180F;box-shadow:0 4px 12px rgba(196,154,60,.2)}
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(196,154,60,.38)}
+    .btn-ghost{background:transparent;color:rgba(228,213,163,.6);
+      border:1px solid rgba(196,154,60,.2)}
+    .btn-ghost:hover{color:var(--dourado-claro);border-color:rgba(196,154,60,.45)}
+    .btn-ok{background:rgba(39,174,96,.14);color:#90EE90;border:1px solid rgba(39,174,96,.28)}
+    .btn-ok:hover{background:rgba(39,174,96,.22)}
+    .btn-danger{background:rgba(192,57,43,.13);color:#F08080;border:1px solid rgba(192,57,43,.28)}
+    .btn-danger:hover{background:rgba(192,57,43,.22)}
+    .btn-sm{padding:5px 11px;font-size:11px}
+    .btn-xs{padding:3px 9px;font-size:10px}
+
+    /* ── STEP NAV FOOTER ─────────────────────── */
+    .step-footer{display:flex;align-items:center;justify-content:space-between;
+      margin-top:20px;padding-top:16px;border-top:1px solid rgba(196,154,60,.09);flex-wrap:wrap;gap:10px}
+    .step-footer .left{display:flex;align-items:center;gap:8px}
+    .step-footer .right{display:flex;align-items:center;gap:8px}
+    .progress-dots{display:flex;gap:6px;align-items:center}
+    .dot{width:7px;height:7px;border-radius:50%;background:rgba(196,154,60,.18);transition:.2s}
+    .dot.active{background:var(--dourado);width:22px;border-radius:4px}
+    .dot.done{background:rgba(39,174,96,.5)}
+
+    /* ── TYPE SELECTOR CARDS ─────────────────── */
+    .type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:14px}
+    .type-card{background:rgba(255,255,255,.03);border:1px solid rgba(196,154,60,.14);
+      border-radius:12px;padding:14px;cursor:pointer;transition:.18s;text-align:center}
+    .type-card:hover{background:rgba(196,154,60,.07);border-color:rgba(196,154,60,.3)}
+    .type-card.selected{background:rgba(196,154,60,.1);border-color:var(--dourado);
+      box-shadow:0 0 0 2px rgba(196,154,60,.18)}
+    .type-icon{font-size:28px;margin-bottom:7px}
+    .type-name{font-size:12px;font-weight:700;color:rgba(228,213,163,.8)}
+    .type-desc{font-size:10px;color:rgba(228,213,163,.35);margin-top:2px}
+
+    /* ── RESOURCE LIST ───────────────────────── */
+    .resource-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+    .resource-row{display:grid;grid-template-columns:1fr 90px 120px 110px 32px;
+      gap:8px;align-items:center;background:rgba(255,255,255,.03);
+      border:1px solid rgba(196,154,60,.1);border-radius:8px;padding:9px 12px}
+    .resource-row input{padding:5px 8px;font-size:12px}
+    .resource-row .res-total{font-size:13px;font-weight:700;color:var(--dourado-claro);
+      text-align:right;min-width:90px}
+    .btn-remove{width:28px;height:28px;border-radius:6px;background:rgba(192,57,43,.12);
+      color:#F08080;border:1px solid rgba(192,57,43,.22);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;font-size:14px;
+      flex-shrink:0;transition:.18s}
+    .btn-remove:hover{background:rgba(192,57,43,.25)}
+    .col-hd{display:grid;grid-template-columns:1fr 90px 120px 110px 32px;
+      gap:8px;padding:0 12px 6px;font-size:9px;color:rgba(228,213,163,.35);
+      letter-spacing:.07em;text-transform:uppercase;font-weight:700}
+    .col-hd span:last-child{opacity:0}
+
+    /* ── STAGE LIST ──────────────────────────── */
+    .stage-list{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+    .stage-card{background:rgba(255,255,255,.03);border:1px solid rgba(196,154,60,.12);
+      border-radius:10px;overflow:hidden}
+    .stage-header{display:flex;align-items:center;gap:10px;padding:11px 14px;
+      background:rgba(0,0,0,.1);cursor:pointer;transition:.18s}
+    .stage-header:hover{background:rgba(196,154,60,.05)}
+    .stage-num-badge{width:26px;height:26px;border-radius:50%;background:rgba(196,154,60,.15);
+      border:1px solid rgba(196,154,60,.28);display:flex;align-items:center;
+      justify-content:center;font-size:11px;font-weight:800;
+      color:var(--dourado-claro);flex-shrink:0}
+    .stage-title-txt{font-size:13px;font-weight:700;color:rgba(228,213,163,.85);flex:1}
+    .stage-meta{display:flex;gap:10px;align-items:center}
+    .stage-tag{font-size:10px;padding:2px 9px;border-radius:20px;font-weight:700}
+    .stage-tag.andamento{background:rgba(52,152,219,.15);color:#87CEEB;border:1px solid rgba(52,152,219,.25)}
+    .stage-tag.concluida{background:rgba(39,174,96,.15);color:#90EE90;border:1px solid rgba(39,174,96,.25)}
+    .stage-tag.pendente{background:rgba(196,154,60,.12);color:var(--dourado-claro);border:1px solid rgba(196,154,60,.22)}
+    .stage-tag.atrasada{background:rgba(192,57,43,.13);color:#F08080;border:1px solid rgba(192,57,43,.25)}
+    .stage-body{padding:14px;border-top:1px solid rgba(196,154,60,.08);display:none}
+    .stage-body.open{display:block}
+    .stage-chevron{font-size:11px;color:rgba(228,213,163,.3);transition:.2s}
+    .stage-chevron.open{transform:rotate(180deg)}
+    .stage-footer{display:flex;align-items:center;justify-content:space-between;
+      padding:9px 14px;border-top:1px solid rgba(196,154,60,.06);background:rgba(0,0,0,.05)}
+    .stage-total-lbl{font-size:10px;color:rgba(228,213,163,.4)}
+    .stage-total-val{font-size:14px;font-weight:700;color:var(--dourado-claro);
+      font-family:'Playfair Display',serif}
+
+    /* ── COST TABLE ──────────────────────────── */
+    .cost-table-wrap{background:rgba(0,0,0,.1);border:1px solid rgba(196,154,60,.1);
+      border-radius:10px;overflow:hidden;margin-bottom:12px}
+    .cost-table{width:100%;border-collapse:collapse}
+    .cost-table thead th{padding:9px 12px;font-size:9px;color:rgba(228,213,163,.38);
+      text-transform:uppercase;letter-spacing:.08em;text-align:left;font-weight:700;
+      border-bottom:1px solid rgba(196,154,60,.09)}
+    .cost-table thead th:last-child{text-align:right}
+    .cost-table tbody td{padding:9px 12px;font-size:12px;color:rgba(228,213,163,.75);
+      border-bottom:1px solid rgba(196,154,60,.06);vertical-align:middle}
+    .cost-table tbody td input{padding:5px 8px;font-size:12px}
+    .cost-table tbody td:last-child{text-align:right;font-weight:700;color:var(--dourado-claro)}
+    .cost-table tbody tr:last-child td{border-bottom:none}
+    .cost-table tfoot td{padding:10px 12px;font-size:13px;font-weight:800;
+      color:var(--dourado-claro);font-family:'Playfair Display',serif}
+    .cost-table tfoot td:last-child{text-align:right}
+    .cost-cat-row td{background:rgba(196,154,60,.04);font-size:10px !important;
+      color:rgba(228,213,163,.42) !important;font-weight:700 !important;
+      text-transform:uppercase;letter-spacing:.07em}
+
+    /* ── REVENUE INPUT ───────────────────────── */
+    .revenue-type-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+    .rev-type-btn{padding:7px 15px;border-radius:20px;border:1px solid rgba(196,154,60,.2);
+      background:transparent;color:rgba(228,213,163,.45);font-family:'Nunito',sans-serif;
+      font-size:11px;font-weight:700;cursor:pointer;transition:.18s}
+    .rev-type-btn.active{background:rgba(196,154,60,.12);color:var(--dourado-claro);
+      border-color:rgba(196,154,60,.4)}
+
+    /* ── VIABILITY DASHBOARD ─────────────────── */
+    .viab-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));
+      gap:12px;margin-bottom:20px}
+    .viab-kpi{background:linear-gradient(135deg,#132B1C,#1B3B28);
+      border:1px solid rgba(196,154,60,.14);border-radius:13px;
+      padding:16px 18px;position:relative;overflow:hidden;text-align:center}
+    .viab-kpi::before{content:'';position:absolute;inset:0;
+      border-radius:13px;opacity:0;transition:.3s}
+    .viab-kpi.ok::before{background:rgba(39,174,96,.05);opacity:1}
+    .viab-kpi.warn::before{background:rgba(224,184,74,.05);opacity:1}
+    .viab-kpi.bad::before{background:rgba(192,57,43,.05);opacity:1}
+    .viab-kpi .vk-icon{font-size:22px;margin-bottom:6px}
+    .viab-kpi .vk-label{font-size:9px;color:rgba(228,213,163,.38);
+      letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+    .viab-kpi .vk-val{font-family:'Playfair Display',serif;font-size:22px;
+      font-weight:700;color:var(--bege)}
+    .viab-kpi.ok .vk-val{color:#90EE90}
+    .viab-kpi.warn .vk-val{color:var(--dourado-claro)}
+    .viab-kpi.bad .vk-val{color:#F08080}
+    .viab-kpi .vk-sub{font-size:10px;color:rgba(228,213,163,.3);margin-top:3px}
+
+    /* Semáforo */
+    .semaforo-wrap{display:flex;align-items:center;gap:20px;
+      background:linear-gradient(135deg,#0F2419,#132B1C);
+      border:1px solid rgba(196,154,60,.14);border-radius:14px;
+      padding:20px 28px;margin-bottom:20px;flex-wrap:wrap}
+    .semaforo-lights{display:flex;flex-direction:column;gap:10px}
+    .light{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.07);
+      border:2px solid rgba(255,255,255,.1);transition:.4s}
+    .light.active-green{background:radial-gradient(circle at 35% 35%,#4AE880,#27AE60);
+      box-shadow:0 0 18px rgba(39,174,96,.6);border-color:rgba(39,174,96,.4)}
+    .light.active-yellow{background:radial-gradient(circle at 35% 35%,#FFE066,var(--dourado));
+      box-shadow:0 0 18px rgba(224,184,74,.6);border-color:rgba(224,184,74,.4)}
+    .light.active-red{background:radial-gradient(circle at 35% 35%,#FF6B6B,#C0392B);
+      box-shadow:0 0 18px rgba(192,57,43,.6);border-color:rgba(192,57,43,.4)}
+    .semaforo-text .sema-titulo{font-family:'Playfair Display',serif;
+      font-size:20px;font-weight:700;color:var(--bege);margin-bottom:5px}
+    .semaforo-text .sema-desc{font-size:13px;color:rgba(228,213,163,.55);line-height:1.6}
+    .semaforo-text .sema-recom{margin-top:10px;font-size:12px;
+      color:rgba(228,213,163,.45);font-style:italic}
+
+    /* Chart wrapper */
+    .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+    @media(max-width:720px){.charts-grid{grid-template-columns:1fr}}
+    .chart-card{background:linear-gradient(135deg,#0F2419,#132B1C);
+      border:1px solid rgba(196,154,60,.12);border-radius:14px;padding:18px}
+    .chart-title{font-family:'Playfair Display',serif;color:rgba(228,213,163,.7);
+      font-size:13px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+
+    /* Breakdown table */
+    .breakdown-table{width:100%;border-collapse:collapse}
+    .breakdown-table tr{border-bottom:1px solid rgba(196,154,60,.07)}
+    .breakdown-table tr:last-child{border-bottom:none}
+    .breakdown-table td{padding:8px 12px;font-size:12px;color:rgba(228,213,163,.7)}
+    .breakdown-table td:last-child{text-align:right;font-weight:700;color:var(--bege)}
+    .breakdown-table .cat-row-bd td{font-size:10px;color:rgba(228,213,163,.35);
+      text-transform:uppercase;letter-spacing:.07em;padding-top:12px}
+
+    /* Print */
+    @media print{
+      .navbar,.steps-nav,.step-footer,.btn,.btn-remove,.btn-nav{display:none!important}
+      body{background:#fff;color:#000}
+      .card,.viab-kpi,.chart-card,.semaforo-wrap{border:1px solid #ccc!important;
+        background:#fff!important;color:#000!important}
+      .kpi-val,.vk-val,.semaforo-text .sema-titulo{color:#000!important}
+    }
+
+    @media(max-width:600px){
+      .navbar,.main,.hero-strip,.steps-nav{padding-left:18px;padding-right:18px}
+      .resource-row{grid-template-columns:1fr 70px 90px 80px 28px}
+      .col-hd{grid-template-columns:1fr 70px 90px 80px 28px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ NAVBAR ══════════ -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-emblem">IAê</div>
+    <div class="nav-brand-text">
+      <div class="brand">IAê <span>Financeiro</span></div>
+      <div class="sub">Consultoria &amp; Gestão</div>
+    </div>
+  </div>
+  <div class="nav-tool-badge">
+    <span class="icon">🏗️</span> Gestão de Projeto
+  </div>
+  <div class="nav-right">
+    <button class="btn-nav" onclick="resetProject()">Novo Projeto</button>
+    <button class="btn-nav" onclick="window.print()">Imprimir</button>
+    <button class="btn-nav primary" onclick="goToStep(6)">Ver Viabilidade</button>
+  </div>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<div class="hero-strip">
+  <div class="hero-top">
+    <div>
+      <div class="hero-title">Gestão de Projeto &amp; Rentabilidade</div>
+      <div class="hero-sub">Configure seu projeto, mapeie recursos e calcule a viabilidade financeira</div>
+      <div class="proj-name-display" id="projNameDisplay">— Nenhum projeto configurado —</div>
+    </div>
+  </div>
+  <div class="kpi-bar">
+    <div class="kpi"><div class="kpi-label">Investimento Total</div><div class="kpi-val" id="kpiInvest">R$ 0</div><div class="kpi-hint">recursos + custos + despesas</div></div>
+    <div class="kpi"><div class="kpi-label">Receita Esperada</div><div class="kpi-val ok" id="kpiReceita">R$ 0</div><div class="kpi-hint">projeção de receita</div></div>
+    <div class="kpi"><div class="kpi-label">Lucro Líquido</div><div class="kpi-val" id="kpiLucro">R$ 0</div><div class="kpi-hint">receita − investimento</div></div>
+    <div class="kpi"><div class="kpi-label">ROI</div><div class="kpi-val" id="kpiRoi">0%</div><div class="kpi-hint">retorno sobre investimento</div></div>
+    <div class="kpi"><div class="kpi-label">Margem Líquida</div><div class="kpi-val" id="kpiMargem">0%</div><div class="kpi-hint">lucro / receita</div></div>
+    <div class="kpi"><div class="kpi-label">Duração</div><div class="kpi-val" id="kpiDuracao">—</div><div class="kpi-hint">prazo estimado</div></div>
+  </div>
+</div>
+
+<!-- ══════════ STEP NAV ══════════ -->
+<div class="steps-nav">
+  <button class="step-btn active" id="sBtn1" onclick="goToStep(1)">
+    <span class="step-num" id="sNum1">1</span> Projeto
+  </button>
+  <button class="step-btn" id="sBtn2" onclick="goToStep(2)">
+    <span class="step-num" id="sNum2">2</span> Recursos
+  </button>
+  <button class="step-btn" id="sBtn3" onclick="goToStep(3)">
+    <span class="step-num" id="sNum3">3</span> Etapas
+  </button>
+  <button class="step-btn" id="sBtn4" onclick="goToStep(4)">
+    <span class="step-num" id="sNum4">4</span> Custos &amp; Despesas
+  </button>
+  <button class="step-btn" id="sBtn5" onclick="goToStep(5)">
+    <span class="step-num" id="sNum5">5</span> Receita
+  </button>
+  <button class="step-btn" id="sBtn6" onclick="goToStep(6)">
+    <span class="step-num" id="sNum6">6</span> Viabilidade
+  </button>
+</div>
+
+<!-- ══════════ MAIN ══════════ -->
+<div class="main">
+
+<!-- ▸▸ STEP 1: PROJETO ◂◂ -->
+<div class="step-panel active" id="sp1">
+  <div class="card">
+    <div class="card-hd">
+      <div>
+        <div class="card-title">🏗️ Identificação do Projeto</div>
+        <div class="card-desc">Defina o título, tipo e características gerais do projeto</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:20px">
+      <label style="display:block;margin-bottom:8px">Tipo do Projeto</label>
+      <div class="type-grid" id="typeGrid">
+        <div class="type-card selected" onclick="selectType(this,'Flipping Imobiliário')" data-type="Flipping Imobiliário">
+          <div class="type-icon">🏠</div>
+          <div class="type-name">Flipping Imobiliário</div>
+          <div class="type-desc">Compra, reforma e venda</div>
+        </div>
+        <div class="type-card" onclick="selectType(this,'Construção')" data-type="Construção">
+          <div class="type-icon">🧱</div>
+          <div class="type-name">Construção</div>
+          <div class="type-desc">Obra nova ou expansão</div>
+        </div>
+        <div class="type-card" onclick="selectType(this,'Reforma Comercial')" data-type="Reforma Comercial">
+          <div class="type-icon">🛠️</div>
+          <div class="type-name">Reforma Comercial</div>
+          <div class="type-desc">Renovação de espaço</div>
+        </div>
+        <div class="type-card" onclick="selectType(this,'Evento')" data-type="Evento">
+          <div class="type-icon">🎯</div>
+          <div class="type-name">Evento</div>
+          <div class="type-desc">Organização e realização</div>
+        </div>
+        <div class="type-card" onclick="selectType(this,'Produto / Serviço')" data-type="Produto / Serviço">
+          <div class="type-icon">📦</div>
+          <div class="type-name">Produto / Serviço</div>
+          <div class="type-desc">Lançamento ou expansão</div>
+        </div>
+        <div class="type-card" onclick="selectType(this,'Tecnologia')" data-type="Tecnologia">
+          <div class="type-icon">💻</div>
+          <div class="type-name">Tecnologia</div>
+          <div class="type-desc">Software ou plataforma</div>
+        </div>
+        <div class="type-card" onclick="selectType(this,'Agronegócio')" data-type="Agronegócio">
+          <div class="type-icon">🌾</div>
+          <div class="type-name">Agronegócio</div>
+          <div class="type-desc">Produção rural / safra</div>
+        </div>
+        <div class="type-card" onclick="selectType(this,'Personalizado')" data-type="Personalizado">
+          <div class="type-icon">⚙️</div>
+          <div class="type-name">Personalizado</div>
+          <div class="type-desc">Outro tipo de projeto</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-grid cols2">
+      <div class="fg full">
+        <label>Título do Projeto</label>
+        <input type="text" id="projTitulo" placeholder="Ex: Reforma e Venda — Apto 302 Vila Madalena" oninput="updateProjName()">
+      </div>
+      <div class="fg full">
+        <label>Objetivo / Natureza do Projeto</label>
+        <textarea id="projObjetivo" placeholder="Descreva o objetivo principal e a natureza do projeto..."></textarea>
+      </div>
+      <div class="fg">
+        <label>Responsável / Gestor</label>
+        <input type="text" id="projResponsavel" placeholder="Nome do responsável">
+      </div>
+      <div class="fg">
+        <label>Data de Início</label>
+        <input type="date" id="projInicio">
+      </div>
+      <div class="fg">
+        <label>Duração Estimada</label>
+        <select id="projDuracao" onchange="updateKpis()">
+          <option value="">Selecione...</option>
+          <option value="1 semana">1 semana</option>
+          <option value="2 semanas">2 semanas</option>
+          <option value="1 mês">1 mês</option>
+          <option value="2 meses">2 meses</option>
+          <option value="3 meses">3 meses</option>
+          <option value="6 meses">6 meses</option>
+          <option value="9 meses">9 meses</option>
+          <option value="12 meses">12 meses</option>
+          <option value="18 meses">18 meses</option>
+          <option value="24 meses">24 meses</option>
+          <option value="Mais de 24 meses">Mais de 24 meses</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Meta de Rentabilidade (%)</label>
+        <input type="number" id="projMeta" placeholder="Ex: 25" min="0" step="0.1" oninput="updateKpis()">
+      </div>
+    </div>
+  </div>
+
+  <div class="step-footer">
+    <div class="left">
+      <div class="progress-dots">
+        <div class="dot active" id="dot1"></div>
+        <div class="dot" id="dot2"></div>
+        <div class="dot" id="dot3"></div>
+        <div class="dot" id="dot4"></div>
+        <div class="dot" id="dot5"></div>
+        <div class="dot" id="dot6"></div>
+      </div>
+    </div>
+    <div class="right">
+      <button class="btn btn-primary" onclick="goToStep(2)">Próximo: Recursos →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ▸▸ STEP 2: RECURSOS ◂◂ -->
+<div class="step-panel" id="sp2">
+  <div class="card">
+    <div class="card-hd">
+      <div>
+        <div class="card-title">💰 Recursos Principais do Projeto</div>
+        <div class="card-desc">Capital, mão de obra, materiais e demais recursos necessários para viabilizar o projeto</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addResource()">+ Adicionar Recurso</button>
+    </div>
+
+    <div class="col-hd">
+      <span>Recurso / Descrição</span>
+      <span>Qtd</span>
+      <span>Categoria</span>
+      <span style="text-align:right">Valor (R$)</span>
+      <span>–</span>
+    </div>
+    <div class="resource-list" id="resourceList"></div>
+
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:16px;padding:10px 12px;
+      background:rgba(0,0,0,.1);border-radius:8px">
+      <span style="font-size:11px;color:rgba(228,213,163,.4)">Total de Recursos</span>
+      <span class="stage-total-val" id="totalRecursos">R$ 0,00</span>
+    </div>
+
+    <div style="margin-top:16px;padding:14px;background:rgba(196,154,60,.05);
+      border:1px dashed rgba(196,154,60,.2);border-radius:10px">
+      <div style="font-size:11px;color:rgba(228,213,163,.45);margin-bottom:8px;font-weight:700;
+        text-transform:uppercase;letter-spacing:.07em">💡 Sugestões rápidas</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap" id="suggestionsRow"></div>
+    </div>
+  </div>
+
+  <div class="step-footer">
+    <div class="left"><button class="btn btn-ghost" onclick="goToStep(1)">← Anterior</button></div>
+    <div class="right">
+      <div class="progress-dots">
+        <div class="dot done" id="dot1b"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+      <button class="btn btn-primary" onclick="goToStep(3)">Próximo: Etapas →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ▸▸ STEP 3: ETAPAS ◂◂ -->
+<div class="step-panel" id="sp3">
+  <div class="card">
+    <div class="card-hd">
+      <div>
+        <div class="card-title">🗂️ Etapas do Projeto</div>
+        <div class="card-desc">Divida o projeto em fases claras com prazo e orçamento por etapa</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addStage()">+ Nova Etapa</button>
+    </div>
+    <div class="stage-list" id="stageList"></div>
+    <div id="stagesEmpty" style="text-align:center;padding:30px;color:rgba(228,213,163,.25);font-size:13px">
+      Nenhuma etapa adicionada. Clique em "+ Nova Etapa" para começar.
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:16px;padding:10px 12px;
+      background:rgba(0,0,0,.1);border-radius:8px;margin-top:8px">
+      <span style="font-size:11px;color:rgba(228,213,163,.4)">Orçamento Total das Etapas</span>
+      <span class="stage-total-val" id="totalEtapas">R$ 0,00</span>
+    </div>
+  </div>
+
+  <div class="step-footer">
+    <div class="left"><button class="btn btn-ghost" onclick="goToStep(2)">← Anterior</button></div>
+    <div class="right">
+      <div class="progress-dots">
+        <div class="dot done"></div><div class="dot done"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+      <button class="btn btn-primary" onclick="goToStep(4)">Próximo: Custos →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ▸▸ STEP 4: CUSTOS E DESPESAS ◂◂ -->
+<div class="step-panel" id="sp4">
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-hd">
+      <div>
+        <div class="card-title">📋 Custos Diretos</div>
+        <div class="card-desc">Custos diretamente ligados à execução do projeto</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addCost('direct')">+ Adicionar</button>
+    </div>
+    <div class="cost-table-wrap">
+      <table class="cost-table">
+        <thead><tr>
+          <th>Descrição</th><th>Categoria</th><th>Etapa</th><th style="text-align:right">Valor (R$)</th>
+        </tr></thead>
+        <tbody id="directCostBody"></tbody>
+        <tfoot><tr>
+          <td colspan="3">Total Custos Diretos</td>
+          <td id="totalDirectCosts">R$ 0,00</td>
+        </tr></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-hd">
+      <div>
+        <div class="card-title">🏢 Custos Fixos &amp; Overhead</div>
+        <div class="card-desc">Custos que ocorrem independente do andamento do projeto</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addCost('fixed')">+ Adicionar</button>
+    </div>
+    <div class="cost-table-wrap">
+      <table class="cost-table">
+        <thead><tr>
+          <th>Descrição</th><th>Frequência</th><th>Qtd meses</th><th style="text-align:right">Valor (R$)</th>
+        </tr></thead>
+        <tbody id="fixedCostBody"></tbody>
+        <tfoot><tr>
+          <td colspan="3">Total Custos Fixos</td>
+          <td id="totalFixedCosts">R$ 0,00</td>
+        </tr></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div>
+        <div class="card-title">💸 Despesas &amp; Impostos</div>
+        <div class="card-desc">Despesas administrativas, impostos, taxas e comissões</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addCost('expense')">+ Adicionar</button>
+    </div>
+    <div class="cost-table-wrap">
+      <table class="cost-table">
+        <thead><tr>
+          <th>Descrição</th><th>Tipo</th><th>Base de Cálculo</th><th style="text-align:right">Valor (R$)</th>
+        </tr></thead>
+        <tbody id="expenseCostBody"></tbody>
+        <tfoot><tr>
+          <td colspan="3">Total Despesas</td>
+          <td id="totalExpenses">R$ 0,00</td>
+        </tr></tfoot>
+      </table>
+    </div>
+
+    <div style="margin-top:14px;display:flex;justify-content:flex-end;align-items:center;gap:16px;
+      padding:12px 14px;background:rgba(196,154,60,.07);border:1px solid rgba(196,154,60,.18);
+      border-radius:9px">
+      <span style="font-size:12px;color:rgba(228,213,163,.55);font-weight:700">TOTAL GERAL DE CUSTOS E DESPESAS</span>
+      <span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--dourado-claro)" id="totalAllCosts">R$ 0,00</span>
+    </div>
+  </div>
+
+  <div class="step-footer">
+    <div class="left"><button class="btn btn-ghost" onclick="goToStep(3)">← Anterior</button></div>
+    <div class="right">
+      <div class="progress-dots">
+        <div class="dot done"></div><div class="dot done"></div><div class="dot done"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div><div class="dot"></div>
+      </div>
+      <button class="btn btn-primary" onclick="goToStep(5)">Próximo: Receita →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ▸▸ STEP 5: RECEITA ◂◂ -->
+<div class="step-panel" id="sp5">
+  <div class="card">
+    <div class="card-hd">
+      <div>
+        <div class="card-title">📈 Receita Projetada</div>
+        <div class="card-desc">Configure as fontes de receita e projeções do projeto</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <label style="display:block;margin-bottom:8px">Modelo de Receita</label>
+      <div class="revenue-type-row">
+        <button class="rev-type-btn active" onclick="setRevType(this,'unica')" data-rt="unica">Venda Única</button>
+        <button class="rev-type-btn" onclick="setRevType(this,'parcelas')" data-rt="parcelas">Parcelada</button>
+        <button class="rev-type-btn" onclick="setRevType(this,'recorrente')" data-rt="recorrente">Recorrente</button>
+        <button class="rev-type-btn" onclick="setRevType(this,'multiplas')" data-rt="multiplas">Múltiplas Fontes</button>
+      </div>
+    </div>
+
+    <!-- Venda Única -->
+    <div id="revUnica">
+      <div class="form-grid cols2">
+        <div class="fg">
+          <label>Valor de Venda / Receita Total (R$)</label>
+          <input type="number" id="revValorTotal" placeholder="0,00" min="0" step="0.01" oninput="updateKpis()">
+        </div>
+        <div class="fg">
+          <label>Previsão de Recebimento</label>
+          <select id="revPrevisao">
+            <option value="">Selecione...</option>
+            <option>No encerramento do projeto</option>
+            <option>30 dias após encerramento</option>
+            <option>60 dias após encerramento</option>
+            <option>90 dias após encerramento</option>
+            <option>Conforme contrato</option>
+          </select>
+        </div>
+        <div class="fg full">
+          <label>Observações sobre a receita</label>
+          <textarea id="revObs" placeholder="Condições de venda, negociações previstas, descontos, etc."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parcelada -->
+    <div id="revParcelas" style="display:none">
+      <div class="form-grid cols2">
+        <div class="fg">
+          <label>Valor Total da Venda (R$)</label>
+          <input type="number" id="revParcelaTotal" placeholder="0,00" min="0" step="0.01" oninput="updateRevParcelas()">
+        </div>
+        <div class="fg">
+          <label>Número de Parcelas</label>
+          <input type="number" id="revNumParcelas" placeholder="Ex: 12" min="1" max="360" oninput="updateRevParcelas()">
+        </div>
+        <div class="fg">
+          <label>Valor por Parcela (R$)</label>
+          <input type="number" id="revValorParcela" placeholder="Calculado automaticamente" readonly
+            style="background:rgba(196,154,60,.07);cursor:not-allowed">
+        </div>
+        <div class="fg">
+          <label>Entrada (%)</label>
+          <input type="number" id="revEntrada" placeholder="Ex: 20" min="0" max="100" step="0.1" oninput="updateRevParcelas()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Recorrente -->
+    <div id="revRecorrente" style="display:none">
+      <div class="form-grid cols2">
+        <div class="fg">
+          <label>Receita Mensal (R$)</label>
+          <input type="number" id="revMensal" placeholder="0,00" min="0" step="0.01" oninput="updateKpis()">
+        </div>
+        <div class="fg">
+          <label>Duração da Receita (meses)</label>
+          <input type="number" id="revMeses" placeholder="Ex: 12" min="1" oninput="updateKpis()">
+        </div>
+        <div class="fg">
+          <label>Receita Total Projetada (R$)</label>
+          <input type="number" id="revRecorrenteTotal" readonly placeholder="Calculado automaticamente"
+            style="background:rgba(196,154,60,.07);cursor:not-allowed">
+        </div>
+        <div class="fg">
+          <label>Crescimento Mensal (%)</label>
+          <input type="number" id="revCrescimento" placeholder="Ex: 2 (opcional)" min="0" step="0.1">
+        </div>
+      </div>
+    </div>
+
+    <!-- Múltiplas Fontes -->
+    <div id="revMultiplas" style="display:none">
+      <div style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:12px;color:rgba(228,213,163,.45)">Adicione cada fonte de receita separadamente</div>
+        <button class="btn btn-primary btn-sm" onclick="addRevSource()">+ Adicionar Fonte</button>
+      </div>
+      <div class="cost-table-wrap">
+        <table class="cost-table">
+          <thead><tr>
+            <th>Fonte de Receita</th><th>Tipo</th><th>Prazo</th><th style="text-align:right">Valor (R$)</th>
+          </tr></thead>
+          <tbody id="revSourceBody"></tbody>
+          <tfoot><tr>
+            <td colspan="3">Total de Receitas</td>
+            <td id="totalRevSources">R$ 0,00</td>
+          </tr></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Resumo receita -->
+    <div style="margin-top:16px;display:flex;justify-content:flex-end;align-items:center;gap:16px;
+      padding:12px 14px;background:rgba(39,174,96,.08);border:1px solid rgba(39,174,96,.2);
+      border-radius:9px">
+      <span style="font-size:12px;color:rgba(228,213,163,.55);font-weight:700">RECEITA TOTAL PROJETADA</span>
+      <span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#90EE90" id="totalRevDisplay">R$ 0,00</span>
+    </div>
+  </div>
+
+  <div class="step-footer">
+    <div class="left"><button class="btn btn-ghost" onclick="goToStep(4)">← Anterior</button></div>
+    <div class="right">
+      <div class="progress-dots">
+        <div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div>
+      </div>
+      <button class="btn btn-primary" onclick="goToStep(6)">Ver Viabilidade →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ▸▸ STEP 6: VIABILIDADE ◂◂ -->
+<div class="step-panel" id="sp6">
+
+  <!-- Semáforo -->
+  <div class="semaforo-wrap" id="semaforoWrap">
+    <div class="semaforo-lights">
+      <div class="light" id="sLight1"></div>
+      <div class="light" id="sLight2"></div>
+      <div class="light" id="sLight3"></div>
+    </div>
+    <div class="semaforo-text">
+      <div class="sema-titulo" id="semaTitle">Calculando viabilidade...</div>
+      <div class="sema-desc" id="semaDesc">Preencha os dados do projeto para visualizar o resultado.</div>
+      <div class="sema-recom" id="semaRecom"></div>
+    </div>
+  </div>
+
+  <!-- KPI Viabilidade -->
+  <div class="viab-kpi-grid" id="viabKpiGrid">
+    <div class="viab-kpi" id="vkInvest">
+      <div class="vk-icon">💰</div>
+      <div class="vk-label">Investimento Total</div>
+      <div class="vk-val" id="vkInvestVal">R$ 0</div>
+      <div class="vk-sub">capital + custos + despesas</div>
+    </div>
+    <div class="viab-kpi" id="vkReceita">
+      <div class="vk-icon">📈</div>
+      <div class="vk-label">Receita Projetada</div>
+      <div class="vk-val" id="vkReceitaVal">R$ 0</div>
+      <div class="vk-sub">entrada estimada</div>
+    </div>
+    <div class="viab-kpi" id="vkLucro">
+      <div class="vk-icon">✅</div>
+      <div class="vk-label">Lucro Líquido</div>
+      <div class="vk-val" id="vkLucroVal">R$ 0</div>
+      <div class="vk-sub">receita − total investido</div>
+    </div>
+    <div class="viab-kpi" id="vkRoi">
+      <div class="vk-icon">🎯</div>
+      <div class="vk-label">ROI</div>
+      <div class="vk-val" id="vkRoiVal">0%</div>
+      <div class="vk-sub">retorno sobre investimento</div>
+    </div>
+    <div class="viab-kpi" id="vkMargem">
+      <div class="vk-icon">📊</div>
+      <div class="vk-label">Margem Líquida</div>
+      <div class="vk-val" id="vkMargemVal">0%</div>
+      <div class="vk-sub">lucro / receita total</div>
+    </div>
+    <div class="viab-kpi" id="vkMeta">
+      <div class="vk-icon">🏆</div>
+      <div class="vk-label">Meta vs. Realizado</div>
+      <div class="vk-val" id="vkMetaVal">—</div>
+      <div class="vk-sub">comparativo com meta definida</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">🥧 Distribuição de Investimento</div>
+      <canvas id="chartPie" height="220"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📊 Receita × Investimento × Lucro</div>
+      <canvas id="chartBar" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- Breakdown detalhado -->
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-title">📑 Demonstrativo de Resultado do Projeto (DRP)</div>
+    </div>
+    <table class="breakdown-table" id="drpTable">
+      <tbody>
+        <tr class="cat-row-bd"><td colspan="2">RECEITA</td></tr>
+        <tr><td>Receita Total Projetada</td><td id="drpReceita">R$ 0,00</td></tr>
+        <tr class="cat-row-bd"><td colspan="2">INVESTIMENTO E CUSTOS</td></tr>
+        <tr><td>Recursos Principais</td><td id="drpRecursos">R$ 0,00</td></tr>
+        <tr><td>Custos Diretos</td><td id="drpCustosDir">R$ 0,00</td></tr>
+        <tr><td>Custos Fixos / Overhead</td><td id="drpCustosFixed">R$ 0,00</td></tr>
+        <tr><td>Despesas &amp; Impostos</td><td id="drpDespesas">R$ 0,00</td></tr>
+        <tr style="border-top:1px solid rgba(196,154,60,.2)">
+          <td style="font-weight:700;color:var(--dourado-claro)">Total Investido</td>
+          <td style="font-weight:800;color:var(--dourado-claro)" id="drpTotalInvest">R$ 0,00</td>
+        </tr>
+        <tr class="cat-row-bd"><td colspan="2">RESULTADO</td></tr>
+        <tr><td>Lucro Bruto</td><td id="drpLucroBruto">R$ 0,00</td></tr>
+        <tr>
+          <td style="font-weight:800;font-size:14px;color:#90EE90">Lucro Líquido</td>
+          <td style="font-weight:800;font-size:16px;font-family:'Playfair Display',serif" id="drpLucroLiq">R$ 0,00</td>
+        </tr>
+        <tr class="cat-row-bd"><td colspan="2">INDICADORES</td></tr>
+        <tr><td>ROI (Retorno sobre Investimento)</td><td id="drpRoi">0%</td></tr>
+        <tr><td>Margem Líquida</td><td id="drpMargem">0%</td></tr>
+        <tr><td>Ponto de Equilíbrio</td><td id="drpBreakeven">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="step-footer">
+    <div class="left"><button class="btn btn-ghost" onclick="goToStep(5)">← Anterior</button></div>
+    <div class="right">
+      <button class="btn btn-ok" onclick="window.print()">🖨️ Imprimir Relatório</button>
+      <button class="btn btn-ghost" onclick="resetProject()">Novo Projeto</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .main -->
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────
+let state = {
+  tipo: 'Flipping Imobiliário',
+  resources: [],
+  stages: [],
+  directCosts: [],
+  fixedCosts: [],
+  expenses: [],
+  revType: 'unica',
+  revSources: [],
+  nextId: 1
+};
+
+let pieChart = null, barChart = null;
+
+// ── NAVIGATION ────────────────────────────────────────────────────
+function goToStep(n) {
+  for (let i = 1; i <= 6; i++) {
+    document.getElementById('sp' + i).classList.toggle('active', i === n);
+    const btn = document.getElementById('sBtn' + i);
+    const num = document.getElementById('sNum' + i);
+    if (i < n) { btn.classList.add('done'); btn.classList.remove('active'); }
+    else if (i === n) { btn.classList.add('active'); btn.classList.remove('done'); }
+    else { btn.classList.remove('active', 'done'); }
+  }
+  if (n === 6) renderViability();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── STEP 1 ────────────────────────────────────────────────────────
+function selectType(el, tipo) {
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.tipo = tipo;
+  updateSuggestions();
+}
+
+function updateProjName() {
+  const v = document.getElementById('projTitulo').value.trim();
+  document.getElementById('projNameDisplay').textContent = v || '— Nenhum projeto configurado —';
+}
+
+// ── STEP 2: RESOURCES ─────────────────────────────────────────────
+const RESOURCE_CATS = ['Capital Próprio','Financiamento','Mão de Obra','Materiais','Equipamentos','Terceiros / Serviços','Honorários','Outros'];
+const SUGGESTIONS = {
+  'Flipping Imobiliário':  ['Compra do imóvel','Reforma estrutural','Acabamentos','Corretagem','ITBI / Registro','Engenheiro / Arquiteto'],
+  'Construção':            ['Terreno','Fundação','Estrutura','Alvenaria','Instalações','Acabamentos'],
+  'Reforma Comercial':     ['Demolição','Elétrica','Hidráulica','Revestimentos','Mobiliário','Projeto'],
+  'Evento':                ['Local / Venue','A/V e Tecnologia','Decoração','Catering','Divulgação','Equipe'],
+  'Produto / Serviço':     ['Desenvolvimento','Protótipo','Marketing','Operação inicial','Estoque','Registro'],
+  'Tecnologia':            ['Desenvolvimento','Infraestrutura','Design UX/UI','Testes','Lançamento','Suporte'],
+  'Agronegócio':           ['Insumos','Sementes','Maquinário','Mão de obra','Logística','Armazenagem'],
+  'Personalizado':         ['Recurso 1','Recurso 2','Recurso 3','Recurso 4']
+};
+
+function updateSuggestions() {
+  const row = document.getElementById('suggestionsRow');
+  if (!row) return;
+  const sugs = SUGGESTIONS[state.tipo] || SUGGESTIONS['Personalizado'];
+  row.innerHTML = sugs.map(s =>
+    `<button class="btn btn-ghost btn-xs" onclick="addResourceQuick('${s}')">${s}</button>`
+  ).join('');
+}
+
+function addResource(desc='', qty='1', cat='', val='') {
+  const id = state.nextId++;
+  const r = { id, desc, qty, cat, val };
+  state.resources.push(r);
+  renderResources();
+}
+
+function addResourceQuick(desc) {
+  addResource(desc, '1', 'Materiais', '');
+}
+
+function removeResource(id) {
+  state.resources = state.resources.filter(r => r.id !== id);
+  renderResources();
+}
+
+function renderResources() {
+  const list = document.getElementById('resourceList');
+  if (!state.resources.length) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(228,213,163,.25);font-size:13px">Nenhum recurso adicionado.</div>';
+    document.getElementById('totalRecursos').textContent = 'R$ 0,00';
+    updateKpis(); return;
+  }
+  list.innerHTML = state.resources.map(r => `
+    <div class="resource-row">
+      <input type="text" placeholder="Descrição do recurso" value="${esc(r.desc)}"
+        oninput="updateResource(${r.id},'desc',this.value)">
+      <input type="number" placeholder="Qtd" value="${r.qty}" min="0" step="0.01"
+        oninput="updateResource(${r.id},'qty',this.value)" style="text-align:center">
+      <select oninput="updateResource(${r.id},'cat',this.value)">
+        <option value="">Categoria...</option>
+        ${RESOURCE_CATS.map(c => `<option${r.cat===c?' selected':''}>${c}</option>`).join('')}
+      </select>
+      <input type="number" placeholder="0,00" value="${r.val}" min="0" step="0.01"
+        oninput="updateResource(${r.id},'val',this.value)" style="text-align:right">
+      <button class="btn-remove" onclick="removeResource(${r.id})">×</button>
+    </div>
+  `).join('');
+  const total = state.resources.reduce((s,r) => s + (parseFloat(r.val)||0) * (parseFloat(r.qty)||1), 0);
+  document.getElementById('totalRecursos').textContent = fmt(total);
+  updateKpis();
+}
+
+function updateResource(id, field, val) {
+  const r = state.resources.find(x => x.id === id);
+  if (r) { r[field] = val; }
+  const total = state.resources.reduce((s,r) => s + (parseFloat(r.val)||0) * (parseFloat(r.qty)||1), 0);
+  document.getElementById('totalRecursos').textContent = fmt(total);
+  updateKpis();
+}
+
+// ── STEP 3: STAGES ────────────────────────────────────────────────
+function addStage() {
+  const id = state.nextId++;
+  state.stages.push({ id, name:'Nova Etapa', desc:'', start:'', weeks:'', budget:'', status:'pendente', open:true });
+  renderStages();
+}
+
+function removeStage(id) {
+  state.stages = state.stages.filter(s => s.id !== id);
+  renderStages();
+}
+
+function toggleStage(id) {
+  const s = state.stages.find(x => x.id === id);
+  if (s) s.open = !s.open;
+  renderStages();
+}
+
+function updateStage(id, field, val) {
+  const s = state.stages.find(x => x.id === id);
+  if (s) s[field] = val;
+  renderStageTotal();
+  updateKpis();
+}
+
+function renderStages() {
+  const list = document.getElementById('stageList');
+  const empty = document.getElementById('stagesEmpty');
+  empty.style.display = state.stages.length ? 'none' : 'block';
+  if (!state.stages.length) { list.innerHTML = ''; renderStageTotal(); updateKpis(); return; }
+
+  const stageSel = state.stages.map((s,i) =>
+    `<option value="${s.id}">${i+1}. ${s.name||'Etapa '+(i+1)}</option>`
+  ).join('');
+  // Also sync stage selects in cost table
+  document.querySelectorAll('.stage-sel-cost').forEach(el => {
+    const cur = el.value;
+    el.innerHTML = '<option value="">Geral</option>' + stageSel;
+    el.value = cur;
+  });
+
+  list.innerHTML = state.stages.map((s, idx) => `
+    <div class="stage-card" id="sc${s.id}">
+      <div class="stage-header" onclick="toggleStage(${s.id})">
+        <div class="stage-num-badge">${idx+1}</div>
+        <div class="stage-title-txt">${esc(s.name)||'Etapa '+(idx+1)}</div>
+        <div class="stage-meta">
+          <span class="stage-tag ${s.status}">${statusLabel(s.status)}</span>
+          <span style="font-size:12px;color:var(--dourado-claro);font-weight:700">${s.budget ? fmt(parseFloat(s.budget)) : '—'}</span>
+        </div>
+        <span class="stage-chevron${s.open?' open':''}">▼</span>
+      </div>
+      <div class="stage-body${s.open?' open':''}">
+        <div class="form-grid cols2">
+          <div class="fg"><label>Nome da Etapa</label>
+            <input type="text" value="${esc(s.name)}" placeholder="Ex: Aquisição do imóvel"
+              oninput="updateStage(${s.id},'name',this.value);this.closest('.stage-card').querySelector('.stage-title-txt').textContent=this.value||'Etapa ${idx+1}'">
+          </div>
+          <div class="fg"><label>Status</label>
+            <select onchange="updateStage(${s.id},'status',this.value)">
+              <option value="pendente"${s.status==='pendente'?' selected':''}>Pendente</option>
+              <option value="andamento"${s.status==='andamento'?' selected':''}>Em Andamento</option>
+              <option value="concluida"${s.status==='concluida'?' selected':''}>Concluída</option>
+              <option value="atrasada"${s.status==='atrasada'?' selected':''}>Atrasada</option>
+            </select>
+          </div>
+          <div class="fg"><label>Início Previsto</label>
+            <input type="date" value="${s.start}" oninput="updateStage(${s.id},'start',this.value)">
+          </div>
+          <div class="fg"><label>Duração (semanas)</label>
+            <input type="number" value="${s.weeks}" placeholder="Ex: 4" min="1"
+              oninput="updateStage(${s.id},'weeks',this.value)">
+          </div>
+          <div class="fg"><label>Orçamento da Etapa (R$)</label>
+            <input type="number" value="${s.budget}" placeholder="0,00" min="0" step="0.01"
+              oninput="updateStage(${s.id},'budget',this.value)">
+          </div>
+          <div class="fg"><label>Responsável</label>
+            <input type="text" value="${esc(s.resp||'')}" placeholder="Responsável pela etapa"
+              oninput="updateStage(${s.id},'resp',this.value)">
+          </div>
+          <div class="fg full"><label>Descrição / Atividades</label>
+            <textarea placeholder="Descreva as atividades desta etapa..."
+              oninput="updateStage(${s.id},'desc',this.value)">${esc(s.desc)}</textarea>
+          </div>
+        </div>
+      </div>
+      <div class="stage-footer">
+        <span class="stage-total-lbl">Orçamento</span>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="stage-total-val">${s.budget ? fmt(parseFloat(s.budget)) : 'R$ 0,00'}</span>
+          <button class="btn btn-danger btn-xs" onclick="removeStage(${s.id})">Remover</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  renderStageTotal();
+}
+
+function renderStageTotal() {
+  const total = state.stages.reduce((s,e) => s + (parseFloat(e.budget)||0), 0);
+  document.getElementById('totalEtapas').textContent = fmt(total);
+  updateKpis();
+}
+
+function statusLabel(s) {
+  return {pendente:'Pendente',andamento:'Em Andamento',concluida:'Concluída',atrasada:'Atrasada'}[s]||s;
+}
+
+// ── STEP 4: COSTS ─────────────────────────────────────────────────
+function addCost(type) {
+  const id = state.nextId++;
+  if (type === 'direct')  { state.directCosts.push({ id, desc:'', cat:'', stage:'', val:'' }); renderDirectCosts(); }
+  if (type === 'fixed')   { state.fixedCosts.push({ id, desc:'', freq:'Mensal', months:'', val:'' }); renderFixedCosts(); }
+  if (type === 'expense') { state.expenses.push({ id, desc:'', tipo:'', base:'', val:'' }); renderExpenses(); }
+}
+
+function removeCost(type, id) {
+  if (type==='direct')  state.directCosts  = state.directCosts.filter(x=>x.id!==id);
+  if (type==='fixed')   state.fixedCosts   = state.fixedCosts.filter(x=>x.id!==id);
+  if (type==='expense') state.expenses     = state.expenses.filter(x=>x.id!==id);
+  renderAllCosts();
+}
+
+function updateCost(type, id, field, val) {
+  let arr = type==='direct'?state.directCosts:type==='fixed'?state.fixedCosts:state.expenses;
+  const item = arr.find(x=>x.id===id);
+  if (item) item[field] = val;
+  renderAllCosts();
+}
+
+const DIRECT_CATS = ['Mão de Obra','Materiais','Equipamentos','Subcontratados','Licenças','Projetos Técnicos','Outros'];
+const EXPENSE_TYPES = ['Imposto','Taxa','Comissão','Administrativa','Jurídica','Financeira','Outros'];
+const FREQ_OPTS = ['Única','Semanal','Mensal','Trimestral'];
+
+function renderDirectCosts() {
+  const body = document.getElementById('directCostBody');
+  const stageOpts = '<option value="">Geral</option>' + state.stages.map((s,i) =>
+    `<option value="${s.id}">${i+1}. ${s.name||'Etapa '+(i+1)}</option>`).join('');
+  if (!state.directCosts.length) { body.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:rgba(228,213,163,.25);font-size:12px">Nenhum custo direto cadastrado.</td></tr>'; }
+  else body.innerHTML = state.directCosts.map(c => `
+    <tr>
+      <td><input type="text" value="${esc(c.desc)}" placeholder="Descreva o custo"
+        oninput="updateCost('direct',${c.id},'desc',this.value)"></td>
+      <td><select onchange="updateCost('direct',${c.id},'cat',this.value)">
+        <option value="">Categoria...</option>${DIRECT_CATS.map(x=>`<option${c.cat===x?' selected':''}>${x}</option>`).join('')}
+      </select></td>
+      <td><select class="stage-sel-cost" onchange="updateCost('direct',${c.id},'stage',this.value)">
+        ${stageOpts}
+      </select></td>
+      <td style="display:flex;gap:6px;align-items:center">
+        <input type="number" value="${c.val}" placeholder="0,00" min="0" step="0.01"
+          oninput="updateCost('direct',${c.id},'val',this.value)" style="text-align:right">
+        <button class="btn-remove" onclick="removeCost('direct',${c.id})">×</button>
+      </td>
+    </tr>`).join('');
+  const total = state.directCosts.reduce((s,c)=>s+(parseFloat(c.val)||0),0);
+  document.getElementById('totalDirectCosts').textContent = fmt(total);
+  updateAllCostsTotal();
+}
+
+function renderFixedCosts() {
+  const body = document.getElementById('fixedCostBody');
+  if (!state.fixedCosts.length) { body.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:rgba(228,213,163,.25);font-size:12px">Nenhum custo fixo cadastrado.</td></tr>'; }
+  else body.innerHTML = state.fixedCosts.map(c => `
+    <tr>
+      <td><input type="text" value="${esc(c.desc)}" placeholder="Descreva o custo"
+        oninput="updateCost('fixed',${c.id},'desc',this.value)"></td>
+      <td><select onchange="updateCost('fixed',${c.id},'freq',this.value)">
+        ${FREQ_OPTS.map(f=>`<option${c.freq===f?' selected':''}>${f}</option>`).join('')}
+      </select></td>
+      <td><input type="number" value="${c.months}" placeholder="Qtd" min="1"
+        oninput="updateCost('fixed',${c.id},'months',this.value)" style="width:70px;text-align:center"></td>
+      <td style="display:flex;gap:6px;align-items:center">
+        <input type="number" value="${c.val}" placeholder="0,00 / período" min="0" step="0.01"
+          oninput="updateCost('fixed',${c.id},'val',this.value)" style="text-align:right">
+        <button class="btn-remove" onclick="removeCost('fixed',${c.id})">×</button>
+      </td>
+    </tr>`).join('');
+  const total = state.fixedCosts.reduce((s,c)=>{
+    const m = parseFloat(c.months)||1;
+    return s+(parseFloat(c.val)||0)*m;
+  },0);
+  document.getElementById('totalFixedCosts').textContent = fmt(total);
+  updateAllCostsTotal();
+}
+
+function renderExpenses() {
+  const body = document.getElementById('expenseCostBody');
+  if (!state.expenses.length) { body.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:rgba(228,213,163,.25);font-size:12px">Nenhuma despesa cadastrada.</td></tr>'; }
+  else body.innerHTML = state.expenses.map(c => `
+    <tr>
+      <td><input type="text" value="${esc(c.desc)}" placeholder="Descreva a despesa"
+        oninput="updateCost('expense',${c.id},'desc',this.value)"></td>
+      <td><select onchange="updateCost('expense',${c.id},'tipo',this.value)">
+        <option value="">Tipo...</option>${EXPENSE_TYPES.map(x=>`<option${c.tipo===x?' selected':''}>${x}</option>`).join('')}
+      </select></td>
+      <td><input type="text" value="${esc(c.base)}" placeholder="Ex: % sobre venda"
+        oninput="updateCost('expense',${c.id},'base',this.value)"></td>
+      <td style="display:flex;gap:6px;align-items:center">
+        <input type="number" value="${c.val}" placeholder="0,00" min="0" step="0.01"
+          oninput="updateCost('expense',${c.id},'val',this.value)" style="text-align:right">
+        <button class="btn-remove" onclick="removeCost('expense',${c.id})">×</button>
+      </td>
+    </tr>`).join('');
+  const total = state.expenses.reduce((s,c)=>s+(parseFloat(c.val)||0),0);
+  document.getElementById('totalExpenses').textContent = fmt(total);
+  updateAllCostsTotal();
+}
+
+function renderAllCosts() { renderDirectCosts(); renderFixedCosts(); renderExpenses(); }
+
+function updateAllCostsTotal() {
+  const d = state.directCosts.reduce((s,c)=>s+(parseFloat(c.val)||0),0);
+  const f = state.fixedCosts.reduce((s,c)=>s+(parseFloat(c.val)||0)*(parseFloat(c.months)||1),0);
+  const e = state.expenses.reduce((s,c)=>s+(parseFloat(c.val)||0),0);
+  document.getElementById('totalAllCosts').textContent = fmt(d+f+e);
+  updateKpis();
+}
+
+// ── STEP 5: REVENUE ───────────────────────────────────────────────
+function setRevType(btn, type) {
+  document.querySelectorAll('.rev-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.revType = type;
+  ['revUnica','revParcelas','revRecorrente','revMultiplas'].forEach(id =>
+    document.getElementById(id).style.display = 'none');
+  document.getElementById('rev' + type.charAt(0).toUpperCase() + type.slice(1)).style.display = 'block';
+  updateKpis();
+}
+
+function updateRevParcelas() {
+  const total = parseFloat(document.getElementById('revParcelaTotal').value)||0;
+  const n = parseInt(document.getElementById('revNumParcelas').value)||1;
+  const entrada = (parseFloat(document.getElementById('revEntrada').value)||0)/100;
+  const restante = total * (1-entrada);
+  document.getElementById('revValorParcela').value = n>1 ? (restante/(n-1)).toFixed(2) : restante.toFixed(2);
+  document.getElementById('totalRevDisplay').textContent = fmt(total);
+  updateKpis();
+}
+
+function addRevSource() {
+  const id = state.nextId++;
+  state.revSources.push({ id, desc:'', tipo:'', prazo:'', val:'' });
+  renderRevSources();
+}
+
+function removeRevSource(id) {
+  state.revSources = state.revSources.filter(x=>x.id!==id);
+  renderRevSources();
+}
+
+function updateRevSource(id, field, val) {
+  const s = state.revSources.find(x=>x.id===id);
+  if (s) s[field]=val;
+  renderRevSources();
+}
+
+function renderRevSources() {
+  const body = document.getElementById('revSourceBody');
+  if (!state.revSources.length) { body.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:rgba(228,213,163,.25);font-size:12px">Nenhuma fonte cadastrada.</td></tr>'; }
+  else body.innerHTML = state.revSources.map(s => `
+    <tr>
+      <td><input type="text" value="${esc(s.desc)}" placeholder="Fonte de receita"
+        oninput="updateRevSource(${s.id},'desc',this.value)"></td>
+      <td><input type="text" value="${esc(s.tipo)}" placeholder="Ex: Venda, Aluguel"
+        oninput="updateRevSource(${s.id},'tipo',this.value)"></td>
+      <td><input type="text" value="${esc(s.prazo)}" placeholder="Prazo previsto"
+        oninput="updateRevSource(${s.id},'prazo',this.value)"></td>
+      <td style="display:flex;gap:6px;align-items:center">
+        <input type="number" value="${s.val}" placeholder="0,00" min="0" step="0.01"
+          oninput="updateRevSource(${s.id},'val',this.value)" style="text-align:right">
+        <button class="btn-remove" onclick="removeRevSource(${s.id})">×</button>
+      </td>
+    </tr>`).join('');
+  const total = state.revSources.reduce((s,x)=>s+(parseFloat(x.val)||0),0);
+  document.getElementById('totalRevSources').textContent = fmt(total);
+  document.getElementById('totalRevDisplay').textContent = fmt(total);
+  updateKpis();
+}
+
+function getReceita() {
+  if (state.revType === 'unica') return parseFloat(document.getElementById('revValorTotal').value)||0;
+  if (state.revType === 'parcelas') return parseFloat(document.getElementById('revParcelaTotal').value)||0;
+  if (state.revType === 'recorrente') {
+    const m = parseFloat(document.getElementById('revMensal').value)||0;
+    const n = parseFloat(document.getElementById('revMeses').value)||1;
+    const rec = m * n;
+    const el = document.getElementById('revRecorrenteTotal');
+    if (el) el.value = rec.toFixed(2);
+    return rec;
+  }
+  if (state.revType === 'multiplas') return state.revSources.reduce((s,x)=>s+(parseFloat(x.val)||0),0);
+  return 0;
+}
+
+// ── KPI UPDATE ────────────────────────────────────────────────────
+function getTotalInvest() {
+  const recursos = state.resources.reduce((s,r)=>s+(parseFloat(r.val)||0)*(parseFloat(r.qty)||1),0);
+  const direct   = state.directCosts.reduce((s,c)=>s+(parseFloat(c.val)||0),0);
+  const fixed    = state.fixedCosts.reduce((s,c)=>s+(parseFloat(c.val)||0)*(parseFloat(c.months)||1),0);
+  const expenses = state.expenses.reduce((s,c)=>s+(parseFloat(c.val)||0),0);
+  return { recursos, direct, fixed, expenses, total: recursos+direct+fixed+expenses };
+}
+
+function updateKpis() {
+  const inv = getTotalInvest();
+  const receita = getReceita();
+  const lucro = receita - inv.total;
+  const roi = inv.total > 0 ? (lucro / inv.total) * 100 : 0;
+  const margem = receita > 0 ? (lucro / receita) * 100 : 0;
+  const dur = document.getElementById('projDuracao').value || '—';
+
+  document.getElementById('kpiInvest').textContent  = fmtK(inv.total);
+  document.getElementById('kpiReceita').textContent = fmtK(receita);
+  document.getElementById('kpiDuracao').textContent = dur;
+
+  const lucroEl  = document.getElementById('kpiLucro');
+  const roiEl    = document.getElementById('kpiRoi');
+  const margemEl = document.getElementById('kpiMargem');
+
+  lucroEl.textContent  = fmtK(lucro);
+  roiEl.textContent    = roi.toFixed(1) + '%';
+  margemEl.textContent = margem.toFixed(1) + '%';
+
+  lucroEl.className  = 'kpi-val' + (lucro>0?' ok':lucro<0?' bad':'');
+  roiEl.className    = 'kpi-val' + (roi>15?' ok':roi>0?' warn':' bad');
+  margemEl.className = 'kpi-val' + (margem>15?' ok':margem>0?' warn':' bad');
+
+  // rev display
+  document.getElementById('totalRevDisplay').textContent = fmt(receita);
+}
+
+// ── VIABILITY RENDER ──────────────────────────────────────────────
+function renderViability() {
+  const inv     = getTotalInvest();
+  const receita = getReceita();
+  const lucro   = receita - inv.total;
+  const roi     = inv.total > 0 ? (lucro / inv.total)*100 : 0;
+  const margem  = receita > 0 ? (lucro / receita)*100 : 0;
+  const meta    = parseFloat(document.getElementById('projMeta').value)||0;
+
+  // Semáforo
+  const s1 = document.getElementById('sLight1');
+  const s2 = document.getElementById('sLight2');
+  const s3 = document.getElementById('sLight3');
+  s1.className='light'; s2.className='light'; s3.className='light';
+
+  let status, title, desc, recom;
+  if (receita <= 0 || inv.total <= 0) {
+    title = 'Dados insuficientes'; status='neutral';
+    desc = 'Preencha os dados de investimento e receita para calcular a viabilidade.';
+    recom = '';
+  } else if (lucro < 0) {
+    s1.className='light active-red'; status='bad';
+    title = '⚠️ Projeto com Prejuízo';
+    desc = `Com investimento de ${fmt(inv.total)} e receita de ${fmt(receita)}, o projeto gera prejuízo de ${fmt(Math.abs(lucro))}.`;
+    recom = 'Revise os custos ou aumente a receita. Considere renegociar fornecedores e otimizar recursos.';
+  } else if (meta > 0 && roi < meta) {
+    s2.className='light active-yellow'; status='warn';
+    title = '⚡ Viável, mas abaixo da meta';
+    desc = `O ROI de ${roi.toFixed(1)}% está abaixo da meta de ${meta}%. O projeto gera lucro, mas pode não compensar o risco.`;
+    recom = 'Analise possibilidades de redução de custos ou revisão do preço de venda para atingir a meta definida.';
+  } else if (roi >= 20 || (meta > 0 && roi >= meta)) {
+    s3.className='light active-green'; status='ok';
+    title = '✅ Projeto Viável e Rentável';
+    desc = `ROI de ${roi.toFixed(1)}% com lucro líquido de ${fmt(lucro)}. ${meta>0?`Acima da sua meta de ${meta}%.`:'Excelente retorno sobre o investimento.'}`;
+    recom = 'O projeto apresenta boa rentabilidade. Monitore os custos durante a execução para preservar a margem.';
+  } else {
+    s2.className='light active-yellow'; status='warn';
+    title = '🟡 Projeto Viável com Atenção';
+    desc = `ROI de ${roi.toFixed(1)}% com lucro de ${fmt(lucro)}. Retorno moderado — acompanhe os custos de perto.`;
+    recom = 'Identifique oportunidades de otimização de custos para melhorar a rentabilidade final do projeto.';
+  }
+
+  document.getElementById('semaTitle').textContent = title;
+  document.getElementById('semaDesc').textContent = desc;
+  document.getElementById('semaRecom').textContent = recom;
+
+  // VKPIs
+  const vkData = [
+    { el:'vkInvest',  val:fmt(inv.total), cls:'', sub:'capital + custos + despesas' },
+    { el:'vkReceita', val:fmt(receita),   cls:'ok', sub:'entrada estimada' },
+    { el:'vkLucro',   val:fmt(lucro),     cls: lucro>0?'ok':lucro<0?'bad':'warn', sub:'receita − total investido' },
+    { el:'vkRoi',     val:roi.toFixed(1)+'%', cls: roi>15?'ok':roi>5?'warn':'bad', sub:'retorno sobre investimento' },
+    { el:'vkMargem',  val:margem.toFixed(1)+'%', cls: margem>15?'ok':margem>5?'warn':'bad', sub:'lucro / receita total' },
+  ];
+
+  if (meta > 0) {
+    const diff = roi - meta;
+    vkData.push({ el:'vkMeta', val: (diff>=0?'+':'')+diff.toFixed(1)+'%',
+      cls: diff>=0?'ok':'bad', sub:`meta: ${meta}% vs. realizado` });
+  }
+
+  vkData.forEach(d => {
+    const el = document.getElementById(d.el+'Val');
+    if (el) el.textContent = d.val;
+    const wrap = document.getElementById(d.el);
+    if (wrap) wrap.className = 'viab-kpi' + (d.cls?' '+d.cls:'');
+  });
+
+  // DRP
+  document.getElementById('drpReceita').textContent     = fmt(receita);
+  document.getElementById('drpRecursos').textContent    = fmt(inv.recursos);
+  document.getElementById('drpCustosDir').textContent   = fmt(inv.direct);
+  document.getElementById('drpCustosFixed').textContent = fmt(inv.fixed);
+  document.getElementById('drpDespesas').textContent    = fmt(inv.expenses);
+  document.getElementById('drpTotalInvest').textContent = fmt(inv.total);
+  document.getElementById('drpLucroBruto').textContent  = fmt(receita - inv.direct - inv.fixed - inv.expenses);
+  const llEl = document.getElementById('drpLucroLiq');
+  llEl.textContent = fmt(lucro);
+  llEl.style.color = lucro >= 0 ? '#90EE90' : '#F08080';
+  document.getElementById('drpRoi').textContent    = roi.toFixed(2) + '%';
+  document.getElementById('drpMargem').textContent = margem.toFixed(2) + '%';
+  const breakeven = inv.total > 0 ? (inv.total / receita * 100).toFixed(1)+'% da receita' : '—';
+  document.getElementById('drpBreakeven').textContent = breakeven;
+
+  // Charts
+  renderCharts(inv, receita, lucro);
+}
+
+function renderCharts(inv, receita, lucro) {
+  // PIE
+  const pieCtx = document.getElementById('chartPie').getContext('2d');
+  if (pieChart) pieChart.destroy();
+  const pieLabels = [], pieData = [], pieColors = [];
+  if (inv.recursos > 0) { pieLabels.push('Recursos'); pieData.push(inv.recursos); pieColors.push('#C49A3C'); }
+  if (inv.direct  > 0) { pieLabels.push('Custos Diretos'); pieData.push(inv.direct); pieColors.push('#4A7A5A'); }
+  if (inv.fixed   > 0) { pieLabels.push('Custos Fixos'); pieData.push(inv.fixed); pieColors.push('#8B5E3C'); }
+  if (inv.expenses> 0) { pieLabels.push('Despesas'); pieData.push(inv.expenses); pieColors.push('#D4763A'); }
+  if (!pieData.length) { pieLabels.push('Sem dados'); pieData.push(1); pieColors.push('rgba(255,255,255,.05)'); }
+
+  pieChart = new Chart(pieCtx, {
+    type: 'doughnut',
+    data: { labels: pieLabels, datasets: [{ data: pieData, backgroundColor: pieColors, borderColor:'rgba(255,255,255,.05)', borderWidth:2 }] },
+    options: {
+      responsive:true, maintainAspectRatio:true,
+      plugins: {
+        legend: { position:'bottom', labels:{ color:'rgba(228,213,163,.6)', font:{size:11}, padding:12 }},
+        tooltip: { callbacks: { label: ctx => ' ' + fmt(ctx.raw) }}
+      }
+    }
+  });
+
+  // BAR
+  const barCtx = document.getElementById('chartBar').getContext('2d');
+  if (barChart) barChart.destroy();
+  barChart = new Chart(barCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Investimento Total','Receita Projetada','Lucro Líquido'],
+      datasets: [{
+        label: 'R$',
+        data: [inv.total, receita, lucro],
+        backgroundColor: [
+          'rgba(196,154,60,.6)',
+          'rgba(39,174,96,.6)',
+          lucro>=0 ? 'rgba(144,238,144,.6)' : 'rgba(192,57,43,.6)'
+        ],
+        borderColor: [
+          'rgba(196,154,60,.9)',
+          'rgba(39,174,96,.9)',
+          lucro>=0 ? 'rgba(144,238,144,.9)' : 'rgba(192,57,43,.9)'
+        ],
+        borderWidth: 1, borderRadius: 6
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:true,
+      plugins: {
+        legend: { display:false },
+        tooltip: { callbacks:{ label: ctx => ' ' + fmt(ctx.raw) }}
+      },
+      scales: {
+        x: { ticks:{ color:'rgba(228,213,163,.55)', font:{size:11} }, grid:{ color:'rgba(196,154,60,.06)' }},
+        y: { ticks:{ color:'rgba(228,213,163,.45)', font:{size:10}, callback: v => fmtK(v) }, grid:{ color:'rgba(196,154,60,.06)' }}
+      }
+    }
+  });
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function fmt(n) {
+  return 'R$ ' + (n||0).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+function fmtK(n) {
+  n = n||0;
+  if (Math.abs(n) >= 1e6) return 'R$ ' + (n/1e6).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1e3) return 'R$ ' + (n/1e3).toFixed(0) + 'k';
+  return 'R$ ' + n.toFixed(0);
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function resetProject() {
+  if (!confirm('Deseja iniciar um novo projeto? Os dados atuais serão perdidos.')) return;
+  state = { tipo:'Flipping Imobiliário', resources:[], stages:[], directCosts:[], fixedCosts:[], expenses:[], revType:'unica', revSources:[], nextId:1 };
+  ['projTitulo','projObjetivo','projResponsavel','projMeta'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  const di = document.getElementById('projInicio'); if(di) di.value='';
+  const dd = document.getElementById('projDuracao'); if(dd) dd.value='';
+  document.getElementById('projNameDisplay').textContent = '— Nenhum projeto configurado —';
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector('.type-card').classList.add('selected');
+  renderResources(); renderStages(); renderAllCosts(); renderRevSources();
+  updateKpis(); goToStep(1);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Set today as default start date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('projInicio').value = today;
+
+  updateSuggestions();
+  renderResources();
+  renderStages();
+  renderAllCosts();
+  updateKpis();
+
+  // Seed with one empty resource
+  addResource('', '1', '', '');
+  // Seed with one stage
+  addStage();
+  state.stages[0].name = 'Fase inicial';
+  renderStages();
+});
+</script>
+</body>
+</html>

@@ -13,9 +13,9 @@
       --verde2:   #2D5A3D;
       --dourado:  #9B7520;
       --dourado2: #B8891A;
-      --texto:    #1C110A;
-      --texto2:   rgba(44,26,14,.55);
-      --bg:       #F7F2E8;
+      --texto:    #000000;
+      --texto2:   rgba(0,0,0,.55);
+      --bg:       #FFFFFF;
     }
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--texto); }
@@ -32,35 +32,36 @@
 
     /* ── TOPO ── */
     .topo {
-      background: linear-gradient(160deg, var(--verde) 0%, var(--verde2) 100%);
+      background: #FFFFFF;
       padding: 40px 24px 36px;
       text-align: center;
       position: relative; overflow: hidden;
+      border-bottom: 1px solid rgba(0,0,0,.08);
     }
     .topo::before {
       content: ''; position: absolute; width: 420px; height: 420px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,255,255,.06) 0%, transparent 65%);
+      background: radial-gradient(circle, rgba(0,0,0,.02) 0%, transparent 65%);
       top: -160px; right: -100px; pointer-events: none;
     }
     .badge {
       display: inline-block; font-size: .65rem; font-weight: 800; letter-spacing: .17em;
-      text-transform: uppercase; color: rgba(240,230,200,.9);
-      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+      text-transform: uppercase; color: rgba(0,0,0,.7);
+      background: rgba(0,0,0,.06); border: 1px solid rgba(0,0,0,.15);
       padding: 5px 15px; border-radius: 100px; margin-bottom: 20px;
     }
     .topo-titulo {
       font-family: 'Playfair Display', serif;
       font-size: clamp(1.9rem, 7vw, 2.6rem);
-      font-weight: 700; line-height: 1.1; color: #FEFCF7; margin-bottom: 6px;
+      font-weight: 700; line-height: 1.1; color: #000000; margin-bottom: 6px;
     }
     .topo-titulo span {
       background: linear-gradient(135deg, #E0B84A, #F0CC6A);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .topo-sub { font-size: .92rem; color: rgba(240,230,200,.65); line-height: 1.6; }
+    .topo-sub { font-size: .92rem; color: rgba(0,0,0,.55); line-height: 1.6; }
 
     /* ── SERVIÇOS ── */
-    .sec-servicos { padding: 36px 24px; background: #FEFCF7; }
+    .sec-servicos { padding: 36px 24px; background: #FFFFFF; }
     .sec-desc { font-size: .88rem; color: var(--texto2); line-height: 1.7; margin-bottom: 22px; }
 
     .servicos { display: flex; flex-direction: column; gap: 10px; }
@@ -70,7 +71,7 @@
       display: flex; align-items: flex-start; gap: 13px;
       box-shadow: 0 2px 8px rgba(0,0,0,.05);
     }
-    .srv.ia { border-color: rgba(155,117,32,.4); background: #FFFDF5; }
+    .srv.ia { border-color: rgba(155,117,32,.4); background: #FFFFFF; }
 
     .srv-ico {
       width: 40px; height: 40px; flex-shrink: 0; border-radius: 11px;
@@ -96,12 +97,13 @@
 
     /* ── CONSULTOR ── */
     .sec-consultor {
-      background: #F0EBE0;
+      background: #FFFFFF;
       padding: 36px 24px;
+      border-top: 1px solid rgba(0,0,0,.06);
     }
     .consultor-card {
       background: #fff;
-      border: 1px solid rgba(155,117,32,.2);
+      border: 1px solid rgba(0,0,0,.12);
       border-radius: 20px; padding: 26px 20px;
       box-shadow: 0 4px 16px rgba(0,0,0,.06);
     }
@@ -138,28 +140,29 @@
     }
     .consultor-bio {
       font-size: .85rem; color: var(--texto2); line-height: 1.75;
-      border-top: 1px solid rgba(155,117,32,.15); padding-top: 18px;
+      border-top: 1px solid rgba(0,0,0,.08); padding-top: 18px;
     }
     .consultor-bio strong { color: var(--texto); font-weight: 700; }
 
     /* ── CONTATO ── */
     .sec-contato {
-      background: linear-gradient(160deg, var(--verde) 0%, var(--verde2) 100%);
+      background: #FFFFFF;
+      border-top: 1px solid rgba(0,0,0,.08);
       padding: 44px 24px; text-align: center;
     }
     .cta-titulo {
       font-family: 'Playfair Display', serif;
       font-size: clamp(1.35rem, 5.5vw, 1.75rem);
-      font-weight: 700; color: #FEFCF7; line-height: 1.25; margin-bottom: 8px;
+      font-weight: 700; color: #000000; line-height: 1.25; margin-bottom: 8px;
     }
-    .cta-titulo em { font-style: italic; color: #E0B84A; }
-    .cta-desc { font-size: .87rem; color: rgba(240,230,200,.65); max-width: 360px; margin: 0 auto 28px; line-height: 1.7; }
+    .cta-titulo em { font-style: italic; color: var(--dourado); }
+    .cta-desc { font-size: .87rem; color: rgba(0,0,0,.55); max-width: 360px; margin: 0 auto 28px; line-height: 1.7; }
 
     .btns { display: flex; flex-direction: column; gap: 11px; align-items: center; }
     .btn-main {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
       background: linear-gradient(135deg, #C49A3C, #E0B84A);
-      color: #1C110A; font-weight: 800; font-size: .92rem;
+      color: #000000; font-weight: 800; font-size: .92rem;
       padding: 14px 0; border-radius: 100px; text-decoration: none;
       box-shadow: 0 6px 22px rgba(0,0,0,.2); width: 100%; max-width: 300px;
       transition: all .25s;
@@ -167,20 +170,20 @@
     .btn-main:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,.28); }
     .btn-sec {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      color: rgba(240,230,200,.8); font-size: .85rem; font-weight: 700;
-      border: 1px solid rgba(255,255,255,.25); padding: 12px 0; border-radius: 100px;
+      color: rgba(0,0,0,.7); font-size: .85rem; font-weight: 700;
+      border: 1px solid rgba(0,0,0,.25); padding: 12px 0; border-radius: 100px;
       text-decoration: none; width: 100%; max-width: 300px; transition: all .25s;
     }
-    .btn-sec:hover { border-color: rgba(255,255,255,.5); color: #fff; }
+    .btn-sec:hover { border-color: rgba(0,0,0,.5); color: #000; }
 
     /* ── RODAPÉ ── */
     footer {
-      background: #1B3B28; border-top: 1px solid rgba(255,255,255,.08);
+      background: #FFFFFF; border-top: 1px solid rgba(0,0,0,.08);
       padding: 18px 24px; text-align: center;
     }
-    .footer-nome { font-family: 'Playfair Display', serif; font-size: .9rem; font-weight: 700; color: rgba(224,184,74,.55); display: block; margin-bottom: 3px; }
-    .footer-email { font-size: .7rem; color: rgba(240,230,200,.25); }
-    .footer-email a { color: rgba(224,184,74,.5); text-decoration: none; }
+    .footer-nome { font-family: 'Playfair Display', serif; font-size: .9rem; font-weight: 700; color: rgba(0,0,0,.7); display: block; margin-bottom: 3px; }
+    .footer-email { font-size: .7rem; color: rgba(0,0,0,.5); }
+    .footer-email a { color: rgba(0,0,0,.7); text-decoration: none; }
   </style>
 </head>
 <body>

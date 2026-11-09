@@ -178,6 +178,19 @@ main{padding:28px 32px;max-width:1300px;margin:0 auto}
 .empty-text{font-size:14px;font-weight:600}
 .empty-hint{font-size:12px;margin-top:6px;opacity:.7}
 
+/* ── CONTEXT BANNER ── */
+.ctx-banner{display:flex;align-items:center;gap:10px;padding:9px 16px;background:rgba(196,154,60,.07);border:1px solid rgba(196,154,60,.18);border-radius:9px;margin-bottom:20px;flex-wrap:wrap}
+.ctx-label{font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.4px}
+.ctx-tag{display:flex;align-items:center;gap:5px;background:rgba(196,154,60,.12);border:1px solid rgba(196,154,60,.25);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;color:var(--dourado)}
+.ctx-tag .ctx-dot{width:7px;height:7px;border-radius:50%;background:var(--dourado);flex-shrink:0}
+.ctx-edit{font-size:11px;color:var(--txt2);cursor:pointer;margin-left:auto;text-decoration:underline}
+.ctx-edit:hover{color:var(--bege)}
+.ctx-nosel{font-size:12px;color:var(--txt2);font-style:italic}
+
+/* ── SECTOR SELECT HIGHLIGHT ── */
+.field select option{background:#0E2018;color:var(--txt)}
+.field-required label::after{content:' *';color:var(--dourado);font-size:10px}
+
 /* ── RESPONSIVE ── */
 @media(max-width:700px){
   main{padding:20px 16px}
@@ -220,6 +233,11 @@ main{padding:28px 32px;max-width:1300px;margin:0 auto}
   <div class="hs-label">Saúde Geral</div>
   <div class="hs-items" id="healthItems">
     <span class="hs-item"><span class="hs-dot" style="background:var(--cinza)"></span>Aguardando dados...</span>
+  </div>
+  <div id="ctxPill" style="display:none;align-items:center;gap:6px;white-space:nowrap">
+    <span style="font-size:10px;color:var(--txt2);font-weight:700;text-transform:uppercase;letter-spacing:.4px">Benchmark:</span>
+    <span id="ctxSectorPill" class="ctx-tag" style="font-size:10px;padding:2px 9px"><span class="ctx-dot"></span><span id="ctxSectorText"></span></span>
+    <span id="ctxRegionPill" class="ctx-tag" style="font-size:10px;padding:2px 9px;background:rgba(61,122,87,.12);border-color:rgba(61,122,87,.25);color:var(--verde-claro)"><span id="ctxRegionText"></span></span>
   </div>
   <div class="health-score">
     <div>
@@ -310,6 +328,42 @@ main{padding:28px 32px;max-width:1300px;margin:0 auto}
 
 <!-- ══════════ TAB: DADOS ══════════ -->
 <div class="tab-panel" id="panel-dados">
+
+  <div class="input-group" style="border-color:rgba(196,154,60,.35)">
+    <div class="input-group-title">🏢 Contexto do Negócio <span style="font-size:10px;font-weight:400;color:var(--txt2);text-transform:none;letter-spacing:0"> — define os benchmarks setoriais de comparação</span></div>
+    <div class="input-grid">
+      <div class="field field-required">
+        <label>Setor de Atuação</label>
+        <select id="i_setor" onchange="autoCalc()">
+          <option value="geral">Geral (todos os setores)</option>
+          <option value="varejo">Comércio Varejista</option>
+          <option value="atacado">Comércio Atacadista</option>
+          <option value="servicos">Serviços (B2B / B2C)</option>
+          <option value="industria">Indústria / Manufatura</option>
+          <option value="construcao">Construção Civil</option>
+          <option value="tecnologia">Tecnologia / TI / SaaS</option>
+          <option value="alimentacao">Alimentação &amp; Restaurantes</option>
+          <option value="saude">Saúde &amp; Clínicas</option>
+          <option value="agro">Agronegócio</option>
+          <option value="imobiliario">Imobiliário</option>
+          <option value="transporte">Transporte &amp; Logística</option>
+          <option value="educacao">Educação</option>
+        </select>
+        <div class="field-hint">Benchmarks ajustados à realidade do seu setor</div>
+      </div>
+      <div class="field field-required">
+        <label>Região de Operação</label>
+        <select id="i_regiao" onchange="autoCalc()">
+          <option value="sudeste">Sudeste (SP, RJ, MG, ES)</option>
+          <option value="sul">Sul (RS, SC, PR)</option>
+          <option value="centro_oeste">Centro-Oeste (GO, MT, MS, DF)</option>
+          <option value="nordeste">Nordeste (BA, PE, CE e demais)</option>
+          <option value="norte">Norte (AM, PA e demais)</option>
+        </select>
+        <div class="field-hint">Contexto regional afeta prazos e margens</div>
+      </div>
+    </div>
+  </div>
 
   <div class="input-group">
     <div class="input-group-title">📋 Demonstrativo de Resultados (DRE)</div>
@@ -470,7 +524,8 @@ function saveData() {
   var d = {};
   ['i_rl','i_cmv','i_desp','i_ebitda','i_ll','i_df',
    'i_caixa','i_cr','i_est','i_ac','i_at',
-   'i_cp','i_pc','i_pt','i_pl','i_div','i_meses'].forEach(function(id) {
+   'i_cp','i_pc','i_pt','i_pl','i_div','i_meses',
+   'i_setor','i_regiao'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) d[id] = el.value;
   });
@@ -528,9 +583,7 @@ function importBackup(inp) {
 function switchTab(name, el) {
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
   document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
-  // find the tab element
-  var tabs = document.querySelectorAll('.tab');
-  tabs.forEach(function(t){
+  document.querySelectorAll('.tab').forEach(function(t){
     if (t.getAttribute('onclick') && t.getAttribute('onclick').indexOf("'"+name+"'") > -1) t.classList.add('active');
   });
   var panel = document.getElementById('panel-'+name);
@@ -539,6 +592,7 @@ function switchTab(name, el) {
 
 // ─── HELPERS ───────────────────────────────────────────────
 function n(id) { var v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; }
+function sv(id) { var el = document.getElementById(id); return el ? el.value : ''; }
 function fmtN(v, decimals, suffix) {
   if (v === null || v === undefined || isNaN(v)) return '—';
   return v.toFixed(decimals !== undefined ? decimals : 1) + (suffix || '');
@@ -548,18 +602,299 @@ function fmtBRL(v) {
   return 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
 }
 
-function scoreKpi(val, thresholds, reverse) {
-  // thresholds: [critical_threshold, attention_threshold, good_threshold, excellent_threshold]
-  if (val === null || isNaN(val)) return 0;
-  if (!reverse) {
-    if (val >= thresholds[3]) return 4;
-    if (val >= thresholds[2]) return 3;
-    if (val >= thresholds[1]) return 2;
+// ─── SECTOR / REGION LABELS ────────────────────────────────
+var SECTOR_LABELS = {
+  geral:'Geral', varejo:'Comércio Varejista', atacado:'Comércio Atacadista',
+  servicos:'Serviços', industria:'Indústria', construcao:'Construção Civil',
+  tecnologia:'Tecnologia / TI', alimentacao:'Alimentação', saude:'Saúde & Clínicas',
+  agro:'Agronegócio', imobiliario:'Imobiliário', transporte:'Transporte & Log.',
+  educacao:'Educação'
+};
+var REGION_LABELS = {
+  sudeste:'Sudeste', sul:'Sul', centro_oeste:'Centro-Oeste',
+  nordeste:'Nordeste', norte:'Norte'
+};
+
+// ─── SECTOR BENCHMARKS ────────────────────────────────────
+// forward (higher=better):  { excellent, good, attention, ref }
+// reverse (lower=better):   { excellent, good, attention, reverse:true, ref }
+var SECTOR_BM = {
+  geral: {
+    liq_corrente:    { excellent:2.0, good:1.5, attention:1.0, ref:'> 1,5×' },
+    liq_seca:        { excellent:1.5, good:1.0, attention:0.8, ref:'> 1,0×' },
+    liq_imediata:    { excellent:0.8, good:0.5, attention:0.2, ref:'> 0,5×' },
+    margem_bruta:    { excellent:55, good:40, attention:20, ref:'> 40%' },
+    margem_ebitda:   { excellent:30, good:20, attention:10, ref:'> 20%' },
+    margem_liquida:  { excellent:15, good:10, attention:5,  ref:'> 10%' },
+    roe:             { excellent:30, good:20, attention:10, ref:'> 20%' },
+    endiv_geral:     { excellent:35, good:50, attention:65, reverse:true, ref:'< 50%' },
+    div_ebitda:      { excellent:1.0, good:2.0, attention:3.5, reverse:true, ref:'< 2,0×' },
+    cobertura_juros: { excellent:5.0, good:3.0, attention:1.5, ref:'> 3,0×' },
+    pmr:             { excellent:15, good:30, attention:50, reverse:true, ref:'< 30 dias' },
+    pmp:             { excellent:60, good:45, attention:25, ref:'> 45 dias' },
+    giro_estoque:    { excellent:15, good:30, attention:60, reverse:true, ref:'< 30 dias' },
+    ciclo_financeiro:{ excellent:10, good:30, attention:60, reverse:true, ref:'< 30 dias' },
+    cg_liquido:      { special:'positive', ref:'Positivo' }
+  },
+  varejo: {
+    liq_corrente:    { excellent:1.8, good:1.3, attention:0.9, ref:'> 1,3×' },
+    liq_seca:        { excellent:1.2, good:0.8, attention:0.5, ref:'> 0,8×' },
+    liq_imediata:    { excellent:0.6, good:0.3, attention:0.15, ref:'> 0,3×' },
+    margem_bruta:    { excellent:50, good:32, attention:20, ref:'32–50%' },
+    margem_ebitda:   { excellent:15, good:8, attention:4, ref:'8–15%' },
+    margem_liquida:  { excellent:10, good:5, attention:2, ref:'5–10%' },
+    roe:             { excellent:28, good:18, attention:9, ref:'> 18%' },
+    endiv_geral:     { excellent:40, good:55, attention:68, reverse:true, ref:'< 55%' },
+    div_ebitda:      { excellent:1.5, good:2.5, attention:4.0, reverse:true, ref:'< 2,5×' },
+    cobertura_juros: { excellent:4.0, good:2.5, attention:1.3, ref:'> 2,5×' },
+    pmr:             { excellent:12, good:28, attention:45, reverse:true, ref:'< 28 dias' },
+    pmp:             { excellent:60, good:40, attention:20, ref:'> 40 dias' },
+    giro_estoque:    { excellent:18, good:38, attention:65, reverse:true, ref:'< 38 dias' },
+    ciclo_financeiro:{ excellent:5, good:22, attention:50, reverse:true, ref:'< 22 dias' }
+  },
+  atacado: {
+    liq_corrente:    { excellent:1.9, good:1.4, attention:1.0, ref:'> 1,4×' },
+    liq_seca:        { excellent:1.3, good:0.9, attention:0.6, ref:'> 0,9×' },
+    liq_imediata:    { excellent:0.5, good:0.25, attention:0.1, ref:'> 0,25×' },
+    margem_bruta:    { excellent:28, good:18, attention:10, ref:'18–28%' },
+    margem_ebitda:   { excellent:10, good:5, attention:2, ref:'5–10%' },
+    margem_liquida:  { excellent:6, good:3, attention:1, ref:'3–6%' },
+    roe:             { excellent:25, good:15, attention:7, ref:'> 15%' },
+    endiv_geral:     { excellent:42, good:58, attention:72, reverse:true, ref:'< 58%' },
+    div_ebitda:      { excellent:1.5, good:2.5, attention:4.5, reverse:true, ref:'< 2,5×' },
+    cobertura_juros: { excellent:4.0, good:2.5, attention:1.3, ref:'> 2,5×' },
+    pmr:             { excellent:18, good:38, attention:58, reverse:true, ref:'< 38 dias' },
+    pmp:             { excellent:70, good:50, attention:28, ref:'> 50 dias' },
+    giro_estoque:    { excellent:14, good:28, attention:50, reverse:true, ref:'< 28 dias' },
+    ciclo_financeiro:{ excellent:0, good:18, attention:40, reverse:true, ref:'< 18 dias' }
+  },
+  servicos: {
+    liq_corrente:    { excellent:2.2, good:1.6, attention:1.1, ref:'> 1,6×' },
+    liq_seca:        { excellent:2.0, good:1.5, attention:1.0, ref:'> 1,5×' },
+    liq_imediata:    { excellent:1.0, good:0.6, attention:0.3, ref:'> 0,6×' },
+    margem_bruta:    { excellent:70, good:52, attention:36, ref:'52–70%' },
+    margem_ebitda:   { excellent:32, good:20, attention:10, ref:'20–32%' },
+    margem_liquida:  { excellent:22, good:13, attention:6, ref:'13–22%' },
+    roe:             { excellent:35, good:22, attention:11, ref:'> 22%' },
+    endiv_geral:     { excellent:28, good:42, attention:58, reverse:true, ref:'< 42%' },
+    div_ebitda:      { excellent:0.8, good:1.5, attention:2.5, reverse:true, ref:'< 1,5×' },
+    cobertura_juros: { excellent:6.0, good:4.0, attention:2.0, ref:'> 4,0×' },
+    pmr:             { excellent:18, good:32, attention:52, reverse:true, ref:'< 32 dias' },
+    pmp:             { excellent:55, good:40, attention:20, ref:'> 40 dias' },
+    giro_estoque:    { excellent:8, good:18, attention:32, reverse:true, ref:'N/A (serviços)' },
+    ciclo_financeiro:{ excellent:8, good:28, attention:52, reverse:true, ref:'< 28 dias' }
+  },
+  industria: {
+    liq_corrente:    { excellent:2.0, good:1.5, attention:1.0, ref:'> 1,5×' },
+    liq_seca:        { excellent:1.3, good:0.9, attention:0.6, ref:'> 0,9×' },
+    liq_imediata:    { excellent:0.6, good:0.3, attention:0.15, ref:'> 0,3×' },
+    margem_bruta:    { excellent:55, good:38, attention:22, ref:'38–55%' },
+    margem_ebitda:   { excellent:25, good:14, attention:7, ref:'14–25%' },
+    margem_liquida:  { excellent:15, good:7, attention:3, ref:'7–15%' },
+    roe:             { excellent:28, good:18, attention:9, ref:'> 18%' },
+    endiv_geral:     { excellent:42, good:58, attention:72, reverse:true, ref:'< 58%' },
+    div_ebitda:      { excellent:1.2, good:2.0, attention:3.5, reverse:true, ref:'< 2,0×' },
+    cobertura_juros: { excellent:5.0, good:3.0, attention:1.5, ref:'> 3,0×' },
+    pmr:             { excellent:22, good:42, attention:68, reverse:true, ref:'< 42 dias' },
+    pmp:             { excellent:75, good:55, attention:32, ref:'> 55 dias' },
+    giro_estoque:    { excellent:28, good:58, attention:90, reverse:true, ref:'< 58 dias' },
+    ciclo_financeiro:{ excellent:12, good:38, attention:68, reverse:true, ref:'< 38 dias' }
+  },
+  construcao: {
+    liq_corrente:    { excellent:1.8, good:1.3, attention:0.9, ref:'> 1,3×' },
+    liq_seca:        { excellent:1.5, good:1.1, attention:0.7, ref:'> 1,1×' },
+    liq_imediata:    { excellent:0.5, good:0.25, attention:0.1, ref:'> 0,2×' },
+    margem_bruta:    { excellent:48, good:30, attention:16, ref:'30–48%' },
+    margem_ebitda:   { excellent:22, good:12, attention:5, ref:'12–22%' },
+    margem_liquida:  { excellent:18, good:9, attention:3, ref:'9–18%' },
+    roe:             { excellent:30, good:20, attention:9, ref:'> 20%' },
+    endiv_geral:     { excellent:45, good:62, attention:76, reverse:true, ref:'< 62%' },
+    div_ebitda:      { excellent:1.5, good:2.5, attention:4.0, reverse:true, ref:'< 2,5×' },
+    cobertura_juros: { excellent:4.0, good:2.5, attention:1.2, ref:'> 2,5×' },
+    pmr:             { excellent:22, good:52, attention:88, reverse:true, ref:'< 52 dias' },
+    pmp:             { excellent:70, good:50, attention:28, ref:'> 50 dias' },
+    giro_estoque:    { excellent:28, good:62, attention:95, reverse:true, ref:'< 62 dias' },
+    ciclo_financeiro:{ excellent:8, good:42, attention:78, reverse:true, ref:'< 42 dias' }
+  },
+  tecnologia: {
+    liq_corrente:    { excellent:2.5, good:2.0, attention:1.3, ref:'> 2,0×' },
+    liq_seca:        { excellent:2.3, good:1.8, attention:1.1, ref:'> 1,8×' },
+    liq_imediata:    { excellent:1.2, good:0.8, attention:0.4, ref:'> 0,8×' },
+    margem_bruta:    { excellent:80, good:65, attention:46, ref:'65–80%' },
+    margem_ebitda:   { excellent:40, good:26, attention:12, ref:'26–40%' },
+    margem_liquida:  { excellent:28, good:16, attention:7, ref:'16–28%' },
+    roe:             { excellent:40, good:25, attention:12, ref:'> 25%' },
+    endiv_geral:     { excellent:22, good:38, attention:54, reverse:true, ref:'< 38%' },
+    div_ebitda:      { excellent:0.8, good:1.5, attention:2.5, reverse:true, ref:'< 1,5×' },
+    cobertura_juros: { excellent:7.0, good:4.5, attention:2.0, ref:'> 4,5×' },
+    pmr:             { excellent:15, good:30, attention:48, reverse:true, ref:'< 30 dias' },
+    pmp:             { excellent:55, good:40, attention:20, ref:'> 40 dias' },
+    giro_estoque:    { excellent:8, good:18, attention:32, reverse:true, ref:'N/A (software)' },
+    ciclo_financeiro:{ excellent:5, good:22, attention:42, reverse:true, ref:'< 22 dias' }
+  },
+  alimentacao: {
+    liq_corrente:    { excellent:1.6, good:1.2, attention:0.8, ref:'> 1,2×' },
+    liq_seca:        { excellent:1.0, good:0.7, attention:0.4, ref:'> 0,7×' },
+    liq_imediata:    { excellent:0.5, good:0.3, attention:0.15, ref:'> 0,3×' },
+    margem_bruta:    { excellent:55, good:38, attention:22, ref:'38–55%' },
+    margem_ebitda:   { excellent:18, good:10, attention:5, ref:'10–18%' },
+    margem_liquida:  { excellent:12, good:6, attention:2, ref:'6–12%' },
+    roe:             { excellent:30, good:20, attention:9, ref:'> 20%' },
+    endiv_geral:     { excellent:40, good:56, attention:70, reverse:true, ref:'< 56%' },
+    div_ebitda:      { excellent:1.2, good:2.0, attention:3.5, reverse:true, ref:'< 2,0×' },
+    cobertura_juros: { excellent:5.0, good:3.0, attention:1.5, ref:'> 3,0×' },
+    pmr:             { excellent:10, good:20, attention:32, reverse:true, ref:'< 20 dias' },
+    pmp:             { excellent:55, good:38, attention:18, ref:'> 38 dias' },
+    giro_estoque:    { excellent:4, good:10, attention:20, reverse:true, ref:'< 10 dias' },
+    ciclo_financeiro:{ excellent:0, good:8, attention:22, reverse:true, ref:'< 8 dias' }
+  },
+  saude: {
+    liq_corrente:    { excellent:2.2, good:1.6, attention:1.1, ref:'> 1,6×' },
+    liq_seca:        { excellent:2.0, good:1.5, attention:1.0, ref:'> 1,5×' },
+    liq_imediata:    { excellent:0.9, good:0.6, attention:0.3, ref:'> 0,6×' },
+    margem_bruta:    { excellent:70, good:55, attention:36, ref:'55–70%' },
+    margem_ebitda:   { excellent:30, good:18, attention:9, ref:'18–30%' },
+    margem_liquida:  { excellent:22, good:13, attention:5, ref:'13–22%' },
+    roe:             { excellent:32, good:22, attention:10, ref:'> 22%' },
+    endiv_geral:     { excellent:32, good:48, attention:62, reverse:true, ref:'< 48%' },
+    div_ebitda:      { excellent:1.0, good:1.8, attention:3.0, reverse:true, ref:'< 1,8×' },
+    cobertura_juros: { excellent:6.0, good:3.5, attention:1.8, ref:'> 3,5×' },
+    pmr:             { excellent:12, good:28, attention:48, reverse:true, ref:'< 28 dias' },
+    pmp:             { excellent:55, good:40, attention:20, ref:'> 40 dias' },
+    giro_estoque:    { excellent:18, good:38, attention:62, reverse:true, ref:'< 38 dias' },
+    ciclo_financeiro:{ excellent:4, good:20, attention:42, reverse:true, ref:'< 20 dias' }
+  },
+  agro: {
+    liq_corrente:    { excellent:1.9, good:1.4, attention:0.9, ref:'> 1,4×' },
+    liq_seca:        { excellent:1.2, good:0.8, attention:0.5, ref:'> 0,8×' },
+    liq_imediata:    { excellent:0.5, good:0.25, attention:0.1, ref:'> 0,2×' },
+    margem_bruta:    { excellent:50, good:33, attention:18, ref:'33–50%' },
+    margem_ebitda:   { excellent:30, good:18, attention:8, ref:'18–30%' },
+    margem_liquida:  { excellent:20, good:10, attention:4, ref:'10–20%' },
+    roe:             { excellent:28, good:18, attention:8, ref:'> 18%' },
+    endiv_geral:     { excellent:42, good:58, attention:72, reverse:true, ref:'< 58%' },
+    div_ebitda:      { excellent:1.5, good:2.5, attention:4.0, reverse:true, ref:'< 2,5×' },
+    cobertura_juros: { excellent:4.0, good:2.5, attention:1.2, ref:'> 2,5×' },
+    pmr:             { excellent:22, good:52, attention:88, reverse:true, ref:'< 52 dias' },
+    pmp:             { excellent:80, good:60, attention:32, ref:'> 60 dias' },
+    giro_estoque:    { excellent:42, good:88, attention:148, reverse:true, ref:'< 88 dias' },
+    ciclo_financeiro:{ excellent:18, good:52, attention:98, reverse:true, ref:'< 52 dias' }
+  },
+  imobiliario: {
+    liq_corrente:    { excellent:1.8, good:1.3, attention:0.8, ref:'> 1,3×' },
+    liq_seca:        { excellent:1.6, good:1.1, attention:0.7, ref:'> 1,1×' },
+    liq_imediata:    { excellent:0.4, good:0.2, attention:0.08, ref:'> 0,2×' },
+    margem_bruta:    { excellent:65, good:48, attention:28, ref:'48–65%' },
+    margem_ebitda:   { excellent:45, good:30, attention:14, ref:'30–45%' },
+    margem_liquida:  { excellent:38, good:22, attention:8, ref:'22–38%' },
+    roe:             { excellent:30, good:20, attention:9, ref:'> 20%' },
+    endiv_geral:     { excellent:52, good:68, attention:82, reverse:true, ref:'< 68%' },
+    div_ebitda:      { excellent:2.0, good:3.5, attention:6.0, reverse:true, ref:'< 3,5×' },
+    cobertura_juros: { excellent:3.5, good:2.0, attention:1.0, ref:'> 2,0×' },
+    pmr:             { excellent:22, good:52, attention:118, reverse:true, ref:'< 52 dias' },
+    pmp:             { excellent:65, good:45, attention:22, ref:'> 45 dias' },
+    giro_estoque:    { excellent:88, good:178, attention:362, reverse:true, ref:'180–365 dias' },
+    ciclo_financeiro:{ excellent:28, good:78, attention:178, reverse:true, ref:'< 78 dias' }
+  },
+  transporte: {
+    liq_corrente:    { excellent:1.7, good:1.3, attention:0.9, ref:'> 1,3×' },
+    liq_seca:        { excellent:1.5, good:1.1, attention:0.7, ref:'> 1,1×' },
+    liq_imediata:    { excellent:0.6, good:0.35, attention:0.15, ref:'> 0,35×' },
+    margem_bruta:    { excellent:40, good:26, attention:13, ref:'26–40%' },
+    margem_ebitda:   { excellent:20, good:12, attention:5, ref:'12–20%' },
+    margem_liquida:  { excellent:12, good:6, attention:2, ref:'6–12%' },
+    roe:             { excellent:25, good:15, attention:7, ref:'> 15%' },
+    endiv_geral:     { excellent:42, good:58, attention:72, reverse:true, ref:'< 58%' },
+    div_ebitda:      { excellent:1.5, good:2.5, attention:4.0, reverse:true, ref:'< 2,5×' },
+    cobertura_juros: { excellent:4.5, good:3.0, attention:1.5, ref:'> 3,0×' },
+    pmr:             { excellent:18, good:38, attention:58, reverse:true, ref:'< 38 dias' },
+    pmp:             { excellent:60, good:45, attention:22, ref:'> 45 dias' },
+    giro_estoque:    { excellent:8, good:18, attention:32, reverse:true, ref:'N/A (transp.)' },
+    ciclo_financeiro:{ excellent:4, good:20, attention:42, reverse:true, ref:'< 20 dias' }
+  },
+  educacao: {
+    liq_corrente:    { excellent:2.0, good:1.6, attention:1.1, ref:'> 1,6×' },
+    liq_seca:        { excellent:1.9, good:1.5, attention:1.0, ref:'> 1,5×' },
+    liq_imediata:    { excellent:1.0, good:0.6, attention:0.3, ref:'> 0,6×' },
+    margem_bruta:    { excellent:75, good:60, attention:40, ref:'60–75%' },
+    margem_ebitda:   { excellent:32, good:20, attention:9, ref:'20–32%' },
+    margem_liquida:  { excellent:25, good:15, attention:6, ref:'15–25%' },
+    roe:             { excellent:30, good:20, attention:9, ref:'> 20%' },
+    endiv_geral:     { excellent:28, good:44, attention:60, reverse:true, ref:'< 44%' },
+    div_ebitda:      { excellent:0.8, good:1.5, attention:2.5, reverse:true, ref:'< 1,5×' },
+    cobertura_juros: { excellent:6.0, good:4.0, attention:2.0, ref:'> 4,0×' },
+    pmr:             { excellent:10, good:22, attention:38, reverse:true, ref:'< 22 dias' },
+    pmp:             { excellent:55, good:38, attention:18, ref:'> 38 dias' },
+    giro_estoque:    { excellent:8, good:18, attention:32, reverse:true, ref:'N/A (educação)' },
+    ciclo_financeiro:{ excellent:4, good:18, attention:38, reverse:true, ref:'< 18 dias' }
+  }
+};
+
+// ─── REGION MODIFIERS ─────────────────────────────────────
+// pmr_days: added to PMR/giro/ciclo thresholds (more lenient for slower-paying regions)
+// pmp_days: subtracted from PMP thresholds (suppliers less flexible)
+// margins:  added to margin thresholds (more lenient for higher-cost regions)
+var REGION_MOD = {
+  sudeste:      { pmr_days: 0,   pmp_days: 0,  margins: 0 },
+  sul:          { pmr_days: -3,  pmp_days: 2,  margins: 1.0 },
+  centro_oeste: { pmr_days: 5,   pmp_days: -3, margins: 0 },
+  nordeste:     { pmr_days: 12,  pmp_days: -5, margins: -1.5 },
+  norte:        { pmr_days: 18,  pmp_days: -8, margins: -2.5 }
+};
+
+// ─── BENCHMARK LOOKUP ─────────────────────────────────────
+function getBM(kpiKey, sector, region) {
+  var sectorData = SECTOR_BM[sector] || SECTOR_BM.geral;
+  var base = sectorData[kpiKey] || SECTOR_BM.geral[kpiKey];
+  if (!base) return null;
+  if (base.special) return base; // cg_liquido special case
+
+  var rm = REGION_MOD[region] || REGION_MOD.sudeste;
+  var bm = { excellent: base.excellent, good: base.good, attention: base.attention,
+             reverse: base.reverse || false, ref: base.ref };
+
+  // Apply region modifiers
+  if (kpiKey === 'pmr' || kpiKey === 'giro_estoque' || kpiKey === 'ciclo_financeiro') {
+    bm.excellent = Math.max(0, bm.excellent + rm.pmr_days);
+    bm.good      = Math.max(0, bm.good      + rm.pmr_days);
+    bm.attention = Math.max(0, bm.attention + rm.pmr_days);
+    // Update ref string
+    bm.ref = '< ' + Math.round(bm.good) + ' dias';
+  }
+  if (kpiKey === 'pmp') {
+    bm.excellent = Math.max(5, bm.excellent - Math.abs(rm.pmp_days));
+    bm.good      = Math.max(5, bm.good      - Math.abs(rm.pmp_days));
+    bm.attention = Math.max(5, bm.attention - Math.abs(rm.pmp_days));
+    bm.ref = '> ' + Math.round(bm.good) + ' dias';
+  }
+  if (['margem_bruta','margem_ebitda','margem_liquida'].indexOf(kpiKey) > -1) {
+    bm.excellent = bm.excellent + rm.margins;
+    bm.good      = bm.good      + rm.margins;
+    bm.attention = bm.attention + rm.margins;
+    var sym = bm.reverse ? '<' : '>';
+    bm.ref = sym + ' ' + bm.good.toFixed(0) + '%';
+  }
+  return bm;
+}
+
+function scoreKpiByBM(val, bm) {
+  if (val === null || isNaN(val) || !bm) return 0;
+  if (bm.special) {
+    // cg_liquido: special logic
+    if (val === null) return 0;
+    if (val < 0) return 1;
+    if (val === 0) return 2;
+    return val > 0 ? 3 : 2; // caller upgrades to 4 if comfortable positive
+  }
+  if (!bm.reverse) {
+    if (val >= bm.excellent) return 4;
+    if (val >= bm.good) return 3;
+    if (val >= bm.attention) return 2;
     return 1;
   } else {
-    if (val <= thresholds[0]) return 4;
-    if (val <= thresholds[1]) return 3;
-    if (val <= thresholds[2]) return 2;
+    if (val <= bm.excellent) return 4;
+    if (val <= bm.good) return 3;
+    if (val <= bm.attention) return 2;
     return 1;
   }
 }
@@ -575,172 +910,111 @@ function barPct(val, min, max) {
 function renderKpiCard(container, cfg) {
   var score = cfg.score;
   var label = score > 0 ? STATUS_LABELS[score] : 'Sem dados';
-  var valStr = cfg.valStr;
   var pct = cfg.barPct !== undefined ? cfg.barPct : (score > 0 ? score * 25 : 0);
   var card = document.createElement('div');
   card.className = 'kpi-card status-' + score;
   card.innerHTML =
     '<div class="kpi-card-accent"></div>' +
     '<div class="kpi-label">' + cfg.name + '</div>' +
-    '<div class="kpi-value">' + valStr + '</div>' +
+    '<div class="kpi-value">' + cfg.valStr + '</div>' +
     '<div><span class="kpi-badge">' + label + '</span></div>' +
     '<div class="kpi-bar-wrap"><div class="kpi-bar" style="width:' + pct + '%"></div></div>' +
-    '<div class="kpi-ref">Ref: ' + cfg.ref + '</div>' +
+    '<div class="kpi-ref" title="Benchmark setorial">⚖ ' + cfg.ref + '</div>' +
     '<div class="kpi-formula">' + cfg.formula + '</div>';
   container.appendChild(card);
 }
 
-// ─── KPI DEFINITIONS ───────────────────────────────────────
+// ─── KPI METADATA (for glossary and recommendations) ──────
 var KPI_META = {
   liq_corrente: {
     name:'Liquidez Corrente', group:'liquidez', icon:'💧',
-    ref:'Ideal > 1,5×', formula:'AC ÷ PC',
+    formula:'AC ÷ PC',
     didactic:'Mostra quantos reais a empresa tem no curto prazo para cada R$ 1 de dívida de curto prazo. Uma liquidez corrente abaixo de 1,0 significa que a empresa pode ter dificuldade em pagar as contas.',
-    bench:{ v:'> 1,5×', a:'1,0–1,5×', c:'< 1,0×' },
-    recs: {
-      title:'Liquidez em Risco',
-      actions:['Negocie prazos mais longos com fornecedores', 'Acelere o recebimento de clientes (desconto à vista)', 'Evite novos compromissos de curto prazo desnecessários', 'Avalie injeção de capital ou antecipação de recebíveis']
-    }
+    recs: { title:'Liquidez em Risco', actions:['Negocie prazos mais longos com fornecedores', 'Acelere o recebimento de clientes (desconto à vista)', 'Evite novos compromissos de curto prazo desnecessários', 'Avalie injeção de capital ou antecipação de recebíveis'] }
   },
   liq_seca: {
     name:'Liquidez Seca', group:'liquidez', icon:'🧪',
-    ref:'Ideal > 1,0×', formula:'(AC − Estoque) ÷ PC',
-    didactic:'Igual à liquidez corrente, mas desconsidera os estoques (que são menos líquidos). Mostra a capacidade de pagar dívidas sem precisar vender estoque.',
-    bench:{ v:'> 1,0×', a:'0,8–1,0×', c:'< 0,8×' },
-    recs: {
-      title:'Liquidez Seca Abaixo do Ideal',
-      actions:['Reduza estoques através de promoções estratégicas', 'Melhore a gestão de compras (just-in-time)', 'Renegecie prazos com fornecedores', 'Monitore o giro de estoque mensalmente']
-    }
+    formula:'(AC − Estoque) ÷ PC',
+    didactic:'Igual à liquidez corrente, mas desconsidera os estoques (menos líquidos). Mostra capacidade de pagar dívidas sem precisar vender estoque.',
+    recs: { title:'Liquidez Seca Abaixo do Ideal', actions:['Reduza estoques com promoções estratégicas', 'Melhore a gestão de compras (just-in-time)', 'Renegocie prazos com fornecedores', 'Monitore o giro de estoque mensalmente'] }
   },
   liq_imediata: {
     name:'Liquidez Imediata', group:'liquidez', icon:'💵',
-    ref:'Ideal > 0,3×', formula:'Caixa ÷ PC',
-    didactic:'Considera apenas caixa e equivalentes. Mostra a capacidade imediata de pagar dívidas sem vender nada. Valores muito altos também são ruins (dinheiro parado).',
-    bench:{ v:'> 0,5×', a:'0,2–0,5×', c:'< 0,2×' },
-    recs: {
-      title:'Caixa Imediato Insuficiente',
-      actions:['Mantenha reserva de emergência equivalente a 2–3 meses de despesas fixas', 'Crie uma linha de crédito pré-aprovada para emergências', 'Revise prazos de recebimento x pagamento', 'Considere aplicações de curto prazo para o caixa excedente']
-    }
+    formula:'Caixa ÷ PC',
+    didactic:'Considera apenas caixa e equivalentes. Mostra capacidade imediata de pagar dívidas sem vender nada. Valores muito altos também são ruins — dinheiro parado.',
+    recs: { title:'Caixa Imediato Insuficiente', actions:['Mantenha reserva equivalente a 2–3 meses de despesas fixas', 'Crie uma linha de crédito pré-aprovada para emergências', 'Revise prazos de recebimento vs pagamento', 'Aplique caixa excedente em aplicações de curto prazo'] }
   },
   margem_bruta: {
     name:'Margem Bruta', group:'rentabilidade', icon:'📊',
-    ref:'Ideal > 40%', formula:'(RL − CMV) ÷ RL × 100',
-    didactic:'Percentual que sobra da receita após pagar o custo direto dos produtos/serviços. Uma margem bruta baixa indica que o produto tem pouco valor agregado ou o custo está alto.',
-    bench:{ v:'> 40%', a:'20–40%', c:'< 20%' },
-    recs: {
-      title:'Margem Bruta Comprimida',
-      actions:['Revise o pricing — calcule seu custo real e aplique o mark-up correto', 'Renegocie com fornecedores ou busque alternativas', 'Identifique produtos com margem negativa e descontinue', 'Foque no mix de produtos de maior margem']
-    }
+    formula:'(RL − CMV) ÷ RL × 100',
+    didactic:'Percentual que sobra da receita após pagar o custo direto dos produtos/serviços. Varia muito por setor — varejo tem margens menores que serviços. Compara sempre com o benchmark do seu setor.',
+    recs: { title:'Margem Bruta Comprimida', actions:['Revise o pricing vs. concorrência do setor', 'Renegocie com fornecedores ou busque alternativas', 'Identifique produtos com margem negativa e descontinue', 'Foque no mix de produtos de maior margem'] }
   },
   margem_ebitda: {
     name:'Margem EBITDA', group:'rentabilidade', icon:'💹',
-    ref:'Ideal > 20%', formula:'EBITDA ÷ RL × 100',
-    didactic:'Mede a geração de caixa operacional em relação à receita, antes de impostos e financiamentos. É o indicador preferido dos investidores para avaliar a eficiência operacional.',
-    bench:{ v:'> 20%', a:'10–20%', c:'< 10%' },
-    recs: {
-      title:'Geração de Caixa Operacional Fraca',
-      actions:['Identifique e corte despesas operacionais desnecessárias', 'Revise a estrutura de custos fixos', 'Busque ganhos de escala e produtividade', 'Analise os processos que mais consomem recursos sem gerar valor']
-    }
+    formula:'EBITDA ÷ RL × 100',
+    didactic:'Mede a geração de caixa operacional em relação à receita, antes de juros, impostos e depreciação. Indicador preferido por investidores para comparar eficiência entre empresas do mesmo setor.',
+    recs: { title:'Geração de Caixa Operacional Fraca', actions:['Identifique e corte despesas operacionais desnecessárias', 'Revise a estrutura de custos fixos', 'Busque ganhos de escala e produtividade', 'Analise processos que consomem recursos sem gerar valor'] }
   },
   margem_liquida: {
     name:'Margem Líquida', group:'rentabilidade', icon:'💰',
-    ref:'Ideal > 10%', formula:'Lucro Líq. ÷ RL × 100',
-    didactic:'O percentual que realmente fica para os sócios de cada R$ 1 vendido, após pagar tudo. Uma das métricas mais importantes para avaliar o sucesso real do negócio.',
-    bench:{ v:'> 10%', a:'5–10%', c:'< 5%' },
-    recs: {
-      title:'Lucro Líquido Baixo',
-      actions:['Calcule seu custo total real e revise preços', 'Reduza despesas financeiras (renegocie dívidas)', 'Otimize a carga tributária com um contador especializado', 'Implante DRE mensal para monitorar tendências']
-    }
+    formula:'Lucro Líq. ÷ RL × 100',
+    didactic:'O percentual que realmente fica para os sócios de cada R$ 1 vendido, após pagar tudo. Uma das métricas mais importantes — e que mais varia entre setores.',
+    recs: { title:'Lucro Líquido Baixo', actions:['Calcule seu custo total real e revise preços', 'Reduza despesas financeiras (renegocie dívidas)', 'Otimize a carga tributária com um contador especializado', 'Implante DRE mensal para monitorar tendências'] }
   },
   roe: {
     name:'ROE', group:'rentabilidade', icon:'🏆',
-    ref:'Ideal > 15% a.a.', formula:'Lucro Líq. ÷ PL × 100',
-    didactic:'Retorno sobre o Capital Próprio. Mostra quanto os sócios estão ganhando em relação ao que investiram na empresa. Abaixo de 10% ao ano, talvez fosse melhor deixar o dinheiro na renda fixa.',
-    bench:{ v:'> 20%', a:'10–20%', c:'< 10%' },
-    recs: {
-      title:'Retorno ao Sócio Abaixo do Esperado',
-      actions:['Aumento de rentabilidade operacional é o caminho mais sustentável', 'Avalie se há ativos subutilizados que podem ser vendidos', 'Considere alavancagem financeira com custo de dívida abaixo do ROE atual', 'Defina uma meta mínima de ROE e monitore mensalmente']
-    }
+    formula:'Lucro Líq. ÷ PL × 100',
+    didactic:'Retorno sobre o Capital Próprio. Mostra quanto os sócios estão ganhando em relação ao que investiram. Abaixo de 10% ao ano sugere que o capital renderia mais em renda fixa.',
+    recs: { title:'Retorno ao Sócio Abaixo do Esperado', actions:['Aumente a rentabilidade operacional', 'Avalie se há ativos subutilizados que podem ser vendidos', 'Considere alavancagem com custo de dívida abaixo do ROE atual', 'Defina uma meta mínima de ROE e monitore mensalmente'] }
   },
   endiv_geral: {
     name:'Endividamento Geral', group:'endividamento', icon:'⚠️',
-    ref:'Ideal < 50%', formula:'PT ÷ AT × 100',
-    didactic:'Percentual do ativo total financiado por terceiros (dívidas). Acima de 70% indica que a empresa depende muito de capital alheio e pode ter dificuldade de crédito.',
-    bench:{ v:'< 40%', a:'40–60%', c:'> 60%' },
-    recs: {
-      title:'Alavancagem Excessiva',
-      actions:['Priorize amortização das dívidas mais caras', 'Evite novos empréstimos enquanto o indicador estiver alto', 'Aporte de capital pelos sócios pode melhorar o índice', 'Venda de ativos não estratégicos reduz passivo']
-    }
+    formula:'PT ÷ AT × 100',
+    didactic:'Percentual do ativo total financiado por terceiros. Setores intensivos em capital (indústria, construção) toleram mais. Serviços e tech devem manter índices mais baixos.',
+    recs: { title:'Alavancagem Excessiva', actions:['Priorize amortização das dívidas mais caras', 'Evite novos empréstimos enquanto o indicador estiver alto', 'Aporte de capital pelos sócios melhora o índice', 'Venda de ativos não estratégicos reduz passivo'] }
   },
   div_ebitda: {
     name:'Dívida / EBITDA', group:'endividamento', icon:'📉',
-    ref:'Ideal < 2,0×', formula:'Dívida Fin. ÷ EBITDA anual',
-    didactic:'Quantos anos de geração de caixa operacional seriam necessários para pagar toda a dívida. Bancos geralmente limitam crédito quando este índice supera 3–4×.',
-    bench:{ v:'< 1,5×', a:'1,5–3,0×', c:'> 3,0×' },
-    recs: {
-      title:'Relação Dívida/EBITDA Elevada',
-      actions:['Aumente o EBITDA reduzindo custos operacionais', 'Amortize dívida com o caixa livre gerado', 'Renegocie taxas e prazos com credores', 'Evite distribuição de lucros até normalizar o indicador']
-    }
+    formula:'Dívida Fin. ÷ EBITDA anual',
+    didactic:'Quantos anos de geração de caixa seriam necessários para pagar toda a dívida. Bancos geralmente limitam crédito quando supera 3–4×. O limite varia por setor.',
+    recs: { title:'Relação Dívida/EBITDA Elevada', actions:['Aumente o EBITDA reduzindo custos operacionais', 'Amortize dívida com o caixa livre gerado', 'Renegocie taxas e prazos com credores', 'Evite distribuição de lucros até normalizar o indicador'] }
   },
   cobertura_juros: {
     name:'Cobertura de Juros', group:'endividamento', icon:'🛡️',
-    ref:'Ideal > 3,0×', formula:'EBITDA ÷ Despesas Financeiras',
-    didactic:'Quantas vezes o resultado operacional cobre as despesas com juros. Abaixo de 1,5× é sinal de alerta sério — a empresa pode não conseguir pagar os juros da dívida.',
-    bench:{ v:'> 4,0×', a:'2,0–4,0×', c:'< 2,0×' },
-    recs: {
-      title:'Capacidade de Pagar Juros em Risco',
-      actions:['Renegocie taxas de juros com os credores', 'Refinancie dívidas caras por linhas mais baratas (ex: FGI, BNDES)', 'Foco urgente em aumentar o EBITDA', 'Avalie carência em financiamentos para aliviar fluxo']
-    }
+    formula:'EBITDA ÷ Despesas Financeiras',
+    didactic:'Quantas vezes o resultado operacional cobre as despesas com juros. Abaixo de 1,5× é sinal de alerta — a empresa pode não conseguir pagar os juros da dívida.',
+    recs: { title:'Capacidade de Pagar Juros em Risco', actions:['Renegocie taxas de juros com os credores', 'Refinancie dívidas por linhas mais baratas (FGI, BNDES)', 'Foco urgente em aumentar o EBITDA', 'Avalie carência em financiamentos para aliviar o fluxo'] }
   },
   pmr: {
     name:'Prazo Médio Recebimento', group:'eficiencia', icon:'📥',
-    ref:'Ideal < 30 dias', formula:'(CR ÷ RL) × dias do período',
-    didactic:'Quantos dias em média a empresa leva para receber seus clientes. Quanto menor, melhor — dinheiro parado no cliente é capital de giro desperdiçado.',
-    bench:{ v:'< 20d', a:'20–45d', c:'> 45d' },
-    recs: {
-      title:'Recebimento Lento',
-      actions:['Ofereça desconto para pagamento à vista ou antecipado', 'Implante régua de cobrança proativa (D+1, D+7, D+15)', 'Revise as condições de prazo para novos clientes', 'Considere antecipação de recebíveis em caso de aperto de caixa']
-    }
+    formula:'(CR ÷ RL) × dias do período',
+    didactic:'Dias em média para receber dos clientes. Quanto menor, melhor. O benchmark varia por setor e região — atacado e indústria naturalmente têm PMR mais longos que varejo e alimentação.',
+    recs: { title:'Recebimento Lento', actions:['Ofereça desconto para pagamento à vista ou antecipado', 'Implante régua de cobrança proativa (D+1, D+7, D+15)', 'Revise as condições de prazo para novos clientes', 'Considere antecipação de recebíveis em caso de aperto de caixa'] }
   },
   pmp: {
     name:'Prazo Médio Pagamento', group:'eficiencia', icon:'📤',
-    ref:'Ideal > 30 dias', formula:'(CP ÷ CMV) × dias do período',
-    didactic:'Quantos dias em média a empresa tem para pagar seus fornecedores. Quanto maior, melhor — mais tempo para o dinheiro trabalhar no negócio antes de sair.',
-    bench:{ v:'> 45d', a:'20–45d', c:'< 20d' },
-    recs: {
-      title:'Prazo com Fornecedores Muito Curto',
-      actions:['Negocie prazos maiores com fornecedores estratégicos', 'Ofereça maior volume ou fidelidade em troca de melhores condições', 'Revise o contrato com principais fornecedores anualmente', 'Diversifique fornecedores para ter mais poder de negociação']
-    }
+    formula:'(CP ÷ CMV) × dias do período',
+    didactic:'Dias em média para pagar fornecedores. Quanto maior, melhor — mais tempo para o dinheiro trabalhar. Variável por região: Norte/Nordeste têm fornecedores com prazos menores.',
+    recs: { title:'Prazo com Fornecedores Muito Curto', actions:['Negocie prazos maiores com fornecedores estratégicos', 'Ofereça maior volume em troca de melhores condições', 'Revise contratos com principais fornecedores anualmente', 'Diversifique fornecedores para ter mais poder de negociação'] }
   },
   giro_estoque: {
     name:'Giro do Estoque (dias)', group:'eficiencia', icon:'🔁',
-    ref:'Ideal < 30 dias', formula:'(Estoque ÷ CMV) × dias do período',
-    didactic:'Quantos dias o estoque fica parado antes de ser vendido. Estoques altos imobilizam capital e aumentam riscos de perda. Cada setor tem seu benchmark ideal.',
-    bench:{ v:'< 20d', a:'20–45d', c:'> 45d' },
-    recs: {
-      title:'Estoque com Giro Lento',
-      actions:['Implante curva ABC e foque no giro dos itens A', 'Reduza pedidos mínimos para produtos de baixo giro', 'Crie promoções para liquidar estoques parados', 'Revise a política de compras com base em demanda real']
-    }
+    formula:'(Estoque ÷ CMV) × dias do período',
+    didactic:'Dias que o estoque fica parado antes de ser vendido. Alimentação exige giro em dias; agronegócio pode ter giro de meses. Sempre compare com o benchmark do seu setor.',
+    recs: { title:'Estoque com Giro Lento', actions:['Implante curva ABC e foque no giro dos itens A', 'Reduza pedidos mínimos para produtos de baixo giro', 'Crie promoções para liquidar estoques parados', 'Revise a política de compras com base em demanda real'] }
   },
   ciclo_financeiro: {
     name:'Ciclo Financeiro (dias)', group:'eficiencia', icon:'🔄',
-    ref:'Ideal < 30 dias', formula:'PMR + Giro Est. − PMP',
-    didactic:'Quantos dias a empresa precisa financiar suas operações com capital próprio. Um ciclo financeiro negativo significa que os fornecedores financiam o negócio — situação ideal!',
-    bench:{ v:'< 15d', a:'15–45d', c:'> 45d' },
-    recs: {
-      title:'Ciclo Financeiro Alto',
-      actions:['Reduza o PMR acelerando cobranças', 'Aumente o PMP negociando com fornecedores', 'Reduza o estoque médio com compras menores e mais frequentes', 'O ideal é ter PMP > PMR + Giro de Estoque']
-    }
+    formula:'PMR + Giro Est. − PMP',
+    didactic:'Dias que a empresa precisa financiar com capital próprio. Ciclo negativo = fornecedores financiam o negócio. Cada setor tem referência diferente — supermercados têm ciclo negativo normal.',
+    recs: { title:'Ciclo Financeiro Alto', actions:['Reduza o PMR acelerando cobranças', 'Aumente o PMP negociando com fornecedores', 'Reduza estoque médio com compras menores e mais frequentes', 'Ideal: PMP > PMR + Giro de Estoque'] }
   },
   cg_liquido: {
     name:'Capital de Giro Líquido', group:'giro', icon:'💎',
-    ref:'Positivo é saudável', formula:'AC − PC',
-    didactic:'Recursos disponíveis para financiar as operações do dia a dia após pagar todas as dívidas de curto prazo. Negativo é sinal de alerta — a empresa pode não conseguir honrar seus compromissos.',
-    bench:{ v:'> 0 (positivo alto)', a:'0 (neutro)', c:'Negativo' },
-    recs: {
-      title:'Capital de Giro Negativo ou Insuficiente',
-      actions:['Renegocie prazos de dívidas de curto para longo prazo', 'Aporte de capital pelos sócios aumenta o CG', 'Reduza imobilizações e libere recursos para o giro', 'Monitore o CG semanalmente em períodos de crise']
-    }
+    formula:'AC − PC',
+    didactic:'Recursos disponíveis para financiar as operações após pagar todas as dívidas de curto prazo. Negativo é sinal de alerta — a empresa pode não conseguir honrar seus compromissos.',
+    recs: { title:'Capital de Giro Negativo ou Insuficiente', actions:['Renegocie prazos de dívidas de curto para longo prazo', 'Aporte de capital pelos sócios aumenta o CG', 'Reduza imobilizações e libere recursos para o giro', 'Monitore o CG semanalmente em períodos de crise'] }
   }
 };
 
@@ -773,106 +1047,89 @@ function calcAll() {
   var div   = n('i_div');
   var meses = parseInt(document.getElementById('i_meses').value) || 12;
   var dias  = meses * 30;
+  var sector = sv('i_setor') || 'geral';
+  var region = sv('i_regiao') || 'sudeste';
 
-  // auto-fill AC if components provided and AC is blank
   if (!ac && caixa !== null && cr !== null && est !== null) ac = caixa + cr + est;
-
-  // auto-calc EBITDA estimate if not provided
   var ebitda_est = ebitda;
-  if (ebitda_est === null && rl !== null && cmv !== null && desp !== null) {
-    ebitda_est = rl - cmv - desp;
-  }
+  if (ebitda_est === null && rl !== null && cmv !== null && desp !== null) ebitda_est = rl - cmv - desp;
 
-  // Liquidez
   var liq_corrente  = (ac !== null && pc !== null && pc > 0) ? ac / pc : null;
   var liq_seca      = (ac !== null && est !== null && pc !== null && pc > 0) ? (ac - est) / pc : null;
   var liq_imediata  = (caixa !== null && pc !== null && pc > 0) ? caixa / pc : null;
-
-  // Rentabilidade
-  var mb = (rl !== null && cmv !== null && rl > 0) ? (rl - cmv) / rl * 100 : null;
+  var mb     = (rl !== null && cmv !== null && rl > 0) ? (rl - cmv) / rl * 100 : null;
   var mebitda = (ebitda_est !== null && rl !== null && rl > 0) ? ebitda_est / rl * 100 : null;
-  var ml = (ll !== null && rl !== null && rl > 0) ? ll / rl * 100 : null;
-  var roe = (ll !== null && pl !== null && pl !== 0) ? ll / pl * 100 : null;
-
-  // Endividamento
+  var ml     = (ll !== null && rl !== null && rl > 0) ? ll / rl * 100 : null;
+  var roe    = (ll !== null && pl !== null && pl !== 0) ? ll / pl * 100 : null;
   var endiv_geral     = (pt !== null && at !== null && at > 0) ? pt / at * 100 : null;
-  var ebitda_anual    = (ebitda_est !== null) ? ebitda_est * (12 / meses) : null;
+  var ebitda_anual    = ebitda_est !== null ? ebitda_est * (12 / meses) : null;
   var div_ebitda      = (div !== null && ebitda_anual !== null && ebitda_anual > 0) ? div / ebitda_anual : null;
   var cobertura_juros = (ebitda_est !== null && df !== null && df > 0) ? ebitda_est / df : null;
-
-  // Eficiência
-  var pmr = (cr !== null && rl !== null && rl > 0) ? (cr / rl) * dias : null;
-  var pmp = (cp !== null && cmv !== null && cmv > 0) ? (cp / cmv) * dias : null;
+  var pmr       = (cr !== null && rl !== null && rl > 0) ? (cr / rl) * dias : null;
+  var pmp       = (cp !== null && cmv !== null && cmv > 0) ? (cp / cmv) * dias : null;
   var giro_dias = (est !== null && cmv !== null && cmv > 0) ? (est / cmv) * dias : null;
   var ciclo_fin = (pmr !== null && pmp !== null && giro_dias !== null) ? pmr + giro_dias - pmp : null;
-
-  // Capital de Giro
-  var cg_liq = (ac !== null && pc !== null) ? ac - pc : null;
+  var cg_liq    = (ac !== null && pc !== null) ? ac - pc : null;
 
   var res = {
     liq_corrente, liq_seca, liq_imediata,
-    margem_bruta: mb, margem_ebitda: mebitda, margem_liquida: ml, roe,
+    margem_bruta:mb, margem_ebitda:mebitda, margem_liquida:ml, roe,
     endiv_geral, div_ebitda, cobertura_juros,
-    pmr, pmp, giro_estoque: giro_dias, ciclo_financeiro: ciclo_fin,
-    cg_liquido: cg_liq
+    pmr, pmp, giro_estoque:giro_dias, ciclo_financeiro:ciclo_fin,
+    cg_liquido:cg_liq
   };
   lastCalc = res;
 
-  // Scores
-  var scores = {
-    liq_corrente:     scoreKpi(liq_corrente,  [1.0, 1.0, 1.5, 2.0], false),
-    liq_seca:         scoreKpi(liq_seca,      [0.8, 0.8, 1.0, 1.5], false),
-    liq_imediata:     scoreKpi(liq_imediata,  [0.2, 0.2, 0.5, 0.8], false),
-    margem_bruta:     scoreKpi(mb,            [10, 20, 40, 55], false),
-    margem_ebitda:    scoreKpi(mebitda,       [5, 10, 20, 30], false),
-    margem_liquida:   scoreKpi(ml,            [2, 5, 10, 15], false),
-    roe:              scoreKpi(roe,           [5, 10, 20, 30], false),
-    endiv_geral:      scoreKpi(endiv_geral,   [40, 60, 40, 30], true),
-    div_ebitda:       scoreKpi(div_ebitda,    [1.5, 3.0, 1.5, 1.0], true),
-    cobertura_juros:  scoreKpi(cobertura_juros,[2.0, 2.0, 3.0, 5.0], false),
-    pmr:              scoreKpi(pmr,           [20, 45, 20, 15], true),
-    pmp:              scoreKpi(pmp,           [45, 20, 45, 60], false),
-    giro_estoque:     scoreKpi(giro_dias,     [20, 45, 20, 15], true),
-    ciclo_financeiro: scoreKpi(ciclo_fin,     [15, 45, 15, 0], true),
-    cg_liquido:       (cg_liq === null) ? 0 : (cg_liq > 0 ? (cg_liq > (ac||1)*0.3 ? 4 : 3) : (cg_liq === 0 ? 2 : 1))
-  };
+  // Score each KPI using sector/region-specific benchmarks
+  var scores = {};
+  Object.keys(res).forEach(function(key) {
+    if (key === 'cg_liquido') {
+      scores[key] = cg_liq === null ? 0 : (cg_liq < 0 ? 1 : cg_liq === 0 ? 2 : (cg_liq > (ac||1)*0.2 ? 4 : 3));
+    } else {
+      var bm = getBM(key, sector, region);
+      scores[key] = scoreKpiByBM(res[key], bm);
+    }
+  });
 
-  renderDashboard(res, scores);
-  renderHealthStrip(scores);
+  renderDashboard(res, scores, sector, region);
+  renderHealthStrip(scores, sector, region);
   renderRecommendations(res, scores);
 }
 
 // ─── RENDER DASHBOARD ──────────────────────────────────────
-function renderDashboard(res, scores) {
+function renderDashboard(res, scores, sector, region) {
   var hasAny = Object.values(res).some(function(v){ return v !== null; });
   document.getElementById('dashEmpty').style.display = hasAny ? 'none' : '';
   document.getElementById('dashContent').style.display = hasAny ? '' : 'none';
   if (!hasAny) return;
 
+  function ref(key) { var bm = getBM(key, sector, region); return bm ? bm.ref : '—'; }
+
   renderKpiGroup('cards-liquidez', [
-    { key:'liq_corrente',  val:res.liq_corrente,  valStr:fmtN(res.liq_corrente,2,'×'), score:scores.liq_corrente,  ref:'Ideal > 1,5×',  formula:'AC ÷ PC',                    barPct:barPct(res.liq_corrente,0,3) },
-    { key:'liq_seca',      val:res.liq_seca,      valStr:fmtN(res.liq_seca,2,'×'),     score:scores.liq_seca,      ref:'Ideal > 1,0×',  formula:'(AC−Est) ÷ PC',              barPct:barPct(res.liq_seca,0,2.5) },
-    { key:'liq_imediata',  val:res.liq_imediata,  valStr:fmtN(res.liq_imediata,2,'×'), score:scores.liq_imediata,  ref:'Ideal > 0,3×',  formula:'Caixa ÷ PC',                 barPct:barPct(res.liq_imediata,0,1.5) }
+    { key:'liq_corrente', valStr:fmtN(res.liq_corrente,2,'×'),  score:scores.liq_corrente,  ref:ref('liq_corrente'),  formula:'AC ÷ PC',         barPct:barPct(res.liq_corrente,0,3) },
+    { key:'liq_seca',     valStr:fmtN(res.liq_seca,2,'×'),      score:scores.liq_seca,      ref:ref('liq_seca'),      formula:'(AC−Est) ÷ PC',   barPct:barPct(res.liq_seca,0,2.5) },
+    { key:'liq_imediata', valStr:fmtN(res.liq_imediata,2,'×'),  score:scores.liq_imediata,  ref:ref('liq_imediata'),  formula:'Caixa ÷ PC',      barPct:barPct(res.liq_imediata,0,1.5) }
   ]);
   renderKpiGroup('cards-rentabilidade', [
-    { key:'margem_bruta',   val:res.margem_bruta,   valStr:fmtN(res.margem_bruta,1,'%'),   score:scores.margem_bruta,   ref:'Ideal > 40%',   formula:'(RL−CMV) ÷ RL',         barPct:barPct(res.margem_bruta,0,70) },
-    { key:'margem_ebitda',  val:res.margem_ebitda,  valStr:fmtN(res.margem_ebitda,1,'%'),  score:scores.margem_ebitda,  ref:'Ideal > 20%',   formula:'EBITDA ÷ RL',            barPct:barPct(res.margem_ebitda,-20,50) },
-    { key:'margem_liquida', val:res.margem_liquida, valStr:fmtN(res.margem_liquida,1,'%'), score:scores.margem_liquida, ref:'Ideal > 10%',   formula:'Lucro Líq ÷ RL',         barPct:barPct(res.margem_liquida,-10,30) },
-    { key:'roe',            val:res.roe,            valStr:fmtN(res.roe,1,'%'),            score:scores.roe,            ref:'Ideal > 15% a.a.', formula:'Lucro Líq ÷ PL',      barPct:barPct(res.roe,0,40) }
+    { key:'margem_bruta',   valStr:fmtN(res.margem_bruta,1,'%'),   score:scores.margem_bruta,   ref:ref('margem_bruta'),   formula:'(RL−CMV) ÷ RL',    barPct:barPct(res.margem_bruta,-5,85) },
+    { key:'margem_ebitda',  valStr:fmtN(res.margem_ebitda,1,'%'),  score:scores.margem_ebitda,  ref:ref('margem_ebitda'),  formula:'EBITDA ÷ RL',       barPct:barPct(res.margem_ebitda,-20,50) },
+    { key:'margem_liquida', valStr:fmtN(res.margem_liquida,1,'%'), score:scores.margem_liquida, ref:ref('margem_liquida'), formula:'Lucro Líq ÷ RL',    barPct:barPct(res.margem_liquida,-10,45) },
+    { key:'roe',            valStr:fmtN(res.roe,1,'%'),            score:scores.roe,            ref:ref('roe'),            formula:'Lucro Líq ÷ PL',   barPct:barPct(res.roe,0,50) }
   ]);
   renderKpiGroup('cards-endividamento', [
-    { key:'endiv_geral',    val:res.endiv_geral,    valStr:fmtN(res.endiv_geral,1,'%'),   score:scores.endiv_geral,   ref:'Ideal < 50%',   formula:'PT ÷ AT',                 barPct:barPct(100-res.endiv_geral,0,100) },
-    { key:'div_ebitda',     val:res.div_ebitda,     valStr:fmtN(res.div_ebitda,1,'×'),    score:scores.div_ebitda,    ref:'Ideal < 2,0×',  formula:'Dívida ÷ EBITDA anual',   barPct:barPct(8-res.div_ebitda,0,8) },
-    { key:'cobertura_juros',val:res.cobertura_juros,valStr:fmtN(res.cobertura_juros,1,'×'),score:scores.cobertura_juros,ref:'Ideal > 3,0×', formula:'EBITDA ÷ Desp. Fin.',    barPct:barPct(res.cobertura_juros,0,8) }
+    { key:'endiv_geral',    valStr:fmtN(res.endiv_geral,1,'%'),    score:scores.endiv_geral,    ref:ref('endiv_geral'),    formula:'PT ÷ AT',          barPct:barPct(100-res.endiv_geral,0,100) },
+    { key:'div_ebitda',     valStr:fmtN(res.div_ebitda,1,'×'),     score:scores.div_ebitda,     ref:ref('div_ebitda'),     formula:'Dívida ÷ EBITDA',  barPct:barPct(8-(res.div_ebitda||0),0,8) },
+    { key:'cobertura_juros',valStr:fmtN(res.cobertura_juros,1,'×'),score:scores.cobertura_juros,ref:ref('cobertura_juros'),formula:'EBITDA ÷ Desp.Fin.',barPct:barPct(res.cobertura_juros,0,10) }
   ]);
   renderKpiGroup('cards-eficiencia', [
-    { key:'pmr',              val:res.pmr,              valStr:fmtN(res.pmr,0,' dias'),    score:scores.pmr,              ref:'Ideal < 30 dias',formula:'(CR÷RL)×dias',          barPct:barPct(90-res.pmr,0,90) },
-    { key:'pmp',              val:res.pmp,              valStr:fmtN(res.pmp,0,' dias'),    score:scores.pmp,              ref:'Ideal > 30 dias',formula:'(CP÷CMV)×dias',         barPct:barPct(res.pmp,0,90) },
-    { key:'giro_estoque',     val:res.giro_estoque,     valStr:fmtN(res.giro_estoque,0,' dias'), score:scores.giro_estoque,ref:'Ideal < 30 dias',formula:'(Est÷CMV)×dias',     barPct:barPct(90-res.giro_estoque,0,90) },
-    { key:'ciclo_financeiro', val:res.ciclo_financeiro, valStr:fmtN(res.ciclo_financeiro,0,' dias'),score:scores.ciclo_financeiro,ref:'Ideal < 30 dias',formula:'PMR+GiroEst−PMP', barPct:barPct(90-res.ciclo_financeiro,0,90) }
+    { key:'pmr',              valStr:fmtN(res.pmr,0,' dias'),              score:scores.pmr,              ref:ref('pmr'),              formula:'(CR÷RL)×dias',      barPct:barPct(120-(res.pmr||0),0,120) },
+    { key:'pmp',              valStr:fmtN(res.pmp,0,' dias'),              score:scores.pmp,              ref:ref('pmp'),              formula:'(CP÷CMV)×dias',     barPct:barPct(res.pmp,0,120) },
+    { key:'giro_estoque',     valStr:fmtN(res.giro_estoque,0,' dias'),     score:scores.giro_estoque,     ref:ref('giro_estoque'),     formula:'(Est÷CMV)×dias',    barPct:barPct(180-(res.giro_estoque||0),0,180) },
+    { key:'ciclo_financeiro', valStr:fmtN(res.ciclo_financeiro,0,' dias'), score:scores.ciclo_financeiro, ref:ref('ciclo_financeiro'), formula:'PMR+GiroEst−PMP',   barPct:barPct(120-(res.ciclo_financeiro||0),0,120) }
   ]);
   renderKpiGroup('cards-giro', [
-    { key:'cg_liquido', val:res.cg_liquido, valStr:fmtBRL(res.cg_liquido), score:scores.cg_liquido, ref:'Positivo é saudável', formula:'AC − PC', barPct: res.cg_liquido !== null ? (res.cg_liquido >= 0 ? Math.min(100, 50 + res.cg_liquido/Math.max(1,Math.abs(res.cg_liquido)+1)*50) : Math.max(0, 50 + res.cg_liquido/Math.max(1,Math.abs(res.cg_liquido))*50)) : 0 }
+    { key:'cg_liquido', valStr:fmtBRL(res.cg_liquido), score:scores.cg_liquido, ref:'Positivo', formula:'AC − PC',
+      barPct: res.cg_liquido !== null ? (res.cg_liquido >= 0 ? Math.min(100, 50 + res.cg_liquido/Math.max(1,Math.abs(res.cg_liquido||1))*50) : Math.max(0, 50 + res.cg_liquido/Math.max(1,Math.abs(res.cg_liquido))*50)) : 0 }
   ]);
 
   renderCharts(res, scores);
@@ -888,11 +1145,6 @@ function renderKpiGroup(containerId, items) {
 }
 
 // ─── CHARTS ────────────────────────────────────────────────
-var CHART_COLORS = {
-  verde: 'rgba(39,174,96,0.8)', amarelo: 'rgba(224,184,74,0.8)',
-  vermelho: 'rgba(192,57,43,0.8)', dourado: 'rgba(196,154,60,0.8)'
-};
-
 function dimScore(keys, scores) {
   var vals = keys.map(function(k){ return scores[k] || 0; }).filter(function(v){ return v > 0; });
   if (!vals.length) return 0;
@@ -907,23 +1159,13 @@ function renderCharts(res, scores) {
     dimScore(['pmr','pmp','giro_estoque','ciclo_financeiro'], scores),
     dimScore(['cg_liquido'], scores)
   ];
-
   var radarCtx = document.getElementById('radarChart').getContext('2d');
   if (radarChartInst) radarChartInst.destroy();
   radarChartInst = new Chart(radarCtx, {
     type:'radar',
     data:{
       labels:['Liquidez','Rentabilidade','Endividamento','Eficiência','Cap. de Giro'],
-      datasets:[{
-        data: radarData,
-        fill:true,
-        backgroundColor:'rgba(196,154,60,.2)',
-        borderColor:'rgba(196,154,60,.8)',
-        pointBackgroundColor:'rgba(196,154,60,1)',
-        pointBorderColor:'#0E2018',
-        pointHoverBackgroundColor:'#fff',
-        borderWidth:2
-      }]
+      datasets:[{ data:radarData, fill:true, backgroundColor:'rgba(196,154,60,.2)', borderColor:'rgba(196,154,60,.8)', pointBackgroundColor:'rgba(196,154,60,1)', pointBorderColor:'#0E2018', borderWidth:2 }]
     },
     options:{
       responsive:true, maintainAspectRatio:false,
@@ -935,13 +1177,11 @@ function renderCharts(res, scores) {
   var barCtx = document.getElementById('barChart').getContext('2d');
   if (barChartInst) barChartInst.destroy();
   var barLabels = [], barVals = [], barColors = [];
-  var margens = [
-    { label:'Mg. Bruta', val:res.margem_bruta, score:scores.margem_bruta },
-    { label:'Mg. EBITDA', val:res.margem_ebitda, score:scores.margem_ebitda },
-    { label:'Mg. Líquida', val:res.margem_liquida, score:scores.margem_liquida },
-    { label:'ROE', val:res.roe, score:scores.roe }
-  ];
-  margens.forEach(function(m) {
+  [{ label:'Mg. Bruta', val:res.margem_bruta, score:scores.margem_bruta },
+   { label:'Mg. EBITDA', val:res.margem_ebitda, score:scores.margem_ebitda },
+   { label:'Mg. Líquida', val:res.margem_liquida, score:scores.margem_liquida },
+   { label:'ROE', val:res.roe, score:scores.roe }
+  ].forEach(function(m) {
     if (m.val !== null) {
       barLabels.push(m.label);
       barVals.push(parseFloat(m.val.toFixed(1)));
@@ -951,10 +1191,7 @@ function renderCharts(res, scores) {
   });
   barChartInst = new Chart(barCtx, {
     type:'bar',
-    data:{
-      labels: barLabels,
-      datasets:[{ data:barVals, backgroundColor:barColors, borderRadius:6, borderSkipped:false }]
-    },
+    data:{ labels:barLabels, datasets:[{ data:barVals, backgroundColor:barColors, borderRadius:6, borderSkipped:false }] },
     options:{
       responsive:true, maintainAspectRatio:false, indexAxis:'y',
       plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:function(c){ return ' '+c.raw+'%'; } } }},
@@ -967,7 +1204,7 @@ function renderCharts(res, scores) {
 }
 
 // ─── HEALTH STRIP ──────────────────────────────────────────
-function renderHealthStrip(scores) {
+function renderHealthStrip(scores, sector, region) {
   var validScores = Object.values(scores).filter(function(v){ return v > 0; });
   if (!validScores.length) return;
   var avg = validScores.reduce(function(a,b){ return a+b; }, 0) / validScores.length;
@@ -982,11 +1219,21 @@ function renderHealthStrip(scores) {
   var lbMap = { 4:'Ótimo', 3:'Bom', 2:'Atenção', 1:'Crítico' };
   var html = '';
   [1,2,3,4].forEach(function(s){
-    if (counts[s] > 0) {
-      html += '<span class="hs-item"><span class="hs-dot" style="background:'+colMap[s]+'"></span>'+counts[s]+' '+lbMap[s]+'</span>';
-    }
+    if (counts[s] > 0) html += '<span class="hs-item"><span class="hs-dot" style="background:'+colMap[s]+'"></span>'+counts[s]+' '+lbMap[s]+'</span>';
   });
   document.getElementById('healthItems').innerHTML = html;
+
+  // Show context pill
+  var ctxPill = document.getElementById('ctxPill');
+  if (sector && sector !== 'geral') {
+    ctxPill.style.display = 'flex';
+    document.getElementById('ctxSectorText').textContent = SECTOR_LABELS[sector] || sector;
+    document.getElementById('ctxRegionText').textContent = REGION_LABELS[region] || region;
+  } else if (sector === 'geral') {
+    ctxPill.style.display = 'flex';
+    document.getElementById('ctxSectorText').textContent = 'Geral';
+    document.getElementById('ctxRegionText').textContent = REGION_LABELS[region] || region;
+  }
 }
 
 // ─── RECOMMENDATIONS ───────────────────────────────────────
@@ -999,93 +1246,74 @@ function renderRecommendations(res, scores) {
   var validScores = Object.values(scores).filter(function(v){ return v > 0; });
   var avg = validScores.length ? validScores.reduce(function(a,b){return a+b;},0)/validScores.length : 0;
   var scoreNum = Math.round(avg / 4 * 100);
-
   var ringClass = scoreNum >= 75 ? 's4' : scoreNum >= 55 ? 's3' : scoreNum >= 35 ? 's2' : 's1';
   var ring = document.getElementById('recRing');
   ring.className = 'rec-score-ring ' + ringClass;
   document.getElementById('recScoreNum').textContent = scoreNum;
 
   var titleMap = { s4:'Saúde Financeira Excelente', s3:'Boa Saúde com Pontos a Melhorar', s2:'Atenção: Indicadores Preocupantes', s1:'Alerta: Situação Financeira Crítica' };
-  var descMap = {
-    s4:'Parabéns! Seus indicadores estão saudáveis. Mantenha o monitoramento e busque crescimento sustentável.',
-    s3:'A maioria dos KPIs está boa. Foque nos indicadores amarelos para atingir excelência.',
-    s2:'Vários indicadores estão abaixo do ideal. Priorize as ações abaixo para estabilizar o negócio.',
-    s1:'A empresa precisa de atenção urgente em múltiplas frentes. Busque apoio de um especialista financeiro.'
-  };
+  var descMap = { s4:'Parabéns! Seus indicadores estão acima dos benchmarks setoriais. Mantenha o monitoramento e busque crescimento sustentável.', s3:'A maioria dos KPIs está boa. Foque nos indicadores amarelos para atingir excelência.', s2:'Vários indicadores estão abaixo do benchmark do setor. Priorize as ações abaixo para estabilizar o negócio.', s1:'A empresa precisa de atenção urgente em múltiplas frentes. Busque apoio de um especialista financeiro.' };
   document.getElementById('recTitle').textContent = titleMap[ringClass];
   document.getElementById('recDesc').textContent = descMap[ringClass];
 
-  // Build priority list — sort by score ascending (worst first), then by importance weight
   var importanceOrder = ['margem_liquida','cg_liquido','liq_corrente','cobertura_juros','endiv_geral','margem_bruta','margem_ebitda','roe','ciclo_financeiro','pmr','div_ebitda','liq_seca','liq_imediata','pmp','giro_estoque'];
   var items = [];
   importanceOrder.forEach(function(key) {
     var s = scores[key];
-    if (s > 0 && s < 4) {
-      items.push({ key:key, score:s });
-    }
+    if (s > 0 && s < 4) items.push({ key:key, score:s });
   });
-  // Sort: critical (1) first, then attention (2), then good (3)
   items.sort(function(a,b){ return a.score - b.score; });
 
   var list = document.getElementById('recList');
   list.innerHTML = '';
   if (!items.length) {
-    list.innerHTML = '<div class="rec-nodata" style="background:rgba(39,174,96,.08);border-color:rgba(39,174,96,.2)"><div style="font-size:28px;margin-bottom:8px">🎉</div><div style="font-weight:700;color:var(--verde)">Todos os KPIs estão nos níveis desejáveis!</div><div style="font-size:12px;margin-top:5px;color:var(--txt2)">Continue monitorando mensalmente para manter a saúde financeira.</div></div>';
+    list.innerHTML = '<div class="rec-nodata" style="background:rgba(39,174,96,.08);border-color:rgba(39,174,96,.2)"><div style="font-size:28px;margin-bottom:8px">🎉</div><div style="font-weight:700;color:var(--verde)">Todos os KPIs estão acima dos benchmarks setoriais!</div><div style="font-size:12px;margin-top:5px;color:var(--txt2)">Continue monitorando mensalmente para manter a saúde financeira.</div></div>';
     return;
   }
-
   items.forEach(function(item, idx) {
-    var meta = KPI_META[item.key];
-    if (!meta) return;
+    var meta = KPI_META[item.key]; if (!meta) return;
     var numClass = item.score === 1 ? 'p1' : item.score === 2 ? 'p2' : 'p3';
-    var valStr = '';
-    if (res[item.key] !== null) {
-      var v = res[item.key];
-      if (['margem_bruta','margem_ebitda','margem_liquida','roe','endiv_geral'].indexOf(item.key) > -1) valStr = v.toFixed(1) + '%';
-      else if (['liq_corrente','liq_seca','liq_imediata','div_ebitda','cobertura_juros'].indexOf(item.key) > -1) valStr = v.toFixed(2) + '×';
-      else if (item.key === 'cg_liquido') valStr = fmtBRL(v);
-      else valStr = v.toFixed(0) + ' dias';
-    }
-    var problemMap = {
-      1: 'Indicador em zona crítica (atual: ' + valStr + '). Ação imediata necessária.',
-      2: 'Indicador abaixo do ideal (atual: ' + valStr + '). Requer atenção.',
-      3: 'Indicador bom mas com espaço para melhoria (atual: ' + valStr + ').'
-    };
+    var v = res[item.key];
+    var valStr = v === null ? '' : (['margem_bruta','margem_ebitda','margem_liquida','roe','endiv_geral'].indexOf(item.key) > -1 ? v.toFixed(1)+'%' : ['liq_corrente','liq_seca','liq_imediata','div_ebitda','cobertura_juros'].indexOf(item.key) > -1 ? v.toFixed(2)+'×' : item.key === 'cg_liquido' ? fmtBRL(v) : v.toFixed(0)+' dias');
+    var problemMap = { 1:'Indicador em zona crítica vs. benchmark setorial (atual: '+valStr+'). Ação imediata necessária.', 2:'Indicador abaixo do benchmark do setor (atual: '+valStr+'). Requer atenção.', 3:'Indicador bom mas com espaço para alcançar excelência setorial (atual: '+valStr+').' };
     var actionsHtml = meta.recs.actions.map(function(a){ return '<li>'+a+'</li>'; }).join('');
     var card = document.createElement('div');
     card.className = 'rec-card';
-    card.innerHTML =
-      '<div class="rec-num '+numClass+'">'+(idx+1)+'</div>' +
-      '<div class="rec-content">' +
-        '<div class="rec-kpi-name">' + meta.name + '</div>' +
-        '<div class="rec-title">' + meta.recs.title + '</div>' +
-        '<div class="rec-problem">' + problemMap[item.score] + '</div>' +
-        '<ul class="rec-actions">' + actionsHtml + '</ul>' +
-        '<span class="rec-impact">' + (item.score===1 ? '🔴 Prioridade Alta' : item.score===2 ? '🟡 Prioridade Média' : '🟢 Oportunidade de Melhoria') + '</span>' +
-      '</div>';
+    card.innerHTML = '<div class="rec-num '+numClass+'">'+(idx+1)+'</div><div class="rec-content"><div class="rec-kpi-name">'+meta.name+'</div><div class="rec-title">'+meta.recs.title+'</div><div class="rec-problem">'+problemMap[item.score]+'</div><ul class="rec-actions">'+actionsHtml+'</ul><span class="rec-impact">'+(item.score===1?'🔴 Prioridade Alta':item.score===2?'🟡 Prioridade Média':'🟢 Oportunidade de Melhoria')+'</span></div>';
     list.appendChild(card);
   });
 }
 
 // ─── GLOSSARIO ─────────────────────────────────────────────
 function renderGlossario() {
+  var sector = sv('i_setor') || 'geral';
+  var region = sv('i_regiao') || 'sudeste';
   var grid = document.getElementById('glossarioGrid');
+  grid.innerHTML = '';
   Object.keys(KPI_META).forEach(function(key) {
     var m = KPI_META[key];
+    var bm = getBM(key, sector, region);
     var groupLabel = { liquidez:'Liquidez', rentabilidade:'Rentabilidade', endividamento:'Endividamento', eficiencia:'Eficiência Operacional', giro:'Capital de Giro' };
+    var sectorName = SECTOR_LABELS[sector] || 'Geral';
+    var bmHtml = '';
+    if (bm && !bm.special) {
+      if (!bm.reverse) {
+        bmHtml = '<span class="bench-v">✓ ≥ '+bm.excellent.toFixed(0)+(key==='roe'||key.indexOf('margem')>-1?'%':key.indexOf('liq')>-1||key.indexOf('div')>-1||key.indexOf('cobertura')>-1?'×':' dias')+'</span><span class="bench-a">⚠ ≥ '+bm.good.toFixed(0)+(key==='roe'||key.indexOf('margem')>-1?'%':key.indexOf('liq')>-1||key.indexOf('div')>-1||key.indexOf('cobertura')>-1?'×':' dias')+'</span><span class="bench-c">✗ < '+bm.attention.toFixed(0)+(key==='roe'||key.indexOf('margem')>-1?'%':key.indexOf('liq')>-1||key.indexOf('div')>-1||key.indexOf('cobertura')>-1?'×':' dias')+'</span>';
+      } else {
+        bmHtml = '<span class="bench-v">✓ ≤ '+bm.excellent.toFixed(0)+(key.indexOf('endiv')>-1?'%':key.indexOf('div_ebitda')>-1?'×':' dias')+'</span><span class="bench-a">⚠ ≤ '+bm.good.toFixed(0)+(key.indexOf('endiv')>-1?'%':key.indexOf('div_ebitda')>-1?'×':' dias')+'</span><span class="bench-c">✗ > '+bm.attention.toFixed(0)+(key.indexOf('endiv')>-1?'%':key.indexOf('div_ebitda')>-1?'×':' dias')+'</span>';
+      }
+    } else if (bm && bm.special) {
+      bmHtml = '<span class="bench-v">✓ Positivo alto</span><span class="bench-a">⚠ Neutro / baixo</span><span class="bench-c">✗ Negativo</span>';
+    }
     var card = document.createElement('div');
     card.className = 'did-card';
     card.innerHTML =
-      '<div class="did-icon">'+m.icon+'</div>' +
-      '<div class="did-group-tag">' + (groupLabel[m.group]||m.group) + '</div>' +
-      '<div class="did-title">' + m.name + '</div>' +
-      '<div class="did-body">' + m.didactic + '</div>' +
-      '<div class="did-formula">' + m.formula + '</div>' +
-      '<div class="did-bench">' +
-        '<span class="bench-v">✓ '+m.bench.v+'</span>' +
-        '<span class="bench-a">⚠ '+m.bench.a+'</span>' +
-        '<span class="bench-c">✗ '+m.bench.c+'</span>' +
-      '</div>';
+      '<div class="did-icon">'+m.icon+'</div>'+
+      '<div class="did-group-tag">'+((groupLabel[m.group]||m.group))+' • <span style="color:var(--dourado)">'+sectorName+'</span></div>'+
+      '<div class="did-title">'+m.name+'</div>'+
+      '<div class="did-body">'+m.didactic+'</div>'+
+      '<div class="did-formula">'+m.formula+'</div>'+
+      '<div class="did-bench">'+bmHtml+'</div>';
     grid.appendChild(card);
   });
 }
@@ -1094,11 +1322,15 @@ function renderGlossario() {
 document.addEventListener('DOMContentLoaded', function() {
   loadData();
   renderGlossario();
-  // recalc if data was loaded
   var hasData = ['i_rl','i_cmv','i_ac','i_pc'].some(function(id){
     var el = document.getElementById(id); return el && el.value !== '';
   });
   if (hasData) calcAll();
+  // Re-render glossary when sector/region changes
+  ['i_setor','i_regiao'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('change', renderGlossario);
+  });
 });
 </script>
 </body>

@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IAê — Sistema Integrado Financeiro</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --verde:#1B3B28;--verde-m:#2D5A3D;--verde-c:#4A7A5A;
+  --dourado:#C49A3C;--dourado-c:#E0B84A;--marrom:#8B5E3C;
+  --bege:#E8D5A3;--bege-c:#F5EDD5;--creme:#FEFBF3;
+  --texto:#2C1A0E;--texto-s:#7A5C3E;--sombra:rgba(27,59,40,.12);
+  --danger:#C0392B;--danger-b:#FADBD8;--ok:#1E8449;--ok-b:#D5F5E3;
+  --warn:#D68910;--warn-b:#FDEBD0;--info:#1A5276;--info-b:#D6EAF8;
+  --top-h:56px;--radius:10px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--creme);color:var(--texto);min-height:100vh}
+
+/* HOME */
+#view-home{background:linear-gradient(160deg,#0A180F 0%,#1B3B28 60%,#2D5A3D 100%);min-height:100vh;padding:0 0 60px}
+.home-nav{display:flex;align-items:center;justify-content:space-between;padding:22px 48px;border-bottom:1px solid rgba(196,154,60,.15)}
+.brand{display:flex;align-items:center;gap:12px}
+.emblem{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--dourado),#A07828);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:var(--verde);font-family:'Playfair Display',serif;box-shadow:0 2px 12px rgba(196,154,60,.45)}
+.brand-text .name{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#FAF0D8;letter-spacing:1px}
+.brand-text .name span{color:var(--dourado)}
+.brand-text .sub{font-size:8px;color:rgba(245,237,213,.4);letter-spacing:3px;text-transform:uppercase}
+.home-hero{text-align:center;padding:60px 24px 48px;color:#FAF0D8}
+.home-hero h1{font-family:'Playfair Display',serif;font-size:clamp(26px,4vw,42px);font-weight:700;margin-bottom:12px;line-height:1.2}
+.home-hero h1 span{color:var(--dourado)}
+.home-hero p{font-size:15px;color:rgba(250,240,216,.65);max-width:540px;margin:0 auto 32px}
+.sistemas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:1100px;margin:0 auto;padding:0 24px}
+.sistema-card{background:rgba(255,255,255,.07);border:1px solid rgba(196,154,60,.2);border-radius:14px;padding:22px;cursor:pointer;transition:.2s;position:relative}
+.sistema-card:hover{background:rgba(255,255,255,.12);border-color:rgba(196,154,60,.4);transform:translateY(-2px)}
+.sc-nome{font-family:'Playfair Display',serif;font-size:18px;color:#FAF0D8;font-weight:600;margin-bottom:4px}
+.sc-seg{font-size:12px;color:rgba(250,240,216,.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.sc-tools{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.sc-tool{background:rgba(196,154,60,.15);color:var(--dourado-c);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600}
+.sc-meta{font-size:12px;color:rgba(250,240,216,.4)}
+.sc-actions{position:absolute;top:12px;right:12px;display:flex;gap:4px}
+.sc-del,.sc-edit{background:none;border:none;color:rgba(255,255,255,.25);font-size:15px;cursor:pointer;padding:4px 6px;border-radius:6px;transition:.15s}
+.sc-del:hover{color:#E74C3C;background:rgba(231,76,60,.1)}
+.sc-edit:hover{color:var(--dourado-c);background:rgba(196,154,60,.15)}
+.card-new{background:none;border:2px dashed rgba(196,154,60,.3);border-radius:14px;padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;min-height:140px;transition:.2s;color:rgba(250,240,216,.5);font-size:14px;font-family:'Nunito',sans-serif;width:100%}
+.card-new:hover{border-color:rgba(196,154,60,.7);color:rgba(250,240,216,.9)}
+.card-new span{font-size:32px;color:var(--dourado);opacity:.6}
+
+/* APP */
+#view-app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+#topbar{height:var(--top-h);background:var(--verde);display:flex;align-items:center;padding:0 16px;gap:10px;border-bottom:2px solid var(--dourado);flex-shrink:0;z-index:50}
+.tb-brand{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.tb-emblem{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--dourado),#A07828);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--verde);font-family:'Playfair Display',serif}
+#tb-nome{font-family:'Playfair Display',serif;color:#FAF0D8;font-size:14px;font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-sep{color:rgba(250,240,216,.2);font-size:18px;flex-shrink:0}
+.nav-tabs{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{background:none;border:none;color:rgba(250,240,216,.55);padding:6px 13px;border-radius:6px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;white-space:nowrap;transition:.15s}
+.nav-tab:hover{background:rgba(255,255,255,.08);color:rgba(250,240,216,.85)}
+.nav-tab.active{background:rgba(196,154,60,.2);color:var(--dourado-c)}
+.tb-right{display:flex;gap:6px;align-items:center;margin-left:auto;flex-shrink:0}
+#content{flex:1;overflow-y:auto;background:var(--creme)}
+.module{display:none;padding:28px;max-width:1200px;margin:0 auto}
+.module.active{display:block}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:8px;padding:9px 18px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;line-height:1;text-decoration:none}
+.btn-primary{background:linear-gradient(135deg,var(--dourado),#A07828);color:var(--verde);box-shadow:0 2px 8px rgba(196,154,60,.3)}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-outline{background:transparent;border:1.5px solid var(--dourado);color:var(--dourado)}
+.btn-outline:hover{background:rgba(196,154,60,.08)}
+.btn-ghost{background:none;border:none;color:rgba(250,240,216,.7);font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;cursor:pointer;padding:6px 10px;border-radius:6px}
+.btn-ghost:hover{background:rgba(255,255,255,.08);color:rgba(250,240,216,.95)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-success{background:var(--ok);color:#fff}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-xs{padding:4px 9px;font-size:11px}
+
+/* CARDS */
+.card{background:#fff;border-radius:var(--radius);box-shadow:0 2px 12px var(--sombra);padding:20px;border:1px solid rgba(27,59,40,.07)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--verde)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:var(--radius);box-shadow:0 2px 12px var(--sombra);padding:16px;border-left:4px solid var(--dourado)}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--texto-s);margin-bottom:6px;font-weight:700}
+.stat-val{font-size:22px;font-weight:800;color:var(--verde);font-family:'Playfair Display',serif;line-height:1.1}
+.stat-sub{font-size:11px;color:var(--texto-s);margin-top:4px}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 12px;background:var(--bege-c);color:var(--verde);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--bege)}
+td{padding:9px 12px;border-bottom:1px solid rgba(27,59,40,.07);vertical-align:middle}
+tr:hover td{background:rgba(27,59,40,.02)}
+.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid rgba(27,59,40,.1)}
+
+/* BADGES */
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.b-ok{background:var(--ok-b);color:var(--ok)}
+.b-danger{background:var(--danger-b);color:var(--danger)}
+.b-warn{background:var(--warn-b);color:var(--warn)}
+.b-info{background:var(--info-b);color:var(--info)}
+.b-gray{background:#F0EFED;color:#666}
+.int-badge{background:rgba(196,154,60,.12);color:var(--marrom);border:1px solid rgba(196,154,60,.3);border-radius:6px;padding:2px 7px;font-size:10px;font-weight:700;letter-spacing:.3px}
+
+/* FORMS */
+.form-row{display:grid;gap:12px;margin-bottom:12px}
+.form-row.c2{grid-template-columns:1fr 1fr}
+.form-row.c3{grid-template-columns:1fr 1fr 1fr}
+.fg{display:flex;flex-direction:column;gap:4px}
+label{font-size:11px;font-weight:700;color:var(--verde);text-transform:uppercase;letter-spacing:.5px}
+input,select,textarea{border:1.5px solid rgba(27,59,40,.2);border-radius:7px;padding:8px 11px;font-family:'Nunito',sans-serif;font-size:13px;color:var(--texto);background:#fff;transition:.15s;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(27,59,40,.08)}
+textarea{resize:vertical;min-height:64px}
+
+/* MODAL */
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;backdrop-filter:blur(2px)}
+#modal-box{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:901;width:min(96vw,560px);max-height:90vh;overflow-y:auto;background:#fff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-head{background:var(--verde);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0;position:sticky;top:0;z-index:1}
+.modal-head h3{font-family:'Playfair Display',serif;color:#FAF0D8;font-size:17px}
+.modal-close{background:none;border:none;color:rgba(250,240,216,.6);font-size:22px;cursor:pointer;padding:0 4px;line-height:1}
+.modal-close:hover{color:#FAF0D8}
+.modal-body{padding:22px}
+.modal-foot{padding:14px 22px;border-top:1px solid rgba(27,59,40,.1);display:flex;justify-content:flex-end;gap:10px;background:#FAFAF8;border-radius:0 0 14px 14px}
+
+/* PAGE HEADER */
+.page-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.page-hd h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--verde)}
+.page-hd p{font-size:12px;color:var(--texto-s);margin-top:2px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.filters input,.filters select{width:auto;padding:7px 10px;font-size:12px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;border-bottom:2px solid rgba(27,59,40,.1);margin-bottom:18px}
+.tab{background:none;border:none;padding:9px 16px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;color:var(--texto-s);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
+.tab:hover{color:var(--verde)}
+.tab.active{color:var(--verde);border-bottom-color:var(--dourado)}
+
+/* ALERTS */
+.alert{padding:11px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px}
+.alert-ok{background:var(--ok-b);color:var(--ok);border-left:4px solid var(--ok)}
+.alert-warn{background:var(--warn-b);color:var(--warn);border-left:4px solid var(--warn)}
+.alert-danger{background:var(--danger-b);color:var(--danger);border-left:4px solid var(--danger)}
+.alert-info{background:var(--info-b);color:var(--info);border-left:4px solid var(--info)}
+
+/* DRE */
+.dre-sec{background:#fff;border-radius:10px;border:1px solid rgba(27,59,40,.1);margin-bottom:14px;overflow:hidden}
+.dre-sec-head{padding:11px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(27,59,40,.08)}
+.dre-sec-body{padding:10px 16px}
+.dre-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(27,59,40,.05);font-size:13px}
+.dre-total{display:flex;justify-content:space-between;padding:8px 16px;font-weight:700;font-size:14px}
+.dre-res-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(27,59,40,.07);font-size:13px}
+
+@keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+.toast{position:fixed;bottom:20px;right:20px;z-index:9999;animation:fadeOut 3s forwards;pointer-events:none}
+
+@media(max-width:640px){
+  .home-nav{padding:14px 16px}
+  .form-row.c2,.form-row.c3{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .module{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HOME VIEW ══════════════ -->
+<div id="view-home">
+  <nav class="home-nav">
+    <div class="brand">
+      <div class="emblem">IAê</div>
+      <div class="brand-text">
+        <div class="name">IAê <span>Financeiro</span></div>
+        <div class="sub">Sistema Integrado</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="abrirCriarSistema()">+ Novo Sistema</button>
+  </nav>
+  <div class="home-hero">
+    <h1>Central de <span>Sistemas</span><br>de Clientes</h1>
+    <p>Crie um sistema financeiro personalizado para cada cliente, integrando CRM, Estoque, Contas, DRE, Fluxo de Caixa, KPIs e Projetos em um só lugar.</p>
+  </div>
+  <div class="sistemas-grid" id="sistemas-grid"></div>
+</div>
+
+<!-- ══════════════ APP VIEW ══════════════ -->
+<div id="view-app" style="display:none">
+  <header id="topbar">
+    <div class="tb-brand">
+      <div class="tb-emblem">IAê</div>
+      <span id="tb-nome">Sistema</span>
+    </div>
+    <span class="tb-sep">|</span>
+    <div class="nav-tabs" id="nav-tabs"></div>
+    <div class="tb-right">
+      <button class="btn-ghost" onclick="exportBackup()">↓ Backup</button>
+      <button class="btn-ghost" style="color:rgba(250,240,216,.45)" onclick="goHome()">← Voltar</button>
+    </div>
+  </header>
+  <div id="content">
+
+    <!-- DASHBOARD -->
+    <section id="mod-dashboard" class="module active">
+      <div class="page-hd">
+        <div><h2>Dashboard</h2><p id="dash-sub">Visão consolidada do sistema</p></div>
+        <div id="dash-actions"></div>
+      </div>
+      <div class="stat-grid" id="dash-kpis"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px" id="dash-panels"></div>
+    </section>
+
+    <!-- CRM -->
+    <section id="mod-crm" class="module">
+      <div class="page-hd">
+        <div><h2>CRM — Contatos</h2><p>Fornecedores, clientes e parceiros do negócio</p></div>
+        <button class="btn btn-primary btn-sm" onclick="abrirContatoForm()">+ Contato</button>
+      </div>
+      <div class="filters">
+        <input id="crm-busca" placeholder="Buscar por nome..." oninput="renderCRM()" style="width:220px">
+        <select id="crm-tipo" onchange="renderCRM()">
+          <option value="">Todos os tipos</option>
+          <option>Fornecedor</option><option>Cliente</option><option>Ambos</option><option>Parceiro</option>
+        </select>
+      </div>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>Nome / Fantasia</th><th>Tipo</th><th>Segmento</th><th>Telefone</th><th>E-mail</th><th>Cond. Pgto</th><th></th></tr></thead>
+        <tbody id="crm-tbody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- ESTOQUE -->
+    <section id="mod-estoque" class="module">
+      <div class="page-hd">
+        <div><h2>Estoque</h2><p>Itens com cálculo automático de preço de venda a partir do custo + impostos + margem</p></div>
+        <button class="btn btn-primary btn-sm" onclick="abrirEstoqueForm()">+ Item</button>
+      </div>
+      <div class="filters">
+        <input id="est-busca" placeholder="Buscar item ou fornecedor..." oninput="renderEstoque()" style="width:220px">
+        <select id="est-cat" onchange="renderEstoque()"><option value="">Todas categorias</option></select>
+        <select id="est-forn" onchange="renderEstoque()"><option value="">Todos fornecedores</option></select>
+      </div>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>Descrição</th><th>Categoria</th><th>Fornecedor</th><th>Qtd</th><th>Custo Unit.</th><th>Preço Venda</th><th>Margem</th><th>Status</th><th></th></tr></thead>
+        <tbody id="est-tbody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- CONTAS -->
+    <section id="mod-contas" class="module">
+      <div class="page-hd">
+        <div><h2>Contas a Pagar / Receber</h2><p>Ao marcar como pago, o DRE e o Fluxo de Caixa são atualizados automaticamente</p></div>
+        <button class="btn btn-primary btn-sm" onclick="abrirContaForm()">+ Lançamento</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="contasTab('pagar',this)">💸 A Pagar</button>
+        <button class="tab" onclick="contasTab('receber',this)">💰 A Receber</button>
+        <button class="tab" onclick="contasTab('todos',this)">Todos</button>
+      </div>
+      <div class="filters">
+        <select id="ct-mes" onchange="renderContas()"></select>
+        <select id="ct-status" onchange="renderContas()">
+          <option value="">Todos status</option>
+          <option value="pendente">Pendente</option>
+          <option value="pago">Pago/Recebido</option>
+          <option value="vencido">Vencido</option>
+        </select>
+      </div>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>Descrição</th><th>Contato</th><th>Tipo / DRE</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr></thead>
+        <tbody id="ct-tbody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- DRE -->
+    <section id="mod-dre" class="module">
+      <div class="page-hd">
+        <div><h2>DRE — Demonstrativo de Resultados</h2><p>Alimentado automaticamente pelas Contas pagas. Lançamentos manuais também são aceitos.</p></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="dre-mes" onchange="renderDRE()"></select>
+          <select id="dre-ano" onchange="renderDRE()"></select>
+          <button class="btn btn-outline btn-sm" onclick="abrirDREEntry()">+ Manual</button>
+        </div>
+      </div>
+      <div id="dre-body"></div>
+    </section>
+
+    <!-- FLUXO -->
+    <section id="mod-fluxo" class="module">
+      <div class="page-hd">
+        <div><h2>Fluxo de Caixa</h2><p id="fc-subtitle">Gerado automaticamente a partir das Contas a Pagar e Receber</p></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div id="fc-actions" style="display:flex;gap:6px"></div>
+          <select id="fc-mes" onchange="renderFluxo()"></select>
+          <select id="fc-ano" onchange="renderFluxo()"></select>
+        </div>
+      </div>
+      <div id="fc-body"></div>
+    </section>
+
+    <!-- ORÇAMENTO -->
+    <section id="mod-orcamento" class="module">
+      <div class="page-hd">
+        <div><h2>Planejamento Orçamentário</h2><p>Budget anual comparado com o realizado do DRE. Clique em qualquer valor para editar.</p></div>
+        <select id="orc-ano" onchange="renderOrcamento()"></select>
+      </div>
+      <div id="orc-body"></div>
+    </section>
+
+    <!-- KPIs -->
+    <section id="mod-kpis" class="module">
+      <div class="page-hd">
+        <div><h2>KPIs Financeiros</h2><p>Indicadores calculados automaticamente a partir do DRE, Contas e Estoque</p></div>
+        <div style="display:flex;gap:8px">
+          <select id="kpi-mes" onchange="renderKPIs()"></select>
+          <select id="kpi-ano" onchange="renderKPIs()"></select>
+        </div>
+      </div>
+      <div id="kpi-body"></div>
+    </section>
+
+    <!-- PROJETO -->
+    <section id="mod-projeto" class="module">
+      <div class="page-hd">
+        <div><h2>Gestão de Projetos</h2><p>Controle financeiro por projeto. Lançamentos integrados com Contas a Pagar/Receber.</p></div>
+        <button class="btn btn-primary btn-sm" onclick="abrirProjetoForm()">+ Projeto</button>
+      </div>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>Projeto</th><th>Cliente</th><th>Orçado</th><th>Custo Real</th><th>Receita</th><th>Margem</th><th>Status</th><th></th></tr></thead>
+        <tbody id="proj-tbody"></tbody></table>
+      </div>
+    </section>
+
+  </div><!-- /content -->
+</div><!-- /view-app -->
+
+<!-- MODAL -->
+<div id="overlay" onclick="closeModal()"></div>
+<div id="modal-box">
+  <div class="modal-head"><h3 id="modal-title"></h3><button class="modal-close" onclick="closeModal()">×</button></div>
+  <div class="modal-body" id="modal-body"></div>
+  <div class="modal-foot" id="modal-foot"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+const uid = () => Math.random().toString(36).slice(2,10);
+const fmt = v => 'R$ ' + (+v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtN = v => (+v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct = v => (+v||0).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+const hoje = () => new Date().toISOString().slice(0,10);
+const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const MESES_F = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const ANO = new Date().getFullYear();
+const MES = new Date().getMonth()+1;
+
+function fmtData(d){ if(!d) return '—'; const p=d.slice(0,10).split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
+function diffDias(d){ if(!d) return 9999; return Math.ceil((new Date(d+'T12:00:00')-new Date())/(864e5)); }
+function toast(msg,tipo='ok'){
+  const el=document.createElement('div');
+  el.className=`alert alert-${tipo} toast`;
+  el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),3100);
+}
+
+// ══════════════════════════════════════════════
+// DATA BUS
+// ══════════════════════════════════════════════
+const DB = {
+  sid: null,
+  k(key){ return `iae_sys_${this.sid}_${key}`; },
+  get(key,def=null){ try{ const v=localStorage.getItem(this.k(key)); return v!==null?JSON.parse(v):def; }catch{ return def; } },
+  set(key,val){ localStorage.setItem(this.k(key),JSON.stringify(val)); },
+
+  getSistemas(){ try{ return JSON.parse(localStorage.getItem('iae_sistemas_v1')||'[]'); }catch{ return []; } },
+  saveSistemas(s){ localStorage.setItem('iae_sistemas_v1',JSON.stringify(s)); },
+
+  // CRM
+  contatos(){ return this.get('crm',[]); },
+  saveContatos(v){ this.set('crm',v); },
+  fornecedores(){ return this.contatos().filter(c=>['Fornecedor','Ambos'].includes(c.tipo)); },
+  clientes(){ return this.contatos().filter(c=>['Cliente','Ambos'].includes(c.tipo)); },
+
+  // Estoque
+  estoque(){ return this.get('estoque',[]); },
+  saveEstoque(v){ this.set('estoque',v); },
+
+  // Contas
+  contas(){ return this.get('contas',[]); },
+  saveContas(v){ this.set('contas',v); },
+
+  // DRE: { "2024-01": { receitas:[], cmv:[], despesas:[] } }
+  dre(){ return this.get('dre',{}); },
+  saveDRE(v){ this.set('dre',v); },
+  dreDoMes(ano,mes){
+    const k=`${ano}-${String(mes).padStart(2,'0')}`;
+    const d=this.dre();
+    return d[k]||{receitas:[],cmv:[],despesas:[]};
+  },
+  saveDreDoMes(ano,mes,v){
+    const k=`${ano}-${String(mes).padStart(2,'0')}`;
+    const d=this.dre(); d[k]=v; this.saveDRE(d);
+  },
+
+  // Orçamento
+  orcamento(){ return this.get('orcamento',{}); },
+  saveOrcamento(v){ this.set('orcamento',v); },
+  orcDoAno(ano){ const o=this.orcamento(); return o[String(ano)]||{rev:{},cost:{},exp:{}}; },
+  saveOrcDoAno(ano,v){ const o=this.orcamento(); o[String(ano)]=v; this.saveOrcamento(o); },
+
+  // Projetos
+  projetos(){ return this.get('projetos',[]); },
+  saveProjetos(v){ this.set('projetos',v); },
+
+  // Fluxo autônomo (usado quando módulo Contas não está ativo)
+  fluxoLanc(){ return this.get('fluxo_lanc',[]); },
+  saveFluxoLanc(v){ this.set('fluxo_lanc',v); },
+  fluxoFixos(){ return this.get('fluxo_fixos',[]); },
+  saveFluxoFixos(v){ this.set('fluxo_fixos',v); },
+
+  // ── INTEGRAÇÃO: Conta paga → DRE ──────────
+  syncContaToDRE(conta){
+    if(conta.status!=='pago') return;
+    const ref=conta.dataPagamento||conta.vencimento;
+    if(!ref) return;
+    const [ano,mes]=ref.split('-');
+    const dm=this.dreDoMes(+ano,+mes);
+    const entry={id:'ct_'+conta.id,descricao:conta.descricao,contato:conta.contato||'',valor:conta.valor,categoria:conta.categoria||'',contaId:conta.id,auto:true};
+    if(conta.tipo==='receber'){
+      dm.receitas=dm.receitas.filter(r=>r.contaId!==conta.id);
+      dm.receitas.push(entry);
+    } else if(conta.tipoCusto==='cmv'){
+      dm.cmv=dm.cmv.filter(r=>r.contaId!==conta.id);
+      dm.cmv.push(entry);
+    } else {
+      dm.despesas=dm.despesas.filter(r=>r.contaId!==conta.id);
+      dm.despesas.push(entry);
+    }
+    this.saveDreDoMes(+ano,+mes,dm);
+  },
+
+  removeDREEntry(contaId){
+    const dre=this.dre();
+    Object.keys(dre).forEach(k=>{
+      ['receitas','cmv','despesas'].forEach(s=>{
+        dre[k][s]=(dre[k][s]||[]).filter(e=>e.contaId!==contaId);
+      });
+    });
+    this.saveDRE(dre);
+  },
+
+  calcKPIs(ano,mes){
+    const dm=this.dreDoMes(ano,mes);
+    const sum=arr=>(arr||[]).reduce((a,b)=>a+(+b.valor||0),0);
+    const rec=sum(dm.receitas),cmv=sum(dm.cmv),desp=sum(dm.despesas);
+    const mb=rec-cmv,ebitda=mb-desp;
+    const contas=this.contas();
+    const cr=contas.filter(c=>c.tipo==='receber'&&c.status!=='pago'&&c.status!=='cancelado').reduce((a,b)=>a+(+b.valor||0),0);
+    const cp=contas.filter(c=>c.tipo==='pagar'&&c.status!=='pago'&&c.status!=='cancelado').reduce((a,b)=>a+(+b.valor||0),0);
+    return {rec,cmv,mb,desp,ebitda,cr,cp,
+      margBruta:rec>0?mb/rec:0,margEbitda:rec>0?ebitda/rec:0};
+  }
+};
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+let sistemaAtual=null;
+let modAtivo='dashboard';
+
+const TOOLS=[
+  {id:'crm',     label:'CRM',           icon:'👥'},
+  {id:'estoque', label:'Estoque',        icon:'📦'},
+  {id:'contas',  label:'Contas',         icon:'💳'},
+  {id:'dre',     label:'DRE',            icon:'📊'},
+  {id:'fluxo',   label:'Fluxo de Caixa', icon:'💰'},
+  {id:'orcamento',label:'Orçamento',     icon:'📋'},
+  {id:'kpis',    label:'KPIs',           icon:'📈'},
+  {id:'projeto', label:'Projetos',       icon:'🏗️'},
+];
+const TOOLS_DESC={
+  crm:'Contatos, fornecedores e clientes',
+  estoque:'Itens com formação de preço de venda',
+  contas:'Contas a pagar e receber',
+  dre:'Demonstrativo mensal de resultados',
+  fluxo:'Projeção e realização de caixa',
+  orcamento:'Planejamento anual vs realizado',
+  kpis:'Indicadores financeiros automáticos',
+  projeto:'Gestão de projeto e rentabilidade',
+};
+
+function goHome(){
+  document.getElementById('view-home').style.display='';
+  document.getElementById('view-app').style.display='none';
+  renderSistemas();
+}
+
+function abrirSistema(sid){
+  const sis=DB.getSistemas().find(s=>s.id===sid);
+  if(!sis) return;
+  sistemaAtual=sis; DB.sid=sid;
+  document.getElementById('view-home').style.display='none';
+  document.getElementById('view-app').style.display='flex';
+  document.getElementById('tb-nome').textContent=sis.nome;
+  renderNavTabs();
+  goMod('dashboard');
+}
+
+function renderNavTabs(){
+  const tabs=[{id:'dashboard',label:'Dashboard',icon:'⊞'},...TOOLS.filter(t=>sistemaAtual.ferramentas.includes(t.id))];
+  document.getElementById('nav-tabs').innerHTML=tabs.map(t=>
+    `<button class="nav-tab${t.id===modAtivo?' active':''}" onclick="goMod('${t.id}')" id="navtab-${t.id}">${t.icon} ${t.label}</button>`
+  ).join('');
+}
+
+function goMod(id){
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+  const m=document.getElementById('mod-'+id);
+  if(m) m.classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const tab=document.getElementById('navtab-'+id);
+  if(tab) tab.classList.add('active');
+  modAtivo=id;
+  const R={dashboard:renderDashboard,crm:renderCRM,estoque:renderEstoque,contas:renderContas,dre:renderDRE,fluxo:renderFluxo,orcamento:renderOrcamento,kpis:renderKPIs,projeto:renderProjeto};
+  if(R[id]) R[id]();
+}
+
+// ══════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════
+function openModal(title,body,foot){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').innerHTML=body;
+  document.getElementById('modal-foot').innerHTML=foot||`<button class="btn btn-outline" onclick="closeModal()">Fechar</button>`;
+  document.getElementById('overlay').style.display='block';
+  document.getElementById('modal-box').style.display='block';
+}
+function closeModal(){
+  document.getElementById('overlay').style.display='none';
+  document.getElementById('modal-box').style.display='none';
+}
+
+// ══════════════════════════════════════════════
+// HOME MODULE
+// ══════════════════════════════════════════════
+function renderSistemas(){
+  const sistemas=DB.getSistemas();
+  const tLabel=Object.fromEntries(TOOLS.map(t=>[t.id,t.label]));
+  let html=sistemas.map(s=>`
+    <div class="sistema-card" onclick="abrirSistema('${s.id}')">
+      <div class="sc-actions">
+        <button class="sc-edit" onclick="event.stopPropagation();abrirEditarSistema('${s.id}')" title="Editar módulos do sistema">⚙</button>
+        <button class="sc-del" onclick="event.stopPropagation();deletarSistema('${s.id}')" title="Deletar sistema">🗑</button>
+      </div>
+      <div class="sc-nome">${esc(s.nome)}</div>
+      <div class="sc-seg">${s.segmento||'Sem segmento'}</div>
+      <div class="sc-tools">${(s.ferramentas||[]).map(f=>`<span class="sc-tool">${tLabel[f]||f}</span>`).join('')}</div>
+      <div class="sc-meta">Criado em ${fmtData(s.criado?.slice(0,10))}${s.responsavel?' · '+esc(s.responsavel):''}</div>
+    </div>
+  `).join('');
+  html+=`<button class="card-new" onclick="abrirCriarSistema()"><span>+</span>Criar Novo Sistema</button>`;
+  document.getElementById('sistemas-grid').innerHTML=html;
+}
+
+function abrirCriarSistema(){
+  const toolsHTML=TOOLS.map(t=>`
+    <label style="display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:8px;border:1.5px solid rgba(27,59,40,.15);cursor:pointer;margin-bottom:8px;background:#fff;transition:.15s" onmouseenter="this.style.background='#F5EDD5'" onmouseleave="this.style.background='#fff'">
+      <input type="checkbox" name="tool" value="${t.id}" checked style="width:auto;margin-top:3px;accent-color:var(--verde)">
+      <div><strong>${t.icon} ${t.label}</strong><div style="font-size:12px;color:var(--texto-s)">${TOOLS_DESC[t.id]}</div></div>
+    </label>
+  `).join('');
+  openModal('Novo Sistema de Cliente',`
+    <div class="form-row"><div class="fg"><label>Nome do Cliente / Empresa *</label><input id="ns-nome" placeholder="Ex: Restaurante do João"></div></div>
+    <div class="form-row c2">
+      <div class="fg"><label>Segmento</label>
+        <select id="ns-seg"><option value="">Selecionar...</option><option>Comércio</option><option>Serviços</option><option>Indústria</option><option>Construção</option><option>Tecnologia</option><option>Saúde</option><option>Educação</option><option>Agronegócio</option><option>Outros</option></select>
+      </div>
+      <div class="fg"><label>Responsável IAê</label><input id="ns-resp" placeholder="Nome do consultor"></div>
+    </div>
+    <div class="fg" style="margin-top:4px"><label>Ferramentas do Sistema</label>
+      <p style="font-size:12px;color:var(--texto-s);margin:4px 0 10px">Selecione quais ferramentas fazem sentido para este cliente. Pode alterar depois.</p>
+      ${toolsHTML}
+    </div>
+  `,`
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="criarSistema()">Criar Sistema →</button>
+  `);
+}
+
+function criarSistema(){
+  const nome=document.getElementById('ns-nome').value.trim();
+  if(!nome){ alert('Informe o nome do cliente.'); return; }
+  const ferramentas=[...document.querySelectorAll('input[name=tool]:checked')].map(i=>i.value);
+  if(!ferramentas.length){ alert('Selecione ao menos uma ferramenta.'); return; }
+  const sistemas=DB.getSistemas();
+  sistemas.push({id:uid(),nome,segmento:document.getElementById('ns-seg').value,responsavel:document.getElementById('ns-resp').value.trim(),ferramentas,criado:new Date().toISOString()});
+  DB.saveSistemas(sistemas);
+  closeModal(); renderSistemas();
+}
+
+function deletarSistema(sid){
+  const s=DB.getSistemas().find(x=>x.id===sid);
+  if(!confirm(`Deletar o sistema "${s?.nome||sid}" e TODOS os seus dados?\n\nEsta ação não pode ser desfeita.`)) return;
+  DB.saveSistemas(DB.getSistemas().filter(x=>x.id!==sid));
+  Object.keys(localStorage).filter(k=>k.startsWith(`iae_sys_${sid}_`)).forEach(k=>localStorage.removeItem(k));
+  renderSistemas();
+}
+
+function abrirEditarSistema(sid){
+  openModal('Editar Sistema — Verificação de Acesso',`
+    <div class="alert alert-warn" style="margin-bottom:16px">🔒 Esta ação requer a senha de administrador IAê.</div>
+    <div class="fg">
+      <label>Senha de administrador</label>
+      <input type="password" id="edit-senha" placeholder="Digite a senha..." autocomplete="off"
+        onkeydown="if(event.key==='Enter') verificarSenhaEdicao('${sid}')">
+      <div id="edit-senha-err" style="display:none;color:var(--danger);font-size:12px;font-weight:700;margin-top:6px">❌ Senha incorreta. Tente novamente.</div>
+    </div>
+  `,`
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="verificarSenhaEdicao('${sid}')">Verificar →</button>
+  `);
+  setTimeout(()=>document.getElementById('edit-senha')?.focus(),60);
+}
+
+function verificarSenhaEdicao(sid){
+  const senha=document.getElementById('edit-senha')?.value||'';
+  if(senha!=='iaefinanceiro2026'){
+    const inp=document.getElementById('edit-senha');
+    const err=document.getElementById('edit-senha-err');
+    if(inp){ inp.style.borderColor='var(--danger)'; inp.style.background='var(--danger-b)'; inp.value=''; inp.focus(); }
+    if(err) err.style.display='block';
+    return;
+  }
+  formEdicaoSistema(sid);
+}
+
+function formEdicaoSistema(sid){
+  const s=DB.getSistemas().find(x=>x.id===sid);
+  if(!s) return;
+  const toolsHTML=TOOLS.map(t=>{
+    const checked=s.ferramentas.includes(t.id);
+    return `<label style="display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:8px;border:1.5px solid ${checked?'var(--dourado)':'rgba(27,59,40,.15)'};cursor:pointer;margin-bottom:8px;background:${checked?'rgba(196,154,60,.06)':'#fff'};transition:.15s" onmouseenter="this.style.background='#F5EDD5'" onmouseleave="this.style.background=${checked?'\"rgba(196,154,60,.06)\"':'\"#fff\"'}">
+      <input type="checkbox" name="edittool" value="${t.id}" ${checked?'checked':''} style="width:auto;margin-top:3px;accent-color:var(--verde)" onchange="this.closest('label').style.borderColor=this.checked?'var(--dourado)':'rgba(27,59,40,.15)';this.closest('label').style.background=this.checked?'rgba(196,154,60,.06)':'#fff'">
+      <div><strong>${t.icon} ${t.label}</strong><div style="font-size:12px;color:var(--texto-s)">${TOOLS_DESC[t.id]}</div></div>
+    </label>`;
+  }).join('');
+  openModal(`Editar Sistema — ${esc(s.nome)}`,`
+    <div class="alert alert-ok" style="margin-bottom:16px">✅ Acesso autorizado. Os dados dos módulos já cadastrados são preservados ao adicionar ou remover ferramentas.</div>
+    <div class="form-row"><div class="fg"><label>Nome do Cliente / Empresa *</label><input id="es-nome" value="${esc(s.nome)}"></div></div>
+    <div class="form-row c2">
+      <div class="fg"><label>Segmento</label>
+        <select id="es-seg"><option value="">Selecionar...</option><option${s.segmento==='Comércio'?' selected':''}>Comércio</option><option${s.segmento==='Serviços'?' selected':''}>Serviços</option><option${s.segmento==='Indústria'?' selected':''}>Indústria</option><option${s.segmento==='Construção'?' selected':''}>Construção</option><option${s.segmento==='Tecnologia'?' selected':''}>Tecnologia</option><option${s.segmento==='Saúde'?' selected':''}>Saúde</option><option${s.segmento==='Educação'?' selected':''}>Educação</option><option${s.segmento==='Agronegócio'?' selected':''}>Agronegócio</option><option${s.segmento==='Outros'?' selected':''}>Outros</option></select>
+      </div>
+      <div class="fg"><label>Responsável IAê</label><input id="es-resp" value="${esc(s.responsavel||'')}"></div>
+    </div>
+    <div class="fg" style="margin-top:4px"><label>Ferramentas Ativas</label>
+      <p style="font-size:12px;color:var(--texto-s);margin:4px 0 10px">Marque os módulos que devem aparecer neste sistema. Dados existentes não são apagados ao desmarcar.</p>
+      ${toolsHTML}
+    </div>
+  `,`
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="salvarEdicaoSistema('${sid}')">💾 Salvar Alterações</button>
+  `);
+}
+
+function salvarEdicaoSistema(sid){
+  const nome=document.getElementById('es-nome').value.trim();
+  if(!nome){ alert('Nome obrigatório.'); return; }
+  const ferramentas=[...document.querySelectorAll('input[name=edittool]:checked')].map(i=>i.value);
+  if(!ferramentas.length){ alert('Selecione ao menos uma ferramenta.'); return; }
+  const sistemas=DB.getSistemas();
+  const idx=sistemas.findIndex(s=>s.id===sid);
+  if(idx<0) return;
+  sistemas[idx]={...sistemas[idx],nome,segmento:document.getElementById('es-seg').value,responsavel:document.getElementById('es-resp').value.trim(),ferramentas};
+  DB.saveSistemas(sistemas);
+  // Se o sistema está aberto, atualizar tabs sem fechar
+  if(sistemaAtual?.id===sid){
+    sistemaAtual=sistemas[idx];
+    document.getElementById('tb-nome').textContent=sistemas[idx].nome;
+    renderNavTabs();
+  }
+  closeModal(); renderSistemas();
+  toast('✅ Sistema atualizado com sucesso.');
+}
+
+// ══════════════════════════════════════════════
+// DASHBOARD MODULE
+// ══════════════════════════════════════════════
+function renderDashboard(){
+  const k=DB.calcKPIs(ANO,MES);
+  const contatos=DB.contatos(), estoque=DB.estoque(), contas=DB.contas(), projetos=DB.projetos();
+  const vencidos=contas.filter(c=>c.status==='pendente'&&c.vencimento&&c.vencimento<hoje());
+  document.getElementById('dash-sub').textContent=`${sistemaAtual?.nome||''} · ${MESES_F[MES-1]} ${ANO}`;
+  const feats=sistemaAtual?.ferramentas||[];
+
+  document.getElementById('dash-kpis').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Receitas ${MESES[MES-1]}</div><div class="stat-val">${fmt(k.rec)}</div><div class="stat-sub">DRE do mês atual</div></div>
+    <div class="stat-card" style="border-left-color:${k.ebitda>=0?'var(--ok)':'var(--danger)'}"><div class="stat-label">EBITDA ${MESES[MES-1]}</div><div class="stat-val" style="color:${k.ebitda>=0?'var(--ok)':'var(--danger)'}">${fmt(k.ebitda)}</div><div class="stat-sub">Margem ${pct(k.margEbitda*100)}</div></div>
+    <div class="stat-card" style="border-left-color:var(--info)"><div class="stat-label">A Receber</div><div class="stat-val" style="color:var(--info)">${fmt(k.cr)}</div><div class="stat-sub">Em aberto</div></div>
+    <div class="stat-card" style="border-left-color:var(--warn)"><div class="stat-label">A Pagar</div><div class="stat-val" style="color:var(--warn)">${fmt(k.cp)}</div><div class="stat-sub">Em aberto</div></div>
+    ${feats.includes('crm')?`<div class="stat-card"><div class="stat-label">Contatos CRM</div><div class="stat-val">${contatos.length}</div><div class="stat-sub">${DB.fornecedores().length} forn. · ${DB.clientes().length} cli.</div></div>`:''}
+    ${feats.includes('estoque')?`<div class="stat-card"><div class="stat-label">Itens Estoque</div><div class="stat-val">${estoque.length}</div><div class="stat-sub">${estoque.filter(i=>i.qtdMin&&+i.quantidade<+i.qtdMin).length} abaixo do mínimo</div></div>`:''}
+    ${feats.includes('projeto')?`<div class="stat-card"><div class="stat-label">Projetos Ativos</div><div class="stat-val">${projetos.filter(p=>p.status==='ativo').length}</div><div class="stat-sub">${projetos.length} total</div></div>`:''}
+  `;
+
+  const ultContas=[...contas].reverse().slice(0,6);
+  const alertas=[];
+  if(vencidos.length) alertas.push(`<div class="alert alert-danger">⚠️ <strong>${vencidos.length} conta(s) vencida(s)</strong> — ${fmt(vencidos.reduce((a,b)=>a+(+b.valor||0),0))} em atraso.</div>`);
+  if(k.margBruta>0&&k.margBruta<0.2) alertas.push(`<div class="alert alert-warn">📉 Margem bruta abaixo de 20% (${pct(k.margBruta*100)}). Revise custos e preços.</div>`);
+  if(k.ebitda<0) alertas.push(`<div class="alert alert-danger">🚨 EBITDA negativo em ${fmt(Math.abs(k.ebitda))}. Despesas superam a margem bruta.</div>`);
+  if(!alertas.length) alertas.push(`<div class="alert alert-ok">✅ Nenhum alerta crítico este mês.</div>`);
+
+  document.getElementById('dash-panels').innerHTML=`
+    <div class="card">
+      <div class="card-header"><div class="card-title">Últimos Lançamentos</div><button class="btn btn-outline btn-xs" onclick="goMod('contas')">Ver todos →</button></div>
+      ${ultContas.length?`<table><tbody>${ultContas.map(c=>`
+        <tr>
+          <td><strong>${esc(c.descricao)}</strong><br><small style="color:var(--texto-s)">${c.contato||'—'}</small></td>
+          <td><span class="badge ${c.tipo==='receber'?'b-ok':'b-warn'}">${c.tipo==='receber'?'Receber':'Pagar'}</span></td>
+          <td><strong>${fmt(c.valor)}</strong></td>
+          <td><span class="badge ${stBadge(c.status,c.vencimento)}">${stLabel(c.status)}</span></td>
+        </tr>`).join('')}</tbody></table>`
+      :`<p style="color:var(--texto-s);font-size:13px;padding:8px 0">Nenhum lançamento. <button class="btn btn-outline btn-xs" onclick="goMod('contas')">+ Adicionar</button></p>`}
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Alertas & Ações Rápidas</div></div>
+      ${alertas.join('')}
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+        ${feats.includes('crm')?`<button class="btn btn-outline btn-xs" onclick="goMod('crm');setTimeout(abrirContatoForm,80)">+ Contato</button>`:''}
+        ${feats.includes('contas')?`<button class="btn btn-outline btn-xs" onclick="goMod('contas');setTimeout(abrirContaForm,80)">+ Lançamento</button>`:''}
+        ${feats.includes('estoque')?`<button class="btn btn-outline btn-xs" onclick="goMod('estoque');setTimeout(abrirEstoqueForm,80)">+ Item Estoque</button>`:''}
+        ${feats.includes('projeto')?`<button class="btn btn-outline btn-xs" onclick="goMod('projeto');setTimeout(abrirProjetoForm,80)">+ Projeto</button>`:''}
+        ${feats.includes('dre')?`<button class="btn btn-outline btn-xs" onclick="goMod('dre')">Ver DRE →</button>`:''}
+        ${feats.includes('kpis')?`<button class="btn btn-outline btn-xs" onclick="goMod('kpis')">Ver KPIs →</button>`:''}
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════
+// CRM MODULE
+// ══════════════════════════════════════════════
+function renderCRM(){
+  const busca=(document.getElementById('crm-busca')?.value||'').toLowerCase();
+  const tipo=document.getElementById('crm-tipo')?.value||'';
+  const lista=DB.contatos().filter(c=>
+    (!busca||(c.nome||'').toLowerCase().includes(busca)||(c.fantasia||'').toLowerCase().includes(busca))&&
+    (!tipo||c.tipo===tipo)
+  );
+  document.getElementById('crm-tbody').innerHTML=lista.length?lista.map(c=>`
+    <tr>
+      <td><strong>${esc(c.nome)}</strong>${c.fantasia?`<br><small style="color:var(--texto-s)">${esc(c.fantasia)}</small>`:''}</td>
+      <td><span class="badge ${c.tipo==='Fornecedor'?'b-warn':c.tipo==='Cliente'?'b-info':c.tipo==='Ambos'?'b-ok':'b-gray'}">${c.tipo||'—'}</span></td>
+      <td>${c.segmento||'—'}</td>
+      <td>${c.telefone||c.whatsapp||'—'}</td>
+      <td>${c.email||'—'}</td>
+      <td>${c.condicao||'—'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-outline btn-xs" onclick="abrirContatoForm('${c.id}')">✏</button>
+        <button class="btn btn-xs" style="background:none;color:var(--danger);border:1px solid var(--danger)" onclick="deletarContato('${c.id}')">🗑</button>
+      </td>
+    </tr>
+  `).join(''):`<tr><td colspan="7" style="text-align:center;color:var(--texto-s);padding:30px">Nenhum contato. <button class="btn btn-primary btn-xs" onclick="abrirContatoForm()">+ Adicionar</button></td></tr>`;
+}
+
+function abrirContatoForm(id=null){
+  const c=id?DB.contatos().find(x=>x.id===id):{};
+  openModal(id?'Editar Contato':'Novo Contato',`
+    <div class="form-row c2">
+      <div class="fg"><label>Nome / Razão Social *</label><input id="cf-nome" value="${esc(c.nome||'')}"></div>
+      <div class="fg"><label>Nome Fantasia</label><input id="cf-fantasia" value="${esc(c.fantasia||'')}"></div>
+    </div>
+    <div class="form-row c3">
+      <div class="fg"><label>Tipo *</label>
+        <select id="cf-tipo">${['Fornecedor','Cliente','Ambos','Parceiro'].map(t=>`<option${c.tipo===t?' selected':''}>${t}</option>`).join('')}</select>
+      </div>
+      <div class="fg"><label>CNPJ / CPF</label><input id="cf-doc" value="${esc(c.doc||'')}"></div>
+      <div class="fg"><label>Segmento</label><input id="cf-seg" value="${esc(c.segmento||'')}" placeholder="Ex: Alimentação"></div>
+    </div>
+    <div class="form-row c3">
+      <div class="fg"><label>Telefone</label><input id="cf-tel" value="${esc(c.telefone||'')}" placeholder="(00) 0000-0000"></div>
+      <div class="fg"><label>WhatsApp</label><input id="cf-wpp" value="${esc(c.whatsapp||'')}" placeholder="(00) 00000-0000"></div>
+      <div class="fg"><label>E-mail</label><input id="cf-email" value="${esc(c.email||'')}" placeholder="email@empresa.com"></div>
+    </div>
+    <div class="form-row c2">
+      <div class="fg"><label>Contato / Responsável</label><input id="cf-resp" value="${esc(c.responsavel||'')}"></div>
+      <div class="fg"><label>Condição de Pagamento</label><input id="cf-cond" value="${esc(c.condicao||'')}" placeholder="Ex: 30/60 dias"></div>
+    </div>
+    <div class="fg"><label>Observações</label><textarea id="cf-obs">${esc(c.obs||'')}</textarea></div>
+  `,`
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="salvarContato('${id||''}')">Salvar</button>
+  `);
+}
+
+function salvarContato(id){
+  const nome=document.getElementById('cf-nome').value.trim();
+  if(!nome){ alert('Nome obrigatório.'); return; }
+  const lista=DB.contatos();
+  const obj={id:id||uid(),nome,fantasia:v('cf-fantasia'),tipo:v('cf-tipo'),doc:v('cf-doc'),segmento:v('cf-seg'),telefone:v('cf-tel'),whatsapp:v('cf-wpp'),email:v('cf-email'),responsavel:v('cf-resp'),condicao:v('cf-cond'),obs:v('cf-obs'),criado:id?lista.find(c=>c.id===id)?.criado:hoje()};
+  if(id){ const i=lista.findIndex(c=>c.id===id); lista[i]=obj; }
+  else lista.push(obj);
+  DB.saveContatos(lista); closeModal(); renderCRM();
+}
+
+function deletarContato(id){
+  if(!confirm('Deletar este contato?')) return;
+  DB.saveContatos(DB.contatos().filter(c=>c.id!==id)); renderCRM();
+}
+
+// ══════════════════════════════════════════════
+// ESTOQUE MODULE
+// ══════════════════════════════════════════════
+function calcPV(custo,frete,outros,imp,mg){
+  const base=(+custo||0)+(+frete||0)+(+outros||0);
+  const comImp=base*(1+(+imp||0)/100);
+  const m=(+mg||0)/100;
+  return m<1?comImp/(1-m):comImp;
+}
+
+function renderEstoque(){
+  const busca=(document.getElementById('est-busca')?.value||'').toLowerCase();
+  const cat=document.getElementById('est-cat')?.value||'';
+  const fornF=document.getElementById('est-forn')?.value||'';
+  const lista=DB.estoque().filter(i=>
+    (!busca||(i.descricao||'').toLowerCase().includes(busca)||(i.fornecedorNome||'').toLowerCase().includes(busca))&&
+    (!cat||i.categoria===cat)&&(!fornF||i.fornecedorId===fornF)
+  );
+  // populate selects
+  const cats=[...new Set(DB.estoque().map(i=>i.categoria).filter(Boolean))];
+  const fEl=document.getElementById('est-cat');
+  if(fEl){ const cur=fEl.value; fEl.innerHTML='<option value="">Todas categorias</option>'+cats.map(c=>`<option${c===cur?' selected':''}>${c}</option>`).join(''); }
+  const fEl2=document.getElementById('est-forn');
+  if(fEl2){ const cur2=fEl2.value; fEl2.innerHTML='<option value="">Todos fornecedores</option>'+DB.fornecedores().map(f=>`<option value="${f.id}"${f.id===cur2?' selected':''}>${esc(f.nome)}</option>`).join(''); }
+
+  document.getElementById('est-tbody').innerHTML=lista.length?lista.map(i=>{
+    const pv=calcPV(i.custoUnit,i.frete,i.outros,i.impostos,i.margem);
+    const baixo=i.qtdMin>0&&+i.quantidade<+i.qtdMin;
+    const feats=sistemaAtual?.ferramentas||[];
+    return `<tr>
+      <td><strong>${esc(i.descricao)}</strong>${i.obs?`<br><small style="color:var(--texto-s)">${esc(i.obs)}</small>`:''}</td>
+      <td>${i.categoria||'—'}</td>
+      <td>${esc(i.fornecedorNome||'—')} ${i.fornecedorId?`<span class="int-badge" title="Vinculado ao CRM">CRM</span>`:''}</td>
+      <td>${fmtN(i.quantidade)} ${i.unidade||''} ${baixo?`<span class="badge b-danger" title="Abaixo do mínimo de ${i.qtdMin}">⚠</span>`:''}</td>
+      <td>${fmt(i.custoUnit)}</td>
+      <td><strong>${fmt(pv)}</strong></td>
+      <td><span style="color:var(--ok);font-weight:700">${pct(i.margem||0)}</span></td>
+      <td><span class="badge ${baixo?'b-danger':'b-ok'}">${baixo?'Baixo':'Normal'}</span></td>
+      <td style="white-space:nowrap;display:flex;gap:4px">
+        <button class="btn btn-outline btn-xs" onclick="abrirEstoqueForm('${i.id}')">✏</button>
+        ${feats.includes('contas')?`<button class="btn btn-xs" style="background:rgba(196,154,60,.1);color:var(--marrom);border:1px solid rgba(196,154,60,.3)" onclick="estoqueParaConta('${i.id}')" title="Criar conta a pagar para este item">💳</button>`:''}
+        <button class="btn btn-xs" style="background:none;color:var(--danger);border:1px solid var(--danger)" onclick="deletarEstoque('${i.id}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="9" style="text-align:center;color:var(--texto-s);padding:30px">Nenhum item. <button class="btn btn-primary btn-xs" onclick="abrirEstoqueForm()">+ Adicionar</button></td></tr>`;
+}
+
+function abrirEstoqueForm(id=null){
+  const i=id?DB.estoque().find(x=>x.id===id):{};
+  const fOpts=DB.fornecedores().map(f=>`<option value="${f.id}"${i.fornecedorId===f.id?' selected':''}>${esc(f.nome)}${f.fantasia?' ('+esc(f.fantasia)+')':''}</option>`).join('');
+  openModal(id?'Editar Item':'Novo Item no Estoque',`
+    <div class="form-row c2">
+      <div class="fg"><label>Descrição *</label><input id="ef-desc" value="${esc(i.descricao||'')}" placeholder="Nome do produto/material"></div>
+      <div class="fg"><label>Categoria</label><input id="ef-cat" value="${esc(i.categoria||'')}" placeholder="Ex: Matéria-Prima"></div>
+    </div>
+    <div class="form-row c2">
+      <div class="fg"><label>Fornecedor <span class="int-badge">CRM</span></label>
+        <select id="ef-forn"><option value="">— Selecionar —</option>${fOpts}${!fOpts?'<option disabled>Cadastre fornecedores no CRM primeiro</option>':''}</select>
+      </div>
+      <div class="fg"><label>Unidade</label><input id="ef-un" value="${esc(i.unidade||'')}" placeholder="un, kg, m², caixa..."></div>
+    </div>
+    <div class="form-row c3">
+      <div class="fg"><label>Quantidade</label><input id="ef-qtd" type="number" value="${i.quantidade||0}" min="0" step="any"></div>
+      <div class="fg"><label>Qtd Mínima (alerta)</label><input id="ef-qtdmin" type="number" value="${i.qtdMin||0}" min="0" step="any"></div>
+      <div class="fg"><label>Data de Entrada</label><input id="ef-data" type="date" value="${i.dataEntrada||hoje()}"></div>
+    </div>
+    <hr style="border:none;border-top:1px solid rgba(27,59,40,.1);margin:12px 0">
+    <div style="font-size:11px;font-weight:700;color:var(--verde);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">💰 Formação de Preço de Venda</div>
+    <div class="form-row c2">
+      <div class="fg"><label>Custo Unitário (R$) *</label><input id="ef-custo" type="number" value="${i.custoUnit||0}" min="0" step="any" oninput="atualizaPV()"></div>
+      <div class="fg"><label>Frete / Transporte (R$)</label><input id="ef-frete" type="number" value="${i.frete||0}" min="0" step="any" oninput="atualizaPV()"></div>
+    </div>
+    <div class="form-row c3">
+      <div class="fg"><label>Outros Custos (R$)</label><input id="ef-outros" type="number" value="${i.outros||0}" min="0" step="any" oninput="atualizaPV()"></div>
+      <div class="fg"><label>Impostos (%)</label><input id="ef-imp" type="number" value="${i.impostos||0}" min="0" max="100" step="any" oninput="atualizaPV()"></div>
+      <div class="fg"><label>Margem Desejada (%)</label><input id="ef-mg" type="number" value="${i.margem||30}" min="0" max="99" step="any" oninput="atualizaPV()"></div>
+    </div>
+    <div class="alert alert-info" id="ef-pv-box">
+      <strong>Preço de Venda Calculado: <span id="ef-pv-val">${fmt(calcPV(i.custoUnit,i.frete,i.outros,i.impostos,i.margem||30))}</span></strong>
+      <small style="display:block;margin-top:3px">Fórmula: (Custo + Frete + Outros) × (1 + Impostos%) ÷ (1 − Margem%)</small>
+    </div>
+    <div class="fg"><label>Observações</label><textarea id="ef-obs">${esc(i.obs||'')}</textarea></div>
+  `,`
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="salvarEstoque('${id||''}')">Salvar</button>
+  `);
+}
+
+function atualizaPV(){
+  const pv=calcPV(v('ef-custo'),v('ef-frete'),v('ef-outros'),v('ef-imp'),v('ef-mg'));
+  const el=document.getElementById('ef-pv-val');
+  if(el) el.textContent=fmt(pv);
+}
+
+function salvarEstoque(id){
+  const desc=v('ef-desc').trim();
+  if(!desc){ alert('Descrição obrigatória.'); return; }
+  const fornId=v('ef-forn');
+  const forn=fornId?DB.contatos().find(c=>c.id===fornId):null;
+  const lista=DB.estoque();
+  const obj={id:id||uid(),descricao:desc,categoria:v('ef-cat'),fornecedorId:fornId||'',fornecedorNome:forn?forn.nome:'',unidade:v('ef-un'),quantidade:+v('ef-qtd')||0,qtdMin:+v('ef-qtdmin')||0,dataEntrada:v('ef-data'),custoUnit:+v('ef-custo')||0,frete:+v('ef-frete')||0,outros:+v('ef-outros')||0,impostos:+v('ef-imp')||0,margem:+v('ef-mg')||0,obs:v('ef-obs')};
+  if(id){ const i=lista.findIndex(x=>x.id===id); lista[i]=obj; }
+  else lista.push(obj);
+  DB.saveEstoque(lista); closeModal(); renderEstoque();
+}
+
+function deletarEstoque(id){
+  if(!confirm('Remover este item?')) return;
+  DB.saveEstoque(DB.estoque().filter(i=>i.id!==id)); renderEstoque();
+}
+
+function estoqueParaConta(itemId){
+  const item=DB.estoque().find(i=>i.id===itemId);
+  if(!item) return;
+  const total=((+item.custoUnit||0)+(+item.frete||0)+(+item.outros||0))*(+item.quantidade||1);
+  goMod('contas');
+  setTimeout(()=>abrirContaForm(null,{tipo:'pagar',descricao:`Compra: ${item.descricao}`,contatoId:item.fornecedorId,contato:item.fornecedorNome,valor:total.toFixed(2),tipoCusto:'cmv',categoria:'Estoque / Materiais'}),80);
+}
+
+// ══════════════════════════════════════════════
+// CONTAS MODULE
+// ══════════════════════════════════════════════
+let contasTabAtiva='pagar';
+function contasTab(tab,el){
+  contasTabAtiva=tab;
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active'); renderContas();
+}
+
+function stBadge(s,venc=''){
+  const hoje2=hoje();
+  if(s==='pendente'&&venc&&venc<hoje2) return 'b-danger';
+  return {pago:'b-ok',pendente:'b-warn',vencido:'b-danger',cancelado:'b-gray'}[s]||'b-gray';
+}
+function stLabel(s){ return {pago:'Pago',pendente:'Pendente',vencido:'Vencido',cancelado:'Cancelado'}[s]||s; }
+
+function populateMesAno(mesId,anoId,selMes,selAno){
+  const m=document.getElementById(mesId), a=document.getElementById(anoId);
+  if(!m||!a) return;
+  const sm=selMes||MES, sa=selAno||ANO;
+  if(!m.innerHTML) m.innerHTML='<option value="">Todos os meses</option>'+MESES.map((n,i)=>`<option value="${i+1}"${i+1===sm?' selected':''}>${n}</option>`).join('');
+  if(!a.innerHTML){ const ys=[]; for(let y=ANO-2;y<=ANO+1;y++) ys.push(y); a.innerHTML=ys.map(y=>`<option${y===sa?' selected':''}>${y}</option>`).join(''); }
+}
+
+function renderContas(){
+  populateMesAno('ct-mes','ct-ano');
+  const mesF=+document.getElementById('ct-mes')?.value||0;
+  const stF=document.getElementById('ct-status')?.value||'';
+  const hoje2=hoje();
+  let lista=DB.contas().filter(c=>{
+    const matchT=contasTabAtiva==='todos'||c.tipo===contasTabAtiva;
+    const matchM=!mesF||new Date(c.vencimento+'T12:00').getMonth()+1===mesF;
+    const st=(c.status==='pendente'&&c.vencimento&&c.vencimento<hoje2)?'vencido':c.status;
+    const matchS=!stF||st===stF;
+    return matchT&&matchM&&matchS;
+  }).sort((a,b)=>a.vencimento>b.vencimento?1:-1);
+
+  document.getElementById('ct-tbody').innerHTML=lista.length?lista.map(c=>{
+    const st=(c.status==='pendente'&&c.vencimento&&c.vencimento<hoje2)?'vencido':c.status;
+    const dias=diffDias(c.vencimento);
+    const feats=sistemaAtual?.ferramentas||[];
+    return `<tr>
+      <td><strong>${esc(c.descricao)}</strong>${c.categoria?`<br><small style="color:var(--texto-s)">${esc(c.categoria)}</small>`:''}</td>
+      <td>${esc(c.contato||'—')} ${c.contatoId?`<span class="int-badge" title="Vinculado ao CRM">CRM</span>`:''} ${c.projetoId?`<span class="int-badge" title="Vinculado a projeto">Proj.</span>`:''}</td>
+      <td>
+        <span class="badge ${c.tipo==='receber'?'b-ok':'b-warn'}">${c.tipo==='receber'?'Receber':'Pagar'}</span>
+        ${c.tipoCusto==='cmv'?` <span class="badge b-info" style="font-size:9px">CMV</span>`:''}
+      </td>
+      <td><strong>${fmt(c.valor)}</strong></td>
+      <td>${fmtData(c.vencimento)}${st==='pendente'&&dias<=5&&dias>=0?` <span style="color:var(--warn);font-size:11px">(${dias}d)</span>`:''}</td>
+      <td><span class="badge ${stBadge(c.status,c.vencimento)}">${stLabel(st)}</span></td>
+      <td style="white-space:nowrap;display:flex;gap:4px">
+        ${st!=='pago'?`<button class="btn btn-success btn-xs" onclick="pagarConta('${c.id}')" title="Marcar como ${c.tipo==='receber'?'recebido':'pago'}">✓</button>`:''}
+        <button class="btn btn-outline btn-xs" onclick="abrirContaForm('${c.id}')">✏</button>
+        <button class="btn btn-xs" style="background:none;color:var(--danger);border:1px solid var(--danger)" onclick="deletarConta('${c.id}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="7" style="text-align:center;color:var(--texto-s);padding:30px">Nenhum lançamento. <button class="btn btn-primary btn-xs" onclick="abrirContaForm()">+ Adicionar</button></td></tr>`;
+}
+
+function abrirContaForm(id=null,prefill={}){
+  const c=id?DB.contas().find(x=>x.id===id):{...prefill};
+  const ctOpts=DB.contatos().map(ct=>`<option value="${ct.id}"${c.contatoId===ct.id?' selected':''}>${esc(ct.nome)} (${ct.tipo})</option>`).join('');
+  const prjOpts=DB.projetos().map(p=>`<option value="${p.id}"${c.projetoId===p.id?' selected':''}>${esc(p.nome)}</option>`).join('');
+  const feats=sistemaAtual?.ferramentas||[];
+  openModal(id?'Editar Lançamento':'Novo Lançamento',`
+    <div class="form-row c2">
+      <div class="fg"><label>Tipo *</label>
+        <select id="ctf-tipo">
+          <option value="pagar"${(c.tipo||'pagar')==='pagar'?' selected':''}>💸 Conta a Pagar</option>
+          <option value="receber"${c.tipo==='receber'?' selected':''}>💰 Conta a Receber</option>
+        </select>
+      </div>
+      <div class="fg"><label>Classificação DRE</label>
+        <select id="ctf-tipocusto">
+          <option value="despesa"${(c.tipoCusto||'despesa')==='despesa'?' selected':''}>Despesa Operacional</option>
+          <option value="cmv"${c.tipoCusto==='cmv'?' selected':''}>CMV / Custo de Mercadoria</option>
+          <option value="investimento"${c.tipoCusto==='investimento'?' selected':''}>Investimento</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:12px"><label>Descrição *</label><input id="ctf-desc" value="${esc(c.descricao||'')}" placeholder="Ex: Compra de materiais, Serviço prestado..."></div>
+    <div class="form-row c2">
+      <div class="fg"><label>Contato <span class="int-badge">CRM</span></label>
+        <select id="ctf-contato"><option value="">— Sem contato —</option>${ctOpts}</select>
+      </div>
+      <div class="fg"><label>Categoria</label><input id="ctf-cat" value="${esc(c.categoria||'')}" placeholder="Ex: Aluguel, Honorários..."></div>
+    </div>
+    <div class="form-row c2">
+      <div class="fg"><label>Valor (R$) *</label><input id="ctf-val" type="number" value="${c.valor||''}" min="0" step="any" placeholder="0,00"></div>
+      <div class="fg"><label>Vencimento *</label><input id="ctf-venc" type="date" value="${c.vencimento||hoje()}"></div>
+    </div>
+    ${feats.includes('projeto')&&prjOpts?`
+    <div class="fg" style="margin-bottom:12px"><label>Projeto <span class="int-badge">Projeto</span></label>
+      <select id="ctf-proj"><option value="">— Sem projeto —</option>${prjOpts}</select>
+    </div>`:'<input type="hidden" id="ctf-proj" value="">'}
+    <div class="fg"><label>Observações</label><textarea id="ctf-obs">${esc(c.obs||'')}</textarea></div>
+  `,`
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="salvarConta('${id||''}')">Salvar</button>
+  `);
+  if(c.contatoId) setTimeout(()=>{ const s=document.getElementById('ctf-contato'); if(s) s.value=c.contatoId; },30);
+}
+
+function salvarConta(id){
+  const desc=v('ctf-desc').trim(), valor=+v('ctf-val'), venc=v('ctf-venc');
+  if(!desc||!valor||!venc){ alert('Preencha descrição, valor e vencimento.'); return; }
+  const contatoId=v('ctf-contato');
+  const contato=contatoId?DB.contatos().find(c=>c.id===contatoId)?.nome:'';
+  const lista=DB.contas();
+  const exist=id?lista.find(c=>c.id===id):{};
+  const obj={id:id||uid(),tipo:v('ctf-tipo'),tipoCusto:v('ctf-tipocusto'),descricao:desc,valor,vencimento:venc,contatoId,contato,categoria:v('ctf-cat'),projetoId:v('ctf-proj')||'',obs:v('ctf-obs'),status:exist.status||'pendente',dataPagamento:exist.dataPagamento||'',criado:exist.criado||hoje()};
+  if(id){ const i=lista.findIndex(c=>c.id===id); lista[i]=obj; }
+  else lista.push(obj);
+  DB.saveContas(lista); closeModal(); renderContas();
+}
+
+function pagarConta(id){
+  const lista=DB.contas();
+  const idx=lista.findIndex(c=>c.id===id);
+  if(idx<0) return;
+  lista[idx]={...lista[idx],status:'pago',dataPagamento:hoje()};
+  DB.saveContas(lista);
+  DB.syncContaToDRE(lista[idx]);
+  renderContas();
+  const tipo=lista[idx].tipo==='receber'?'Recebimento':'Pagamento';
+  toast(`✓ ${tipo} registrado. DRE atualizado automaticamente.`);
+}
+
+function deletarConta(id){
+  if(!confirm('Deletar este lançamento?')) return;
+  DB.removeDREEntry(id);
+  DB.saveContas(DB.contas().filter(c=>c.id!==id)); renderContas();
+}
+
+// ══════════════════════════════════════════════
+// DRE MODULE
+// ══════════════════════════════════════════════
+function renderDRE(){
+  populateMesAno('dre-mes','dre-ano');
+  const mes=+document.getElementById('dre-mes')?.value||MES;
+  const ano=+document.getElementById('dre-ano')?.value||ANO;
+  const dm=DB.dreDoMes(ano,mes);
+  const sum=arr=>(arr||[]).reduce((a,b)=>a+(+b.valor||0),0);
+  const rec=sum(dm.receitas), cmv=sum(dm.cmv), desp=sum(dm.despesas);
+  const mb=rec-cmv, mgb=rec>0?mb/rec:0;
+  const ebitda=mb-desp, mge=rec>0?ebitda/rec:0;
+
+  function secao(titulo,arr,secKey,cor,borderCor){
+    const total=sum(arr);
+    return `<div class="dre-sec">
+      <div class="dre-sec-head" style="background:${cor}">
+        <strong style="color:${borderCor};font-size:13px">${titulo}</strong>
+        <strong style="color:${borderCor}">${fmt(total)}</strong>
+      </div>
+      <div class="dre-sec-body">
+        ${arr.length?arr.map(e=>`
+          <div class="dre-row">
+            <div>
+              ${esc(e.descricao||'—')}
+              ${e.contato?`<span style="color:var(--texto-s)"> · ${esc(e.contato)}</span>`:''}
+              ${e.auto?`<span class="int-badge" style="margin-left:6px">Contas</span>`:''}
+              ${e.categoria?`<div style="font-size:11px;color:var(--texto-s)">${esc(e.categoria)}</div>`:''}
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <strong>${fmt(e.valor)}</strong>
+              ${!e.auto?`<button onclick="deletarDREEntry('${secKey}','${e.id}',${ano},${mes})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;line-height:1" title="Remover">×</button>`:''}
+            </div>
+          </div>`).join('')
+        :`<p style="color:var(--texto-s);font-size:12px;padding:6px 0">Nenhum lançamento. ${!arr.some(r=>r.auto)?'Marque contas como pagas para alimentar automaticamente.':''}</p>`}
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('dre-body').innerHTML=`
+    <div class="alert alert-info">ℹ️ Lançamentos com badge <strong>Contas</strong> foram sincronizados ao marcar como pago em <strong>Contas a Pagar/Receber</strong>. Itens manuais podem ser removidos.</div>
+    <div style="display:grid;grid-template-columns:1fr 290px;gap:18px;align-items:start">
+      <div>
+        ${secao('💰 Receitas Brutas',dm.receitas||[],'receitas','rgba(30,132,73,.08)','var(--ok)')}
+        ${secao('📦 CMV — Custo das Mercadorias/Serviços',dm.cmv||[],'cmv','rgba(160,64,0,.06)','#A04000')}
+        ${secao('📋 Despesas Operacionais',dm.despesas||[],'despesas','rgba(146,43,33,.06)','var(--danger)')}
+      </div>
+      <div>
+        <div class="card" style="position:sticky;top:20px">
+          <div class="card-title" style="margin-bottom:14px">Resumo — ${MESES[mes-1]}/${ano}</div>
+          ${dreResLinha('Receita Bruta',rec,true,'var(--ok)')}
+          ${dreResLinha('(−) CMV',cmv,false,'var(--warn)')}
+          ${dreResLinha('= Margem Bruta',mb,true,mb>=0?'var(--ok)':'var(--danger)')}
+          <div style="font-size:11px;color:var(--texto-s);margin:2px 0 10px;padding-left:4px">${pct(mgb*100)} da receita</div>
+          ${dreResLinha('(−) Despesas Operacionais',desp,false,'var(--warn)')}
+          ${dreResLinha('= EBITDA',ebitda,true,ebitda>=0?'var(--ok)':'var(--danger)')}
+          <div style="font-size:11px;color:var(--texto-s);margin-top:2px;padding-left:4px">${pct(mge*100)} da receita</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function dreResLinha(label,val,bold=false,cor='var(--texto)'){
+  return `<div class="dre-res-row" style="${bold?'font-weight:700':''}">
+    <span>${label}</span><span style="color:${cor}">${fmt(val)}</span>
+  </div>`;
+}
+
+function abrirDREEntry(){
+  const mes=+document.getElementById('dre-mes')?.value||MES;
+  const ano=+document.getElementById('dre-ano')?.value||ANO;
+  openModal(`Lançamento Manual — DRE ${MESES[mes-1]}/${ano}`,`
+    <div class="form-row c2">
+      <div class="fg"><label>Seção</label>
+        <select id="dre-sec">
+          <option value="receitas">Receita</option>
+          <option value="cmv">CMV (Custo de Mercadoria/Serviço)</option>
+          <option value="despesas">Despesa Operacional</option>
+        </select>
+      </div>
+      <div class="fg"><label>Valor (R$)</label><input id="dre-val" type="number" min="0" step="any" placeholder="0,00"></div>
+    </div>
+    <div class="form-row c2">
+      <div class="fg"><label>Descrição</label><input id="dre-desc" placeholder="Descrição do lançamento"></div>
+      <div class="fg"><label>Categoria</label><input id="dre-cat" placeholder="Ex: Serviços, Aluguel..."></div>
+    </div>
+  `,`
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="salvarDREEntry(${ano},${mes})">Salvar no DRE</button>
+  `);
+}
+
+function salvarDREEntry(ano,mes){
+  const sec=v('dre-sec'), val=+v('dre-val'), desc=v('dre-desc').trim();
+  if(!val||!desc){ alert('Preencha descrição e valor.'); return; }
+  const dm=DB.dreDoMes(ano,mes);
+  dm[sec]=dm[sec]||[];
+  dm[sec].push({id:uid(),descricao:desc,valor:val,categoria:v('dre-cat'),auto:false});
+  DB.saveDreDoMes(ano,mes,dm); closeModal(); renderDRE();
+}
+
+function deletarDREEntry(sec,id,ano,mes){
+  if(!confirm('Remover este lançamento manual?')) return;
+  const dm=DB.dreDoMes(ano,mes);
+  dm[sec]=(dm[sec]||[]).filter(e=>e.id!==id);
+  DB.saveDreDoMes(ano,mes,dm); renderDRE();
+}
+
+// ══════════════════════════════════════════════
+// FLUXO DE CAIXA
+// ══════════════════════════════════════════════
+function renderFluxo(){
+  populateMesAno('fc-mes','fc-ano');
+  const feats=sistemaAtual?.ferramentas||[];
+  if(feats.includes('contas')){
+    renderFluxoDeContas();
+  } else {
+    renderFluxoAutonomo();
+  }
+}
+
+// ── Modo derivado de Contas ─────────────────────
+function renderFluxoDeContas(){
+  document.getElementById('fc-subtitle').textContent='Gerado automaticamente a partir das Contas a Pagar e Receber';
+  document.getElementById('fc-actions').innerHTML=`<button class="btn btn-outline btn-sm" onclick="goMod('contas')">+ Lançamento →</button>`;
+  const mes=+document.getElementById('fc-mes')?.value||MES;
+  const ano=+document.getElementById('fc-ano')?.value||ANO;
+  const ym=`${ano}-${String(mes).padStart(2,'0')}`;
+  const contas=DB.contas().filter(c=>c.vencimento?.startsWith(ym)||c.dataPagamento?.startsWith(ym));
+  const entradas=contas.filter(c=>c.tipo==='receber');
+  const saidas=contas.filter(c=>c.tipo==='pagar');
+  const sumV=arr=>arr.reduce((a,b)=>a+(+b.valor||0),0);
+  const tEnt=sumV(entradas),tSai=sumV(saidas),saldo=tEnt-tSai;
+  const entReal=entradas.filter(c=>c.status==='pago'),entPrev=entradas.filter(c=>c.status!=='pago');
+  const saiReal=saidas.filter(c=>c.status==='pago'),saiPrev=saidas.filter(c=>c.status!=='pago');
+
+  function tbl(titulo,lista,cor){
+    if(!lista.length) return '';
+    return `<div style="margin-bottom:14px">
+      <div style="font-weight:700;color:${cor};font-size:12px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${titulo} (${fmt(sumV(lista))})</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Descrição</th><th>Contato</th><th>Data</th><th>Valor</th><th>Status</th></tr></thead><tbody>
+        ${lista.map(c=>`<tr><td>${esc(c.descricao)}</td><td>${esc(c.contato||'—')}</td><td>${fmtData(c.vencimento)}</td><td>${fmt(c.valor)}</td><td><span class="badge ${stBadge(c.status,c.vencimento)}">${stLabel(c.status)}</span></td></tr>`).join('')}
+      </tbody></table></div>
+    </div>`;
+  }
+
+  document.getElementById('fc-body').innerHTML=`
+    <div class="stat-grid">
+      <div class="stat-card" style="border-left-color:var(--ok)"><div class="stat-label">Total Entradas</div><div class="stat-val" style="color:var(--ok)">${fmt(tEnt)}</div><div class="stat-sub">${entradas.length} lançamentos · ${entReal.length} realizados</div></div>
+      <div class="stat-card" style="border-left-color:var(--danger)"><div class="stat-label">Total Saídas</div><div class="stat-val" style="color:var(--danger)">${fmt(tSai)}</div><div class="stat-sub">${saidas.length} lançamentos · ${saiReal.length} realizados</div></div>
+      <div class="stat-card" style="border-left-color:${saldo>=0?'var(--ok)':'var(--danger)'}"><div class="stat-label">Saldo do Período</div><div class="stat-val" style="color:${saldo>=0?'var(--ok)':'var(--danger)'}">${fmt(saldo)}</div><div class="stat-sub">${saldo>=0?'Fluxo positivo':'⚠️ Fluxo negativo'}</div></div>
+      <div class="stat-card"><div class="stat-label">Realizado (Entradas)</div><div class="stat-val">${fmt(sumV(entReal))}</div><div class="stat-sub">${fmt(sumV(entPrev))} pendente</div></div>
+    </div>
+    <div class="alert alert-info">ℹ️ Este fluxo é gerado automaticamente pelas <strong>Contas a Pagar e Receber</strong>. Para adicionar lançamentos, use o módulo Contas.</div>
+    ${tbl('✅ Recebimentos Realizados',entReal,'var(--ok)')}
+    ${tbl('⏳ A Receber (Previsto)',entPrev,'var(--info)')}
+    ${tbl('✅ Pagamentos Realizados',saiReal,'var(--ok)')}
+    ${tbl('⏳ A Pagar (Previsto)',saiPrev,'var(--warn)')}
+    ${!contas.length?`<div class="alert alert-info">Nenhum lançamento para ${MESES[mes-1]}/${ano}. <button class="btn btn-outline btn-xs" onclick="goMod('contas')">Ir para Contas →</button></div>`:''}
+  `;
+}
+
+// ── Modo autônomo (sem módulo Contas) ──────────
+function renderFluxoAutonomo(){
+  document.getElementById('fc-subtitle').textContent='Lançamentos manuais e custos fixos';
+  document.getElementById('fc-actions').innerHTML=`
+    <button class="btn btn-primary btn-sm" onclick="abrirFluxoForm()">+ Lançamento</button>
+    <button class="btn btn-outline btn-sm" onclick="abrirFixosModal()">⚙ Custos Fixos</button>
+  `;
+  const mes=+document.getElementById('fc-mes')?.value||MES;
+  const ano=+document.getElementById('fc-ano')?.value||ANO;
+  const ym=`${ano}-${String(mes).padStart(2,'0')}`;
+
+  // Lançamentos manuais do mês
+  const lanc=DB.fluxoLanc().filter(l=>l.data?.startsWith(ym));
+
+  // Custos fixos ativos → geram saídas previstas para o mês
+  const fixosAtivos=DB.fluxoFixos().filter(f=>f.ativo);
+  const lancFixos=fixosAtivos.map(f=>{
+    const dia=String(f.diaVencimento||1).padStart(2,'0');
+    return {id:'fix_'+f.id,descricao:f.nome,categoria:f.categoria||'Custo Fixo',valor:f.valor,data:`${ym}-${dia}`,tipo:'saida',status:'previsto',fixo:true};
+  });
+
+  const tudo=[...lanc,...lancFixos];
+  const entradas=tudo.filter(l=>l.tipo==='entrada');
+  const saidas=tudo.filter(l=>l.tipo==='saida');
+  const sumV=arr=>arr.reduce((a,b)=>a+(+b.valor||0),0);
+  const tEnt=sumV(entradas),tSai=sumV(saidas),saldo=tEnt-tSai;
+  const entReal=entradas.filter(l=>l.status==='realizado'),entPrev=entradas.filter(l=>l.status==='previsto');
+  const saiReal=saidas.filter(l=>l.status==='realizado'),saiPrev=saidas.filter(l=>l.status==='previsto');
+
+  function tbl(titulo,lista,cor){
+    if(!lista.length) return '';
+    return `<div style="margin-bottom:14px">
+      <div style="font-weight:700;color:${cor};font-size:12px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${titulo} (${fmt(sumV(lista))})</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th>Valor</th><th>Status</th><th></th></tr></thead><tbody>
+        ${lista.map(l=>`<tr>
+          <td><strong>${esc(l.descricao)}</strong>${l.fixo?` <span class="int-badge">Fixo</span>`:''}</td>
+          <td>${esc(l.categoria||'—')}</td>
+          <td>${fmtData(l.data)}</td>
+          <td>${fmt(l.valor)}</td>
+          <td><span class="badge ${l.status==='realizado'?'b-ok':'b-warn'}">${l.status==='realizado'?'Realizado':'Previsto'}</span></td>
+          <td style="white-space:nowrap">
+            ${!l.fixo?`
+              ${l.status==='previsto'?`<button class="btn btn-success btn-xs" onclick="realizarFluxoEntry('${l.id}')" title="Marcar como realizado">✓</button> `:''}
+              <button class="btn btn-outline btn-xs" onclick="abrirFluxoForm('${l.id}')">✏</button>
+              <button class="btn btn-xs" style="background:none;color:var(--danger);border:1px solid var(--danger)" onclick="deletarFluxoEntry('${l.id}')">🗑</button>
+            `:'<span style="color:var(--texto-s);font-size:11px">automático</span>'}
+          </td>
+        </tr>`).join('')}
+      </tbody></table></div>
+    </div>`;
+  }
+
+  document.getElementById('fc-body').innerHTML=`
+    <div class="stat-grid">
+      <div class="stat-card" style="border-left-color:var(--ok)"><div class="stat-label">Total Entradas</div><div class="stat-val" style="color:var(--ok)">${fmt(tEnt)}</div><div class="stat-sub">${entradas.length} lançamentos · ${entReal.length} realizados</div></div>
+      <div class="stat-card" style="border-left-color:var(--danger)"><div class="stat-label">Total Saídas</div><div class="stat-val" style="color:var(--danger)">${fmt(tSai)}</div><div class="stat-sub">${saidas.length} lançamentos (${fixosAtivos.length} custos fixos)</div></div>
+      <div class="stat-card" style="border-left-color:${saldo>=0?'var(--ok)':'var(--danger)'}"><div class="stat-label">Saldo do Período</div><div class="stat-val" style="color:${saldo>=0?'var(--ok)':'var(--danger)'}">${fmt(saldo)}</div><div class="stat-sub">${saldo>=0?'Fluxo positivo':'⚠️ Fluxo negativo'}</div></div>
+      <div class="stat-card"><div class="stat-label">Realizado (Líquido)</div><div class="stat-val">${fmt(sumV(entReal)-sumV(saiReal))}</div><div class="stat-sub">${fmt(sumV(entPrev)-sumV(saiPrev))} previsto</div></div>
+    </div>
+    ${fixosAtivos.length?`<div class="alert alert-info">⚙️ <strong>${fixosAtivos.length} custo(s) fixo(s) ativo(s)</strong> gerando ${fmt(sumV(lancFixos))} de saídas previstas neste mês. <button class="btn btn-outline btn-xs" onclick="abrirFixosModal()">Gerenciar →</button></div>`:''}
+    ${tbl('✅ Entradas Realizadas',entReal,'var(--ok)')}
+    ${tbl('⏳ Entradas Previstas',entPrev,'var(--info)')}
+    ${tbl('✅ Saídas Realizadas',saiReal,'var(--ok)')}
+    ${tbl('⏳ Saídas Previstas',saiPrev,'var(--warn)')}
+    ${!tudo.length?`<div class="alert alert-info">Nenhum lançamento para ${MESES[mes-1]}/${ano}. <button class="btn btn-primary btn-xs" onclick="abrirFluxoForm()">+ Adicionar</button></div>`:''}
+  `;
+}
+
+function abrirFluxoForm(id=null){
+  const l=id?DB.fluxoLanc().find(x=>x.id===id):{};
+  openModal(id?'Editar Lançamento':'Novo Lançamento de Fluxo',`
+    <div class="form-row c2">
+      <div class="fg"><label>Tipo *</label>
+        <select id="fl-tipo">
+          <option value="entrada"${(l.tipo||'entrada')==='entrada'?' selected':''}>💰 Entrada</option>
+          <option value="saida"${l.tipo==='saida'?' selected':''}>💸 Saída</option>
+        </select>
+      </div>
+      <div class="fg"><label>Status</label>
+        <select id="fl-status">
+          <option value="previsto"${(l.status||'previsto')==='previsto'?' selected':''}>Previsto</option>
+          <option value="realizado"${l.status==='realizado'?' selected':''}>Realizado</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:12px"><label>Descrição *</label><input id="fl-desc" value="${esc(l.descricao||'')}" placeholder="Ex: Venda de produto, Pagamento de aluguel..."></div>
+    <div class="form-row c2">
+      <div class="fg"><label>Valor (R$) *</label><input id="fl-val" type="number" value="${l.valor||''}" min="0" step="any" placeholder="0,00"></div>
+      <div class="fg"><label>Data *</label><input id="fl-data" type="date" value="${l.data||hoje()}"></div>
+    </div>
+    <div class="form-row c2">
+      <div class="fg"><label>Categoria</label><input id="fl-cat" value="${esc(l.categoria||'')}" placeholder="Ex: Vendas, Aluguel, Salários..."></div>
+      <div class="fg"><label>Observações</label><input id="fl-obs" value="${esc(l.obs||'')}" placeholder="Opcional"></div>
+    </div>
+  `,`
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="salvarFluxoEntry('${id||''}')">Salvar</button>
+  `);
+}
+
+function salvarFluxoEntry(id){
+  const desc=v('fl-desc').trim(), valor=+v('fl-val'), data=v('fl-data');
+  if(!desc||!valor||!data){ alert('Preencha descrição, valor e data.'); return; }
+  const lista=DB.fluxoLanc();
+  const obj={id:id||uid(),tipo:v('fl-tipo'),status:v('fl-status'),descricao:desc,valor,data,categoria:v('fl-cat'),obs:v('fl-obs')};
+  if(id){ const i=lista.findIndex(x=>x.id===id); lista[i]=obj; }
+  else lista.push(obj);
+  DB.saveFluxoLanc(lista); closeModal(); renderFluxo();
+}
+
+function realizarFluxoEntry(id){
+  const lista=DB.fluxoLanc();
+  const idx=lista.findIndex(x=>x.id===id);
+  if(idx<0) return;
+  lista[idx]={...lista[idx],status:'realizado'};
+  DB.saveFluxoLanc(lista); renderFluxo();
+  toast('✓ Lançamento marcado como realizado.');
+}
+
+function deletarFluxoEntry(id){
+  if(!confirm('Deletar este lançamento?')) return;
+  DB.saveFluxoLanc(DB.fluxoLanc().filter(x=>x.id!==id)); renderFluxo();
+}
+
+function abrirFixosModal(){
+  const fixos=DB.fluxoFixos();
+  const rows=fixos.length?fixos.map(f=>`
+    <div style="display:grid;grid-template-columns:1fr 100px 80px 60px auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(27,59,40,.07);font-size:13px">
+      <span><strong>${esc(f.nome)}</strong><div style="font-size:11px;color:var(--texto-s)">${f.categoria||''} · dia ${f.diaVencimento||1}</div></span>
+      <span>${fmt(f.valor)}</span>
+      <span>${{mensal:'Mensal',semanal:'Semanal',quinzenal:'Quinzenal',anual:'Anual'}[f.frequencia]||f.frequencia}</span>
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" ${f.ativo?'checked':''} onchange="toggleFixo('${f.id}',this.checked)" style="width:auto;accent-color:var(--verde)"><span style="font-size:11px">${f.ativo?'Ativo':'Off'}</span></label>
+      <div style="display:flex;gap:4px">
+        <button class="btn btn-outline btn-xs" onclick="abrirFixoForm('${f.id}')">✏</button>
+        <button class="btn btn-xs" style="background:none;color:var(--danger);border:1px solid var(--danger)" onclick="deletarFixo('${f.id}')">🗑</button>
+      </div>
+    </div>`).join('')
+  :`<p style="color:var(--texto-s);font-size:13px;padding:10px 0">Nenhum custo fixo cadastrado.</p>`;
+
+  openModal('Custos Fixos',`
+    <div class="alert alert-info" style="margin-bottom:14px">Custos fixos ativos geram saídas <strong>previstas</strong> automaticamente em todos os meses.</div>
+    ${rows}
+    <div style="margin-top:14px">
+      <button class="btn btn-primary btn-sm" onclick="abrirFixoForm()">+ Novo Custo Fixo</button>
+    </div>
+  `);
+}
+
+function abrirFixoForm(id=null){
+  const f=id?DB.fluxoFixos().find(x=>x.id===id):{};
+  openModal(id?'Editar Custo Fixo':'Novo Custo Fixo',`
+    <div class="form-row c2">
+      <div class="fg"><label>Nome *</label><input id="ff-nome" value="${esc(f.nome||'')}" placeholder="Ex: Aluguel, Salário, Seguro..."></div>
+      <div class="fg"><label>Valor (R$) *</label><input id="ff-val" type="number" value="${f.valor||''}" min="0" step="any" placeholder="0,00"></div>
+    </div>
+    <div class="form-row c3">
+      <div class="fg"><label>Frequência</label>
+        <select id="ff-freq">
+          <option value="mensal"${(f.frequencia||'mensal')==='mensal'?' selected':''}>Mensal</option>
+          <option value="quinzenal"${f.frequencia==='quinzenal'?' selected':''}>Quinzenal</option>
+          <option value="semanal"${f.frequencia==='semanal'?' selected':''}>Semanal</option>
+          <option value="anual"${f.frequencia==='anual'?' selected':''}>Anual</option>
+        </select>
+      </div>
+      <div class="fg"><label>Dia do Vencimento</label><input id="ff-dia" type="number" value="${f.diaVencimento||1}" min="1" max="28"></div>
+      <div class="fg"><label>Categoria</label><input id="ff-cat" value="${esc(f.categoria||'')}" placeholder="Ex: Infraestrutura, Pessoal..."></div>
+    </div>
+    <div class="fg" style="margin-top:4px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0">
+        <input type="checkbox" id="ff-ativo" ${f.ativo!==false?'checked':''} style="width:auto;accent-color:var(--verde)">
+        Ativo (gera saídas previstas automaticamente)
+      </label>
+    </div>
+  `,`
+    <button class="btn btn-outline" onclick="${id?'abrirFixosModal':'closeModal'}()">Cancelar</button>
+    <button class="btn btn-primary" onclick="salvarFixo('${id||''}')">Salvar</button>
+  `);
+}
+
+function salvarFixo(id){
+  const nome=v('ff-nome').trim(), valor=+v('ff-val');
+  if(!nome||!valor){ alert('Preencha nome e valor.'); return; }
+  const lista=DB.fluxoFixos();
+  const obj={id:id||uid(),nome,valor,frequencia:v('ff-freq'),diaVencimento:+v('ff-dia')||1,categoria:v('ff-cat'),ativo:document.getElementById('ff-ativo').checked};
+  if(id){ const i=lista.findIndex(x=>x.id===id); lista[i]=obj; }
+  else lista.push(obj);
+  DB.saveFluxoFixos(lista); closeModal(); renderFluxo();
+}
+
+function toggleFixo(id,ativo){
+  const lista=DB.fluxoFixos();
+  const idx=lista.findIndex(x=>x.id===id);
+  if(idx<0) return;
+  lista[idx].ativo=ativo;
+  DB.saveFluxoFixos(lista); renderFluxo();
+}
+
+function deletarFixo(id){
+  if(!confirm('Deletar este custo fixo?')) return;
+  DB.saveFluxoFixos(DB.fluxoFixos().filter(x=>x.id!==id)); closeModal(); renderFluxo();
+}
+
+// ══════════════════════════════════════════════
+// ORÇAMENTO
+// ══════════════════════════════════════════════
+const ORC_CATS={
+  rev:['Receitas de Serviços','Receitas de Produtos','Receitas de Projetos','Outras Receitas'],
+  cost:['CMV / Custo de Mercadorias','Custo de Produção','Custo de Serviços'],
+  exp:['Pessoal / Salários','Aluguel / Infraestrutura','Marketing / Vendas','Software / Ferramentas','Administrativo','Financeiro','Outros'],
+};
+
+function renderOrcamento(){
+  const anoEl=document.getElementById('orc-ano');
+  if(!anoEl.innerHTML){ for(let y=ANO-1;y<=ANO+1;y++){ const o=document.createElement('option'); o.value=y; o.textContent=y; if(y===ANO) o.selected=true; anoEl.appendChild(o); } }
+  const ano=+anoEl.value||ANO;
+  const orc=DB.orcDoAno(ano);
+  const dre=DB.dre();
+
+  function actual(secKey,cat){
+    let t=0;
+    for(let m=1;m<=12;m++){
+      const k=`${ano}-${String(m).padStart(2,'0')}`;
+      const dm=dre[k]||{receitas:[],cmv:[],despesas:[]};
+      const arr=secKey==='rev'?dm.receitas:secKey==='cost'?dm.cmv:dm.despesas;
+      t+=(arr||[]).filter(e=>!cat||e.categoria===cat).reduce((a,b)=>a+(+b.valor||0),0);
+    }
+    return t;
+  }
+
+  function secRows(secKey,cats,titulo,cor){
+    const tBud=cats.reduce((a,c)=>a+(+orc[secKey]?.[c]||0),0);
+    const tAct=actual(secKey);
+    const tVar=tBud?((tAct-tBud)/tBud)*100:0;
+    return `<div class="dre-sec" style="margin-bottom:14px">
+      <div class="dre-sec-head" style="background:${cor}10">
+        <div style="display:grid;grid-template-columns:1fr 140px 140px 100px;gap:8px;width:100%;align-items:center">
+          <strong style="color:${cor}">${titulo}</strong>
+          <span style="font-size:11px;color:var(--texto-s);font-weight:700;text-transform:uppercase">Budget Anual</span>
+          <span style="font-size:11px;color:var(--texto-s);font-weight:700;text-transform:uppercase">Realizado (DRE)</span>
+          <span style="font-size:11px;color:var(--texto-s);font-weight:700;text-transform:uppercase">Variação</span>
+        </div>
+      </div>
+      <div class="dre-sec-body" style="padding:0">
+        ${cats.map(cat=>{
+          const bud=+orc[secKey]?.[cat]||0;
+          const act=actual(secKey,cat);
+          const varP=bud?(act-bud)/bud*100:0;
+          const vCor=secKey==='rev'?(varP>0?'var(--ok)':varP>-10?'var(--warn)':'var(--danger)'):(varP>10?'var(--danger)':varP>0?'var(--warn)':'var(--ok)');
+          return `<div style="display:grid;grid-template-columns:1fr 140px 140px 100px;gap:8px;padding:9px 16px;border-bottom:1px solid rgba(27,59,40,.05);align-items:center;font-size:13px">
+            <span>${cat}</span>
+            <span class="orc-editable" data-sec="${secKey}" data-cat="${encodeURIComponent(cat)}" data-ano="${ano}" style="font-weight:600;color:var(--verde);cursor:pointer;text-decoration:underline dotted" title="Clique para editar">${fmt(bud)}</span>
+            <span style="font-weight:600">${fmt(act)}</span>
+            <span style="color:${vCor};font-weight:700">${varP>0?'+':''}${pct(varP)}</span>
+          </div>`;
+        }).join('')}
+        <div style="display:grid;grid-template-columns:1fr 140px 140px 100px;gap:8px;padding:10px 16px;background:${cor}08;font-weight:700;font-size:13px">
+          <span>Total</span><span>${fmt(tBud)}</span><span>${fmt(tAct)}</span>
+          <span style="color:${tVar>10?'var(--danger)':tVar>0?'var(--warn)':'var(--ok)'}">${tVar>0?'+':''}${pct(tVar)}</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('orc-body').innerHTML=`
+    <div class="alert alert-info" style="margin-bottom:16px">ℹ️ O <strong>Realizado</strong> é puxado automaticamente do DRE. Clique nos valores de <u>Budget</u> (sublinhados) para editar.</div>
+    ${secRows('rev',ORC_CATS.rev,'💰 Receitas Orçadas','#1E8449')}
+    ${secRows('cost',ORC_CATS.cost,'📦 CMV Orçado','#A04000')}
+    ${secRows('exp',ORC_CATS.exp,'📋 Despesas Orçadas','#922B21')}
+  `;
+
+  document.querySelectorAll('.orc-editable').forEach(el=>{
+    el.addEventListener('click',function(){
+      const{sec,cat,ano:a}=this.dataset;
+      const catD=decodeURIComponent(cat);
+      const cur=+DB.orcDoAno(+a)[sec]?.[catD]||0;
+      const novo=prompt(`Budget anual para "${catD}" em ${a}:\n(deixe 0 para zerar)`,cur.toFixed(2));
+      if(novo===null||isNaN(+novo)) return;
+      const orc2=DB.orcDoAno(+a);
+      orc2[sec]=orc2[sec]||{}; orc2[sec][catD]=+novo;
+      DB.saveOrcDoAno(+a,orc2); renderOrcamento();
+    });
+  });
+}
+
+// ══════════════════════════════════════════════
+// KPIs MODULE
+// ══════════════════════════════════════════════
+function renderKPIs(){
+  populateMesAno('kpi-mes','kpi-ano');
+  const mes=+document.getElementById('kpi-mes')?.value||MES;
+  const ano=+document.getElementById('kpi-ano')?.value||ANO;
+  const k=DB.calcKPIs(ano,mes);
+  const contas=DB.contas();
+  const recebidas=contas.filter(c=>c.tipo==='receber'&&c.status==='pago');
+  const ticket=recebidas.length?recebidas.reduce((a,b)=>a+(+b.valor||0),0)/recebidas.length:0;
+  const pendRec=contas.filter(c=>c.tipo==='receber'&&c.status!=='pago'&&c.status!=='cancelado');
+  const pendPag=contas.filter(c=>c.tipo==='pagar'&&c.status!=='pago'&&c.status!=='cancelado');
+  const pmr=pendRec.length?pendRec.reduce((a,c)=>a+Math.max(0,diffDias(c.vencimento)),0)/pendRec.length:0;
+  const pmp=pendPag.length?pendPag.reduce((a,c)=>a+Math.max(0,diffDias(c.vencimento)),0)/pendPag.length:0;
+  const est=DB.estoque();
+  const valEst=est.reduce((a,i)=>{const pv=calcPV(i.custoUnit,i.frete,i.outros,i.impostos,i.margem);return a+pv*(+i.quantidade||0);},0);
+  const proj=DB.projetos();
+  const feats=sistemaAtual?.ferramentas||[];
+
+  function kCard(label,val,unid,desc,cor,sub=''){
+    return `<div class="stat-card" style="border-left-color:${cor}">
+      <div class="stat-label">${label}</div>
+      <div class="stat-val" style="color:${cor};font-size:${String(val).length>10?'16px':String(val).length>7?'19px':'22px'}">${val}<small style="font-size:12px;font-weight:400"> ${unid}</small></div>
+      <div class="stat-sub">${desc}${sub?`<br><strong>${sub}</strong>`:''}</div>
+    </div>`;
+  }
+
+  const sec=(titulo)=>`<div style="margin:20px 0 8px;font-weight:700;color:var(--verde);font-size:11px;text-transform:uppercase;letter-spacing:.8px">${titulo}</div>`;
+
+  document.getElementById('kpi-body').innerHTML=`
+    <div class="alert alert-ok">✅ KPIs calculados automaticamente · DRE + Contas + Estoque · ${MESES[mes-1]}/${ano}</div>
+    ${sec('RENTABILIDADE')}
+    <div class="stat-grid">
+      ${kCard('Receita Líquida',fmt(k.rec),'','DRE do período','var(--ok)')}
+      ${kCard('Margem Bruta',pct(k.margBruta*100),'','(Rec − CMV) ÷ Rec',k.margBruta>=0.2?'var(--ok)':k.margBruta>=0.1?'var(--warn)':'var(--danger)',k.margBruta>=0.2?'✓ Acima de 20%':'⚠ Abaixo do ideal')}
+      ${kCard('Margem EBITDA',pct(k.margEbitda*100),'','Operacional ÷ Receita',k.margEbitda>=0.1?'var(--ok)':k.margEbitda>=0?'var(--warn)':'var(--danger)')}
+      ${kCard('EBITDA',fmt(k.ebitda),'','Margem bruta − despesas',k.ebitda>=0?'var(--ok)':'var(--danger)')}
+      ${kCard('Ticket Médio',fmt(ticket),'','Por recebimento realizado','var(--info)')}
+    </div>
+    ${sec('LIQUIDEZ & CAPITAL DE GIRO')}
+    <div class="stat-grid">
+      ${kCard('A Receber',fmt(k.cr),'','Em aberto (pendente/vencido)','var(--info)')}
+      ${kCard('A Pagar',fmt(k.cp),'','Em aberto (pendente/vencido)','var(--warn)')}
+      ${kCard('Capital de Giro Líq.',fmt(k.cr-k.cp),'','A Receber − A Pagar',k.cr>=k.cp?'var(--ok)':'var(--danger)')}
+      ${kCard('PMR',Math.round(pmr)+' dias','','Prazo médio de recebimento',pmr<=30?'var(--ok)':pmr<=60?'var(--warn)':'var(--danger)',pmr<=30?'✓ Bom':pmr<=60?'Atenção':'⚠ Longo')}
+      ${kCard('PMP',Math.round(pmp)+' dias','','Prazo médio de pagamento',pmp>=30?'var(--ok)':'var(--warn)',pmp>=30?'✓ Bom':'Atenção')}
+    </div>
+    ${feats.includes('estoque')?`${sec('ESTOQUE')}<div class="stat-grid">
+      ${kCard('Valor em Estoque',fmt(valEst),'','Preço venda × quantidade','var(--info)')}
+      ${kCard('Total de Itens',est.length+'','itens cadastrados','SKUs no sistema','var(--verde)')}
+      ${kCard('Abaixo do Mínimo',est.filter(i=>i.qtdMin>0&&+i.quantidade<+i.qtdMin).length+'','itens','Necessitam reposição',est.filter(i=>i.qtdMin>0&&+i.quantidade<+i.qtdMin).length?'var(--danger)':'var(--ok)')}
+    </div>`:''}
+    ${feats.includes('projeto')&&proj.length?`${sec('PROJETOS')}<div class="stat-grid">
+      ${kCard('Projetos Ativos',proj.filter(p=>p.status==='ativo').length+'','','De '+proj.length+' total','var(--info)')}
+      ${kCard('Receita em Projetos',fmt(proj.reduce((a,p)=>a+(+p.receita||0),0)),'','Total receita confirmada','var(--ok)')}
+      ${kCard('Margem Média',pct(proj.length?proj.reduce((a,p)=>{const r=+p.receita||0;return a+(r>0?((r-(+p.custoReal||0))/r)*100:0);},0)/proj.length:0),'','Margem líquida média',proj.reduce((a,p)=>{const r=+p.receita||0;return a+(r>0?((r-(+p.custoReal||0))/r)*100:0);},0)/proj.length>=15?'var(--ok)':'var(--warn)')}
+    </div>`:''}
+  `;
+}
+
+// ══════════════════════════════════════════════
+// PROJETO MODULE
+// ══════════════════════════════════════════════
+function renderProjeto(){
+  const lista=DB.projetos();
+  document.getElementById('proj-tbody').innerHTML=lista.length?lista.map(p=>{
+    const r=+p.receita||0, c=+p.custoReal||0;
+    const mg=r>0?(r-c)/r*100:0;
+    const feats=sistemaAtual?.ferramentas||[];
+    return `<tr>
+      <td><strong>${esc(p.nome)}</strong>${p.desc?`<br><small style="color:var(--texto-s)">${esc(p.desc.slice(0,60))}${p.desc.length>60?'…':''}</small>`:''}</td>
+      <td>${esc(p.clienteNome||'—')} ${p.clienteId?`<span class="int-badge">CRM</span>`:''}</td>
+      <td>${fmt(p.orcamento)}</td>
+      <td>${fmt(p.custoReal)}</td>
+      <td>${fmt(p.receita)}</td>
+      <td><strong style="color:${mg>=15?'var(--ok)':mg>=0?'var(--warn)':'var(--danger)'}">${pct(mg)}</strong></td>
+      <td><span class="badge ${p.status==='ativo'?'b-ok':p.status==='concluido'?'b-info':'b-gray'}">${p.status==='ativo'?'Ativo':p.status==='concluido'?'Concluído':'Pausado'}</span></td>
+      <td style="white-space:nowrap;display:flex;gap:4px">
+        <button class="btn btn-outline btn-xs" onclick="abrirProjetoForm('${p.id}')">✏</button>
+        ${feats.includes('contas')?`
+          <button class="btn btn-xs" style="background:rgba(30,132,73,.1);color:var(--ok);border:1px solid var(--ok)" onclick="lancarReceita('${p.id}')" title="Lançar receita em Contas a Receber">💰</button>
+          <button class="btn btn-xs" style="background:rgba(192,57,43,.1);color:var(--danger);border:1px solid var(--danger)" onclick="lancarCusto('${p.id}')" title="Lançar custo em Contas a Pagar">💸</button>`:''}
+        <button class="btn btn-xs" style="background:none;color:var(--danger);border:1px solid var(--danger)" onclick="deletarProjeto('${p.id}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="8" style="text-align:center;color:var(--texto-s);padding:30px">Nenhum projeto. <button class="btn btn-primary btn-xs" onclick="abrirProjetoForm()">+ Criar</button></td></tr>`;
+}
+
+function abrirProjetoForm(id=null){
+  const p=id?DB.projetos().find(x=>x.id===id):{};
+  const cliOpts=DB.clientes().map(c=>`<option value="${c.id}"${p.clienteId===c.id?' selected':''}>${esc(c.nome)}</option>`).join('');
+  openModal(id?'Editar Projeto':'Novo Projeto',`
+    <div class="form-row c2">
+      <div class="fg"><label>Nome do Projeto *</label><input id="pf-nome" value="${esc(p.nome||'')}" placeholder="Ex: Implantação Sistema X"></div>
+      <div class="fg"><label>Cliente <span class="int-badge">CRM</span></label>
+        <select id="pf-cli"><option value="">— Sem cliente —</option>${cliOpts}${!cliOpts?'<option disabled>Cadastre clientes no CRM</option>':''}</select>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:12px"><label>Descrição / Escopo</label><textarea id="pf-desc">${esc(p.desc||'')}</textarea></div>
+    <div class="form-row c3">
+      <div class="fg"><label>Valor Orçado (R$)</label><input id="pf-orc" type="number" value="${p.orcamento||''}" min="0" step="any"></div>
+      <div class="fg"><label>Custo Real (R$)</label><input id="pf-custo" type="number" value="${p.custoReal||0}" min="0" step="any"></div>
+      <div class="fg"><label>Receita Confirmada (R$)</label><input id="pf-rec" type="number" value="${p.receita||''}" min="0" step="any"></div>
+    </div>
+    <div class="form-row c3">
+      <div class="fg"><label>Status</label>
+        <select id="pf-status">
+          <option value="ativo"${(p.status||'ativo')==='ativo'?' selected':''}>Ativo</option>
+          <option value="pausado"${p.status==='pausado'?' selected':''}>Pausado</option>
+          <option value="concluido"${p.status==='concluido'?' selected':''}>Concluído</option>
+        </select>
+      </div>
+      <div class="fg"><label>Data de Início</label><input id="pf-ini" type="date" value="${p.inicio||hoje()}"></div>
+      <div class="fg"><label>Previsão de Fim</label><input id="pf-fim" type="date" value="${p.fim||''}"></div>
+    </div>
+  `,`
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="salvarProjeto('${id||''}')">Salvar</button>
+  `);
+  if(p.clienteId) setTimeout(()=>{ const s=document.getElementById('pf-cli'); if(s) s.value=p.clienteId; },30);
+}
+
+function salvarProjeto(id){
+  const nome=v('pf-nome').trim();
+  if(!nome){ alert('Nome obrigatório.'); return; }
+  const clienteId=v('pf-cli');
+  const cliente=clienteId?DB.contatos().find(c=>c.id===clienteId):null;
+  const lista=DB.projetos();
+  const obj={id:id||uid(),nome,desc:v('pf-desc'),clienteId,clienteNome:cliente?.nome||'',orcamento:+v('pf-orc')||0,custoReal:+v('pf-custo')||0,receita:+v('pf-rec')||0,status:v('pf-status'),inicio:v('pf-ini'),fim:v('pf-fim')};
+  if(id){ const i=lista.findIndex(p=>p.id===id); lista[i]=obj; }
+  else lista.push(obj);
+  DB.saveProjetos(lista); closeModal(); renderProjeto();
+}
+
+function deletarProjeto(id){
+  if(!confirm('Deletar este projeto?')) return;
+  DB.saveProjetos(DB.projetos().filter(p=>p.id!==id)); renderProjeto();
+}
+
+function lancarReceita(id){
+  const p=DB.projetos().find(x=>x.id===id); if(!p) return;
+  goMod('contas');
+  setTimeout(()=>abrirContaForm(null,{tipo:'receber',descricao:`Receita — ${p.nome}`,contatoId:p.clienteId,contato:p.clienteNome,valor:p.receita||p.orcamento||'',tipoCusto:'despesa',projetoId:p.id,categoria:'Projetos'}),80);
+}
+
+function lancarCusto(id){
+  const p=DB.projetos().find(x=>x.id===id); if(!p) return;
+  goMod('contas');
+  setTimeout(()=>abrirContaForm(null,{tipo:'pagar',descricao:`Custo — ${p.nome}`,valor:p.custoReal||'',tipoCusto:'despesa',projetoId:p.id,categoria:'Projetos'}),80);
+}
+
+// ══════════════════════════════════════════════
+// BACKUP
+// ══════════════════════════════════════════════
+function exportBackup(){
+  const prefix=`iae_sys_${DB.sid}_`;
+  const dados={};
+  Object.keys(localStorage).filter(k=>k.startsWith(prefix)).forEach(k=>{ try{dados[k]=JSON.parse(localStorage.getItem(k))}catch{dados[k]=localStorage.getItem(k)}});
+  const bkp={v:1,sistema:sistemaAtual,dados,exportado:new Date().toISOString()};
+  const a=document.createElement('a');
+  a.href='data:application/json,'+encodeURIComponent(JSON.stringify(bkp,null,2));
+  a.download=`iae-${(sistemaAtual?.nome||'sistema').replace(/\s+/g,'-').toLowerCase()}-${hoje()}.json`;
+  a.click();
+}
+
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
+function v(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+window.addEventListener('load', renderSistemas);
+</script>
+</body>
+</html>

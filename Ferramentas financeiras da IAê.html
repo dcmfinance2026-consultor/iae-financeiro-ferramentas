@@ -6,17 +6,14 @@
     <title>IAê Financeiro — Central de Ferramentas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Nunito:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --verde-escuro:  #1B3B28;
             --verde-medio:   #2D5A3D;
             --verde-claro:   #4A7A5A;
-            --marrom:        #8B5E3C;
-            --marrom-esc:    #5C3D1F;
             --dourado:       #C49A3C;
             --dourado-claro: #E0B84A;
-            --laranja:       #D4763A;
             --bege:          #E8D5A3;
             --bege-claro:    #F5EDD5;
             --creme:         #FEFBF3;
@@ -24,22 +21,21 @@
             --texto-suave:   #7A5C3E;
             --sombra:        rgba(27,59,40,.12);
             --sombra-f:      rgba(27,59,40,.28);
+            --glow:          rgba(196,154,60,.35);
         }
 
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
         html { scroll-behavior: smooth; }
-
         body {
             font-family: 'Nunito', sans-serif;
-            background: #0E2018;
+            background: #080F0B;
             color: var(--texto);
             min-height: 100vh;
         }
 
-        /* ── HERO ────────────────────────────────────────────── */
+        /* ── HERO ──────────────────────────────────────────────── */
         .hero {
-            background: linear-gradient(160deg, #0A180F 0%, #132B1C 40%, #1B3B28 70%, #2D5A3D 100%);
+            background: #060E09;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -47,32 +43,106 @@
             overflow: hidden;
         }
 
-        /* decorative circles */
-        .hero::before {
-            content: '';
+        /* Animated grid overlay */
+        .hero-grid {
             position: absolute;
-            width: 700px; height: 700px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(196,154,60,.07) 0%, transparent 70%);
-            top: -200px; right: -200px;
+            inset: 0;
             pointer-events: none;
+            background-image:
+                linear-gradient(rgba(196,154,60,.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(196,154,60,.045) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridDrift 18s linear infinite;
         }
-        .hero::after {
-            content: '';
-            position: absolute;
-            width: 500px; height: 500px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(196,154,60,.05) 0%, transparent 70%);
-            bottom: -100px; left: -100px;
-            pointer-events: none;
+        @keyframes gridDrift {
+            0%   { background-position: 0 0,  0 0; }
+            100% { background-position: 0 60px, 60px 0; }
         }
 
-        /* ── NAVBAR ──────────────────────────────────────────── */
+        /* Radial glow bursts */
+        .hero-glow-1 {
+            position: absolute;
+            width: 900px; height: 900px;
+            top: -350px; right: -250px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(196,154,60,.12) 0%, transparent 65%);
+            pointer-events: none;
+            animation: pulse1 6s ease-in-out infinite;
+        }
+        .hero-glow-2 {
+            position: absolute;
+            width: 600px; height: 600px;
+            bottom: -150px; left: -100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(45,90,61,.4) 0%, transparent 65%);
+            pointer-events: none;
+            animation: pulse2 8s ease-in-out infinite;
+        }
+        .hero-glow-3 {
+            position: absolute;
+            width: 400px; height: 400px;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(196,154,60,.04) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        @keyframes pulse1 {
+            0%,100% { opacity: .7; transform: scale(1); }
+            50%      { opacity: 1;  transform: scale(1.08); }
+        }
+        @keyframes pulse2 {
+            0%,100% { opacity: .5; transform: scale(1); }
+            50%      { opacity: .9; transform: scale(1.05); }
+        }
+
+        /* Floating particles */
+        .particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--dourado);
+            opacity: 0;
+            animation: floatUp var(--dur,12s) linear var(--delay,0s) infinite;
+        }
+        @keyframes floatUp {
+            0%   { opacity: 0;    transform: translateY(0)      scale(0); }
+            10%  { opacity: .55; }
+            90%  { opacity: .3; }
+            100% { opacity: 0;    transform: translateY(-130vh) scale(1); }
+        }
+
+        /* Diagonal accent lines */
+        .hero-lines {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .hero-lines::before {
+            content: '';
+            position: absolute;
+            width: 1px; height: 60%;
+            top: 20%; left: 12%;
+            background: linear-gradient(to bottom, transparent, rgba(196,154,60,.18), transparent);
+            transform: rotate(15deg);
+        }
+        .hero-lines::after {
+            content: '';
+            position: absolute;
+            width: 1px; height: 40%;
+            top: 30%; right: 15%;
+            background: linear-gradient(to bottom, transparent, rgba(196,154,60,.12), transparent);
+            transform: rotate(-12deg);
+        }
+
+        /* ── NAVBAR ──────────────────────────────────────────────── */
         .navbar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 22px 56px;
-            border-bottom: 1px solid rgba(196,154,60,.15);
+            border-bottom: 1px solid rgba(196,154,60,.12);
             position: relative; z-index: 10;
+            backdrop-filter: blur(4px);
         }
 
         .nav-brand { display: flex; align-items: center; gap: 14px; }
@@ -83,8 +153,21 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 19px; font-weight: 900; color: var(--verde-escuro);
             font-family: 'Playfair Display', serif;
-            box-shadow: 0 2px 14px rgba(196,154,60,.45);
+            box-shadow: 0 0 20px rgba(196,154,60,.5), 0 2px 10px rgba(0,0,0,.6);
             flex-shrink: 0;
+            position: relative;
+        }
+        .nav-emblem::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 1px solid rgba(196,154,60,.3);
+            animation: emblemRing 3s ease-in-out infinite;
+        }
+        @keyframes emblemRing {
+            0%,100% { opacity: .6; transform: scale(1); }
+            50%      { opacity: 1;  transform: scale(1.1); }
         }
 
         .nav-brand-text .name {
@@ -94,104 +177,286 @@
         }
         .nav-brand-text .name span { color: var(--dourado); }
         .nav-brand-text .sub {
-            font-size: 8px; color: rgba(245,240,216,.4);
+            font-size: 8px; color: rgba(245,240,216,.35);
             letter-spacing: 3px; text-transform: uppercase; margin-top: 2px;
         }
 
-        .nav-right {
-            display: flex; align-items: center; gap: 10px;
-        }
+        .nav-links { display: flex; align-items: center; gap: 8px; }
 
+        .nav-link {
+            display: flex; align-items: center; gap: 7px;
+            padding: 9px 18px; border-radius: 8px;
+            font-size: 12.5px; font-weight: 600;
+            color: rgba(250,240,216,.6);
+            text-decoration: none;
+            border: 1px solid transparent;
+            transition: all .25s;
+            letter-spacing: .3px;
+        }
+        .nav-link:hover {
+            color: #FAF0D8;
+            background: rgba(196,154,60,.08);
+            border-color: rgba(196,154,60,.2);
+        }
+        .nav-link.active {
+            color: var(--dourado);
+            background: rgba(196,154,60,.1);
+            border-color: rgba(196,154,60,.25);
+        }
         .nav-badge {
-            font-size: 9px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 1px; color: rgba(245,240,216,.45);
-            border: 1px solid rgba(196,154,60,.25); border-radius: 20px;
-            padding: 3px 12px;
+            font-size: 9px; padding: 2px 7px; border-radius: 20px;
+            font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+        }
+        .nav-badge.consultoria {
+            background: rgba(196,154,60,.18);
+            color: var(--dourado-claro);
+            border: 1px solid rgba(196,154,60,.3);
+        }
+        .nav-badge.sistema {
+            background: rgba(45,90,61,.35);
+            color: #7FBB93;
+            border: 1px solid rgba(45,90,61,.6);
+        }
+        .nav-cta {
+            margin-left: 12px;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: 12.5px; font-weight: 700;
+            background: linear-gradient(135deg, var(--dourado), #A07828);
+            color: var(--verde-escuro);
+            text-decoration: none;
+            transition: all .25s;
+            box-shadow: 0 0 16px rgba(196,154,60,.3);
+        }
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 28px rgba(196,154,60,.55);
         }
 
-        /* ── HERO CONTENT ─────────────────────────────────────── */
+        /* ── HERO CONTENT ────────────────────────────────────────── */
         .hero-content {
-            flex: 1; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 60px 40px 40px;
+            padding: 80px 40px 60px;
             position: relative; z-index: 5;
         }
 
         .hero-eyebrow {
-            font-size: 10px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 4px; color: var(--dourado);
-            margin-bottom: 20px; opacity: .85;
+            display: inline-flex; align-items: center; gap: 10px;
+            font-size: 10px; font-weight: 700; letter-spacing: 4px;
+            text-transform: uppercase; color: var(--dourado);
+            margin-bottom: 36px;
+            padding: 8px 20px;
+            border: 1px solid rgba(196,154,60,.25);
+            border-radius: 30px;
+            background: rgba(196,154,60,.06);
+            backdrop-filter: blur(8px);
+        }
+        .hero-eyebrow::before, .hero-eyebrow::after {
+            content: '';
+            display: block; width: 18px; height: 1px;
+            background: var(--dourado); opacity: .6;
         }
 
-        .hero-title {
+        .hero-challenge {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(36px, 5vw, 62px);
-            font-weight: 700; color: #FAF0D8;
-            line-height: 1.15; margin-bottom: 18px;
-            max-width: 780px;
+            font-size: clamp(38px, 6vw, 80px);
+            font-weight: 700;
+            color: #FAF0D8;
+            line-height: 1.08;
+            letter-spacing: -.5px;
+            max-width: 900px;
+            margin-bottom: 18px;
         }
-        .hero-title em { color: var(--dourado); font-style: italic; }
+        .hero-challenge .gold { color: var(--dourado); }
+        .hero-challenge .italic { font-style: italic; }
 
-        .hero-sub {
-            font-size: 16px; color: rgba(245,240,216,.6);
-            max-width: 520px; line-height: 1.7; margin-bottom: 40px;
+        .hero-tagline {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(22px, 3.5vw, 44px);
+            font-style: italic;
             font-weight: 400;
+            color: rgba(250,240,216,.55);
+            max-width: 720px;
+            line-height: 1.3;
+            margin-bottom: 52px;
+        }
+        .hero-tagline strong {
+            font-style: normal;
+            color: rgba(250,240,216,.8);
+            font-weight: 600;
         }
 
-        .hero-deco {
-            font-size: 13px; letter-spacing: 14px;
-            color: var(--dourado); opacity: .4; margin-bottom: 56px;
+        .hero-actions {
+            display: flex; align-items: center; gap: 16px;
+            flex-wrap: wrap; justify-content: center;
+            margin-bottom: 64px;
         }
 
-        /* ── TOOLS SECTION ────────────────────────────────────── */
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 16px 36px; border-radius: 10px;
+            font-size: 14px; font-weight: 800;
+            background: linear-gradient(135deg, var(--dourado), #A07828);
+            color: var(--verde-escuro);
+            text-decoration: none;
+            box-shadow: 0 0 30px rgba(196,154,60,.45), 0 4px 20px rgba(0,0,0,.5);
+            transition: all .3s;
+            letter-spacing: .3px;
+            position: relative; overflow: hidden;
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,.12) 50%, transparent 70%);
+            transform: translateX(-100%) rotate(45deg);
+            transition: transform .5s;
+        }
+        .btn-primary:hover::before { transform: translateX(100%) rotate(45deg); }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 50px rgba(196,154,60,.65), 0 8px 30px rgba(0,0,0,.6);
+        }
+
+        .btn-secondary {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 15px 32px; border-radius: 10px;
+            font-size: 14px; font-weight: 700;
+            color: rgba(250,240,216,.8);
+            text-decoration: none;
+            border: 1px solid rgba(196,154,60,.3);
+            background: rgba(196,154,60,.06);
+            backdrop-filter: blur(8px);
+            transition: all .3s;
+        }
+        .btn-secondary:hover {
+            color: var(--dourado);
+            border-color: rgba(196,154,60,.6);
+            background: rgba(196,154,60,.1);
+            transform: translateY(-1px);
+        }
+
+        /* ── STATS STRIP ─────────────────────────────────────────── */
+        .hero-stats {
+            display: flex; align-items: stretch;
+            border-top: 1px solid rgba(196,154,60,.1);
+            width: 100%; max-width: 900px;
+            position: relative; z-index: 5;
+        }
+
+        .stat-item {
+            flex: 1;
+            padding: 26px 20px;
+            text-align: center;
+            border-right: 1px solid rgba(196,154,60,.1);
+            position: relative;
+        }
+        .stat-item:last-child { border-right: none; }
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 0; height: 2px;
+            background: var(--dourado);
+            transition: width .4s;
+        }
+        .stat-item:hover::before { width: 60%; }
+
+        .stat-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 34px; font-weight: 700;
+            color: var(--dourado);
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(196,154,60,.4);
+        }
+        .stat-label {
+            font-size: 9px; font-weight: 700;
+            color: rgba(245,240,216,.38);
+            letter-spacing: 2.5px; text-transform: uppercase;
+            margin-top: 6px;
+        }
+
+        /* ── SECTION DIVIDER ─────────────────────────────────────── */
+        .section-divider {
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--dourado), transparent);
+            opacity: .3;
+        }
+
+        /* ── TOOLS SECTION ───────────────────────────────────────── */
         .tools-section {
-            background: radial-gradient(ellipse at top, #F5EDD5 0%, #EDD8A8 60%, #E0C880 100%);
-            padding: 72px 40px 80px;
+            background: var(--creme);
+            padding: 100px 40px;
+            position: relative;
+        }
+
+        .tools-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 6px;
+            background: linear-gradient(90deg, var(--verde-escuro) 0%, var(--dourado) 50%, var(--verde-escuro) 100%);
         }
 
         .section-header {
-            text-align: center; margin-bottom: 52px;
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto 72px;
         }
 
         .section-label {
-            font-size: 9px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 3.5px; color: var(--texto-suave); margin-bottom: 10px;
+            display: inline-flex; align-items: center; gap: 10px;
+            font-size: 10px; font-weight: 700; letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--dourado);
+            margin-bottom: 20px;
+        }
+        .section-label::before, .section-label::after {
+            content: '';
+            display: block; width: 28px; height: 1px;
+            background: var(--dourado); opacity: .5;
         }
 
         .section-title {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(26px, 3vw, 36px); font-weight: 700;
-            color: var(--verde-escuro); margin-bottom: 12px;
+            font-size: clamp(30px, 4vw, 46px);
+            font-weight: 700;
+            color: var(--verde-escuro);
+            line-height: 1.15;
+            margin-bottom: 18px;
+        }
+        .section-title span { color: var(--dourado); }
+
+        .section-sub {
+            font-size: 16px; font-weight: 400;
+            color: var(--texto-suave); line-height: 1.65;
         }
 
-        .section-divider {
-            width: 48px; height: 2px;
-            background: linear-gradient(90deg, var(--dourado), transparent);
-            margin: 14px auto 0;
-        }
-
-        /* ── TOOL GRID ────────────────────────────────────────── */
+        /* ── TOOL CARDS ──────────────────────────────────────────── */
         .tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            max-width: 1200px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 28px;
+            max-width: 1180px;
             margin: 0 auto;
         }
 
         .tool-card {
-            background: var(--creme);
-            border-radius: 20px;
-            border: 1px solid rgba(196,154,60,.18);
-            box-shadow: 0 4px 24px var(--sombra);
+            background: #fff;
+            border-radius: 18px;
             overflow: hidden;
+            box-shadow: 0 4px 24px var(--sombra);
             display: flex; flex-direction: column;
-            transition: transform .25s, box-shadow .25s;
-            text-decoration: none; color: inherit;
+            transition: transform .3s, box-shadow .3s;
+            border: 1px solid rgba(27,59,40,.06);
             position: relative;
         }
-
         .tool-card:hover {
             transform: translateY(-6px);
             box-shadow: 0 16px 48px var(--sombra-f);
@@ -199,253 +464,198 @@
 
         .tool-card-accent {
             height: 5px;
+            background: var(--dourado);
         }
-
-        .tool-card:nth-child(1) .tool-card-accent { background: linear-gradient(90deg, #1F6B42, #52A878); }
-        .tool-card:nth-child(2) .tool-card-accent { background: linear-gradient(90deg, #1B3B28, #C49A3C); }
-        .tool-card:nth-child(3) .tool-card-accent { background: linear-gradient(90deg, #5C3D1F, #D4763A); }
-        .tool-card:nth-child(4) .tool-card-accent { background: linear-gradient(90deg, #A0341E, #E07050); }
-        .tool-card:nth-child(5) .tool-card-accent { background: linear-gradient(90deg, #1A4060, #2E86C1); }
+        .tool-card:nth-child(2) .tool-card-accent { background: #2D5A3D; }
+        .tool-card:nth-child(3) .tool-card-accent { background: #7A5C3E; }
+        .tool-card:nth-child(4) .tool-card-accent { background: #3A6B4E; }
+        .tool-card:nth-child(5) .tool-card-accent { background: #8B5E3C; }
+        .tool-card:nth-child(6) .tool-card-accent { background: #1B3B28; }
+        .tool-card:nth-child(7) .tool-card-accent { background: #C49A3C; }
+        .tool-card:nth-child(8) .tool-card-accent { background: #4A6741; }
+        .tool-card:nth-child(9) .tool-card-accent { background: #5C3D1F; }
 
         .tool-card-body {
-            padding: 28px 28px 24px;
-            flex: 1; display: flex; flex-direction: column;
+            padding: 28px 28px 32px;
+            display: flex; flex-direction: column; flex: 1;
         }
 
         .tool-icon-wrap {
-            width: 60px; height: 60px; border-radius: 14px;
+            width: 52px; height: 52px;
+            background: var(--bege-claro);
+            border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 28px; margin-bottom: 20px;
-            flex-shrink: 0;
+            font-size: 24px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(27,59,40,.07);
+            transition: transform .3s, background .3s;
         }
-
-        .tool-card:nth-child(1) .tool-icon-wrap { background: #E6F4EC; }
-        .tool-card:nth-child(2) .tool-icon-wrap { background: rgba(196,154,60,.12); }
-        .tool-card:nth-child(3) .tool-icon-wrap { background: rgba(212,118,58,.12); }
-        .tool-card:nth-child(4) .tool-icon-wrap { background: rgba(160,52,30,.10); }
-        .tool-card:nth-child(5) .tool-icon-wrap { background: rgba(46,134,193,.10); }
+        .tool-card:hover .tool-icon-wrap {
+            transform: scale(1.08) rotate(-3deg);
+            background: var(--bege);
+        }
 
         .tool-tag {
-            font-size: 8px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 1.5px; border-radius: 20px; padding: 3px 10px;
-            display: inline-block; margin-bottom: 10px; width: fit-content;
+            display: inline-block;
+            font-size: 9.5px; font-weight: 700;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--texto-suave);
+            margin-bottom: 10px;
         }
-
-        .tool-card:nth-child(1) .tool-tag { background: #E6F4EC; color: #1F6B42; }
-        .tool-card:nth-child(2) .tool-tag { background: rgba(196,154,60,.15); color: #7A4C10; }
-        .tool-card:nth-child(3) .tool-tag { background: rgba(212,118,58,.12); color: #8B4010; }
-        .tool-card:nth-child(4) .tool-tag { background: rgba(160,52,30,.10); color: #A0341E; }
-        .tool-card:nth-child(5) .tool-tag { background: rgba(46,134,193,.12); color: #1A4060; }
 
         .tool-name {
             font-family: 'Playfair Display', serif;
-            font-size: 20px; font-weight: 700;
-            color: var(--verde-escuro); margin-bottom: 10px; line-height: 1.25;
+            font-size: 21px; font-weight: 700;
+            color: var(--verde-escuro);
+            line-height: 1.25;
+            margin-bottom: 12px;
         }
 
         .tool-desc {
-            font-size: 13px; color: var(--texto-suave);
-            line-height: 1.65; flex: 1; margin-bottom: 24px;
+            font-size: 13.5px; font-weight: 400;
+            color: var(--texto-suave); line-height: 1.65;
+            margin-bottom: 18px;
         }
 
         .tool-features {
-            list-style: none; margin-bottom: 26px; display: flex; flex-direction: column; gap: 6px;
+            list-style: none;
+            display: flex; flex-direction: column; gap: 7px;
+            margin-bottom: 28px; flex: 1;
         }
 
         .tool-features li {
-            font-size: 12px; color: var(--texto-suave);
-            display: flex; align-items: center; gap: 7px;
+            font-size: 12.5px; font-weight: 500;
+            color: var(--texto-suave);
+            padding-left: 18px;
+            position: relative;
+            line-height: 1.45;
         }
-
         .tool-features li::before {
-            content: '✦';
-            font-size: 8px; color: var(--dourado); flex-shrink: 0;
+            content: '→';
+            position: absolute; left: 0;
+            color: var(--dourado);
+            font-size: 11px; top: 1px;
         }
 
         .tool-cta {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 14px 20px;
+            padding: 13px 18px;
             border-radius: 10px;
-            font-size: 13px; font-weight: 700;
-            cursor: pointer; transition: all .2s;
-            text-decoration: none;
-            font-family: 'Nunito', sans-serif;
-        }
-
-        .tool-card:nth-child(1) .tool-cta {
-            background: linear-gradient(135deg, #1B3B28, #2D5A3D);
-            color: #FAF0D8;
-            box-shadow: 0 3px 12px rgba(27,59,40,.35);
-        }
-        .tool-card:nth-child(2) .tool-cta {
-            background: linear-gradient(135deg, #1B3B28, var(--dourado));
-            color: #FAF0D8;
-            box-shadow: 0 3px 12px rgba(27,59,40,.30);
-        }
-        .tool-card:nth-child(3) .tool-cta {
-            background: linear-gradient(135deg, #5C3D1F, #D4763A);
-            color: #FAF0D8;
-            box-shadow: 0 3px 12px rgba(92,61,31,.35);
-        }
-        .tool-card:nth-child(4) .tool-cta {
-            background: linear-gradient(135deg, #A0341E, #C04030);
-            color: #FAF0D8;
-            box-shadow: 0 3px 12px rgba(160,52,30,.35);
-        }
-        .tool-card:nth-child(5) .tool-cta {
-            background: linear-gradient(135deg, #1A4060, #2E86C1);
-            color: #FAF0D8;
-            box-shadow: 0 3px 12px rgba(26,64,96,.35);
-        }
-        .tool-card:nth-child(6) .tool-card-accent { background: linear-gradient(90deg, #1A5C42, #27AE60); }
-        .tool-card:nth-child(6) .tool-icon-wrap { background: rgba(39,174,96,.10); }
-        .tool-card:nth-child(6) .tool-tag { background: rgba(39,174,96,.12); color: #1A5C42; }
-        .tool-card:nth-child(6) .tool-cta {
-            background: linear-gradient(135deg, #1A5C42, #27AE60);
-            color: #FAF0D8;
-            box-shadow: 0 3px 12px rgba(26,92,66,.35);
-        }
-
-        .tool-card:nth-child(7) .tool-card-accent { background: linear-gradient(90deg, #4A1A6B, #8E44AD); }
-        .tool-card:nth-child(7) .tool-icon-wrap { background: rgba(142,68,173,.10); }
-        .tool-card:nth-child(7) .tool-tag { background: rgba(142,68,173,.12); color: #4A1A6B; }
-        .tool-card:nth-child(7) .tool-cta {
-            background: linear-gradient(135deg, #4A1A6B, #8E44AD);
-            color: #FAF0D8;
-            box-shadow: 0 3px 12px rgba(74,26,107,.35);
-        }
-
-        .tool-card:nth-child(8) .tool-card-accent { background: linear-gradient(90deg, #1A5560, #17A589); }
-        .tool-card:nth-child(8) .tool-icon-wrap { background: rgba(23,165,137,.10); }
-        .tool-card:nth-child(8) .tool-tag { background: rgba(23,165,137,.12); color: #1A5560; }
-        .tool-card:nth-child(8) .tool-cta {
-            background: linear-gradient(135deg, #1A5560, #17A589);
-            color: #FAF0D8;
-            box-shadow: 0 3px 12px rgba(26,85,96,.35);
-        }
-
-        .tool-card:nth-child(9) .tool-card-accent { background: linear-gradient(90deg, #7B3F00, #E0821E); }
-        .tool-card:nth-child(9) .tool-icon-wrap { background: rgba(224,130,30,.10); }
-        .tool-card:nth-child(9) .tool-tag { background: rgba(224,130,30,.12); color: #7B3F00; }
-        .tool-card:nth-child(9) .tool-cta {
-            background: linear-gradient(135deg, #7B3F00, #E0821E);
-            color: #FAF0D8;
-            box-shadow: 0 3px 12px rgba(123,63,0,.35);
-        }
-
-        .tool-cta:hover { transform: translateY(-1px); filter: brightness(1.08); }
-
-        .cta-arrow { font-size: 16px; transition: transform .2s; }
-        .tool-cta:hover .cta-arrow { transform: translateX(4px); }
-
-        .tool-card.em-breve .tool-cta {
-            background: rgba(139,94,60,.12) !important;
-            color: var(--texto-suave) !important;
-            box-shadow: none !important;
-            cursor: default;
-        }
-        .tool-card.em-breve .tool-cta:hover { transform: none; filter: none; }
-
-        .badge-breve {
-            position: absolute; top: 18px; right: 18px;
-            font-size: 8px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 1px; background: rgba(196,154,60,.18);
-            color: var(--marrom); border-radius: 20px; padding: 4px 10px;
-            border: 1px solid rgba(196,154,60,.3);
-        }
-
-        /* ── STATS BAR ────────────────────────────────────────── */
-        .stats-bar {
             background: var(--verde-escuro);
-            padding: 36px 56px;
-            display: flex; align-items: center; justify-content: center;
-            gap: 0; flex-wrap: wrap;
+            color: var(--bege-claro);
+            font-size: 13px; font-weight: 700;
+            text-decoration: none;
+            transition: all .25s;
+            margin-top: auto;
         }
-
-        .stat-item {
-            display: flex; flex-direction: column; align-items: center;
-            padding: 8px 48px;
-            border-right: 1px solid rgba(196,154,60,.18);
+        .tool-cta:hover {
+            background: var(--verde-medio);
+            box-shadow: 0 4px 18px rgba(27,59,40,.3);
         }
-        .stat-item:last-child { border-right: none; }
+        .cta-arrow {
+            font-size: 16px;
+            transition: transform .25s;
+        }
+        .tool-cta:hover .cta-arrow { transform: translateX(5px); }
 
-        .stat-value {
+        /* ── SISTEMA INTEGRADO HIGHLIGHT ─────────────────────────── */
+        .sistema-banner {
+            background: linear-gradient(135deg, #060E09 0%, #0E1F13 40%, #152B1C 100%);
+            padding: 80px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .sistema-banner::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(196,154,60,.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(196,154,60,.04) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+        .sistema-banner-inner {
+            position: relative; z-index: 2;
+            max-width: 760px; margin: 0 auto;
+        }
+        .sistema-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 10px; font-weight: 700; letter-spacing: 3.5px;
+            text-transform: uppercase;
+            color: var(--dourado);
+            padding: 6px 18px; border-radius: 20px;
+            border: 1px solid rgba(196,154,60,.28);
+            background: rgba(196,154,60,.07);
+            margin-bottom: 28px;
+        }
+        .sistema-title {
             font-family: 'Playfair Display', serif;
-            font-size: 32px; font-weight: 700; color: var(--dourado);
-            line-height: 1.1;
+            font-size: clamp(28px, 4vw, 48px);
+            font-weight: 700; color: #FAF0D8;
+            line-height: 1.15; margin-bottom: 18px;
         }
-        .stat-label {
-            font-size: 10px; font-weight: 600; text-transform: uppercase;
-            letter-spacing: 1.2px; color: rgba(245,240,216,.45); margin-top: 5px;
+        .sistema-title span { color: var(--dourado); font-style: italic; }
+        .sistema-desc {
+            font-size: 15px; color: rgba(250,240,216,.55);
+            line-height: 1.7; margin-bottom: 38px;
+        }
+        .sistema-cta {
+            display: inline-flex; align-items: center; gap: 12px;
+            padding: 17px 40px; border-radius: 10px;
+            font-size: 14px; font-weight: 800;
+            background: linear-gradient(135deg, var(--dourado), #A07828);
+            color: var(--verde-escuro);
+            text-decoration: none;
+            box-shadow: 0 0 36px rgba(196,154,60,.4), 0 4px 20px rgba(0,0,0,.5);
+            transition: all .3s;
+            letter-spacing: .3px;
+        }
+        .sistema-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 56px rgba(196,154,60,.65), 0 8px 30px rgba(0,0,0,.6);
         }
 
-        /* ── FOOTER ───────────────────────────────────────────── */
+        /* ── FOOTER ──────────────────────────────────────────────── */
         footer {
-            background: #0A180F;
+            background: #060E09;
+            border-top: 1px solid rgba(196,154,60,.1);
             padding: 36px 56px;
-            border-top: 1px solid rgba(196,154,60,.12);
             display: flex; align-items: center; justify-content: space-between;
-            flex-wrap: wrap; gap: 16px;
+            flex-wrap: wrap; gap: 18px;
         }
 
-        .footer-brand { display: flex; align-items: center; gap: 12px; }
+        .footer-brand { display: flex; align-items: center; gap: 14px; }
+
         .footer-emblem {
-            width: 36px; height: 36px; border-radius: 50%;
+            width: 40px; height: 40px; border-radius: 50%;
             background: linear-gradient(135deg, var(--dourado), #A07828);
             display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 900; color: var(--verde-escuro);
             font-family: 'Playfair Display', serif;
+            font-size: 16px; font-weight: 900;
+            color: var(--verde-escuro);
         }
+
         .footer-name {
             font-family: 'Playfair Display', serif;
-            font-size: 16px; font-weight: 700; color: rgba(245,240,216,.7);
+            font-size: 18px; font-weight: 700; color: #FAF0D8;
         }
         .footer-name span { color: var(--dourado); }
 
         .footer-copy {
-            font-size: 11px; color: rgba(245,240,216,.25);
-            letter-spacing: .5px;
+            font-size: 11px; color: rgba(250,240,216,.3);
+            letter-spacing: 1px;
         }
 
-        /* ── SCROLL CTA (hero bottom) ─────────────────────────── */
-        .scroll-cta {
-            text-align: center; padding: 0 0 40px;
-            position: relative; z-index: 5;
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
-        }
-        .scroll-cta span {
-            font-size: 10px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 2px; color: rgba(245,240,216,.3);
-        }
-        .scroll-arrow {
-            width: 32px; height: 32px; border-radius: 50%;
-            border: 1px solid rgba(196,154,60,.3);
-            display: flex; align-items: center; justify-content: center;
-            color: rgba(196,154,60,.6); font-size: 14px;
-            animation: bounce 2s infinite;
-            cursor: pointer;
-        }
-        @keyframes bounce {
-            0%,100%{transform:translateY(0)}
-            50%{transform:translateY(6px)}
-        }
-
-        /* ── RESPONSIVE ───────────────────────────────────────── */
-        @media(max-width:900px) {
-            .navbar { padding: 16px 24px; }
-            .hero-content { padding: 40px 24px 32px; }
-            .tools-section { padding: 48px 20px 60px; }
-            .stats-bar { padding: 28px 20px; }
-            .stat-item { padding: 8px 24px; }
-            footer { padding: 24px 24px; }
-        }
-
-        @media(max-width:600px) {
-            .tools-grid { grid-template-columns: 1fr; }
-            .stat-item { border-right: none; border-bottom: 1px solid rgba(196,154,60,.18); padding: 14px 20px; }
-            .stat-item:last-child { border-bottom: none; }
-            .nav-right { display: none; }
-            .hero-deco { display: none; }
+        /* ── RESPONSIVE ──────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .navbar { padding: 18px 24px; }
+            .nav-links { display: none; }
+            .hero-content { padding: 60px 24px 40px; }
+            .hero-stats { flex-wrap: wrap; }
+            .stat-item { flex: 1 1 50%; border-bottom: 1px solid rgba(196,154,60,.1); }
+            .tools-section { padding: 72px 24px; }
+            .tools-grid { grid-template-columns: 1fr; gap: 20px; }
+            footer { padding: 28px 24px; }
         }
     </style>
 </head>
@@ -453,87 +663,141 @@
 
 <!-- ══ HERO ════════════════════════════════════════════════════ -->
 <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+    <div class="hero-glow-3"></div>
+    <div class="hero-lines"></div>
+
+    <!-- Floating particles (generated via JS below) -->
+    <div class="particles" id="particles"></div>
+
+    <!-- NAVBAR -->
     <nav class="navbar">
         <div class="nav-brand">
             <div class="nav-emblem">IAê</div>
             <div class="nav-brand-text">
                 <div class="name">IAê <span>Financeiro</span></div>
-                <div class="sub">BPO Financeiro &bull; Consultoria</div>
+                <div class="sub">Consultoria Financeira</div>
             </div>
         </div>
-        <div class="nav-right">
-            <span class="nav-badge">BPO Financeiro</span>
-            <span class="nav-badge">Consultoria Financeira</span>
+        <div class="nav-links">
+            <a href="Ferramentas financeiras da IAê.html" class="nav-link active">
+                <span>Ferramentas</span>
+                <span class="nav-badge consultoria">Consultoria</span>
+            </a>
+            <a href="sistema-integrado.html" class="nav-link">
+                <span>Sistema Integrado</span>
+                <span class="nav-badge sistema">Novo</span>
+            </a>
+            <a href="apresentacao-executiva.html" class="nav-link">Apresentação</a>
+            <a href="one-pager-consultoria.html" class="nav-link">One Pager</a>
+            <a href="sistema-integrado.html" class="nav-cta">Acessar Sistema →</a>
         </div>
     </nav>
 
+    <!-- HERO CONTENT -->
     <div class="hero-content">
-        <div class="hero-eyebrow">Central de Ferramentas Financeiras</div>
-        <h1 class="hero-title">
-            Inteligência que organiza.<br>
-            <em>Estratégia que transforma.</em>
-        </h1>
-        <p class="hero-sub">
-            Ferramentas desenvolvidas para o seu negócio — do diagnóstico financeiro
-            à gestão completa do fluxo de caixa, DRE e estoque.
-        </p>
-        <div class="hero-deco">✦ &nbsp; ✦ &nbsp; ✦</div>
-    </div>
+        <div class="hero-eyebrow">Consultoria Financeira Estratégica</div>
 
-    <div class="scroll-cta" onclick="document.getElementById('ferramentas').scrollIntoView({behavior:'smooth'})">
-        <span>Explorar ferramentas</span>
-        <div class="scroll-arrow">▼</div>
+        <h1 class="hero-challenge">
+            Preparados para alcançar<br>
+            o <span class="gold italic">próximo patamar</span><br>
+            da sua empresa?
+        </h1>
+
+        <p class="hero-tagline">
+            Inteligência que organiza.<br>
+            <strong>Estratégia que transforma.</strong>
+        </p>
+
+        <div class="hero-actions">
+            <a href="#ferramentas" class="btn-primary">
+                Explorar ferramentas
+                <span>↓</span>
+            </a>
+            <a href="sistema-integrado.html" class="btn-secondary">
+                Sistema Integrado →
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="hero-stats">
+            <div class="stat-item">
+                <div class="stat-num">9</div>
+                <div class="stat-label">Ferramentas</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">100%</div>
+                <div class="stat-label">Offline &amp; Seguro</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">PME</div>
+                <div class="stat-label">Foco em PME</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">0</div>
+                <div class="stat-label">Custo por acesso</div>
+            </div>
+        </div>
     </div>
 </section>
 
-<!-- ══ STATS ════════════════════════════════════════════════════ -->
-<div class="stats-bar">
-    <div class="stat-item">
-        <div class="stat-value">9</div>
-        <div class="stat-label">Ferramentas</div>
-    </div>
-    <div class="stat-item">
-        <div class="stat-value">100%</div>
-        <div class="stat-label">Offline</div>
-    </div>
-    <div class="stat-item">
-        <div class="stat-value">Local</div>
-        <div class="stat-label">Dados Seguros</div>
-    </div>
-    <div class="stat-item">
-        <div class="stat-value">BPO</div>
-        <div class="stat-label">Financeiro</div>
-    </div>
-</div>
+<div class="section-divider"></div>
 
-<!-- ══ FERRAMENTAS ══════════════════════════════════════════════ -->
+<!-- ══ SISTEMA INTEGRADO BANNER ═════════════════════════════════ -->
+<section class="sistema-banner">
+    <div class="sistema-banner-inner">
+        <div class="sistema-badge">✦ Lançamento</div>
+        <h2 class="sistema-title">
+            Todas as ferramentas em um<br>
+            <span>Sistema Integrado</span>
+        </h2>
+        <p class="sistema-desc">
+            Crie um ambiente financeiro completo e personalizado para cada cliente.
+            Selecione os módulos necessários, e os dados fluem automaticamente entre
+            CRM, Estoque, Contas, DRE, Fluxo de Caixa, Orçamento e KPIs.
+        </p>
+        <a href="sistema-integrado.html" class="sistema-cta">
+            Abrir Sistema Integrado →
+        </a>
+    </div>
+</section>
+
+<!-- ══ FERRAMENTAS ═══════════════════════════════════════════════ -->
 <section class="tools-section" id="ferramentas">
     <div class="section-header">
-        <div class="section-label">Soluções disponíveis</div>
-        <h2 class="section-title">Escolha sua ferramenta</h2>
-        <div class="section-divider"></div>
+        <div class="section-label">Arsenal Financeiro</div>
+        <h2 class="section-title">
+            Ferramentas construídas para<br>
+            <span>resultados reais</span>
+        </h2>
+        <p class="section-sub">
+            Cada ferramenta é independente, roda no navegador sem instalação,
+            e foi desenhada para o empresário que quer clareza financeira — não complexidade.
+        </p>
     </div>
 
     <div class="tools-grid">
 
-        <!-- 1. Diagnóstico Empresarial -->
+        <!-- 1. DRE -->
         <div class="tool-card">
             <div class="tool-card-accent"></div>
             <div class="tool-card-body">
-                <div class="tool-icon-wrap">🔍</div>
-                <span class="tool-tag">Diagnóstico</span>
-                <h3 class="tool-name">Diagnóstico Empresarial</h3>
+                <div class="tool-icon-wrap">📈</div>
+                <span class="tool-tag">Resultado</span>
+                <h3 class="tool-name">DRE Mensal</h3>
                 <p class="tool-desc">
-                    Análise completa da saúde financeira do seu negócio — indicadores-chave,
-                    pontos críticos e recomendações estratégicas em um único relatório.
+                    Demonstrativo de Resultado do Exercício mensal com categorias personalizáveis.
+                    Calcule margem bruta, EBITDA e lucro líquido em tempo real.
                 </p>
                 <ul class="tool-features">
-                    <li>Indicadores financeiros automatizados</li>
-                    <li>Análise de liquidez e endividamento</li>
-                    <li>Relatório de pontos de atenção</li>
-                    <li>Recomendações personalizadas</li>
+                    <li>Receitas, CMV e despesas com categorias livres</li>
+                    <li>Indicadores: margem bruta, EBITDA, lucro líquido</li>
+                    <li>Comparativo de competência × caixa</li>
+                    <li>Exportação para impressão e apresentação</li>
                 </ul>
-                <a class="tool-cta" href="https://dcmfinance2026-consultor.github.io/IAe-Financeiro/" target="_blank">
+                <a class="tool-cta" href="dre-mensal-cliente.html">
                     <span>Acessar ferramenta</span>
                     <span class="cta-arrow">→</span>
                 </a>
@@ -544,18 +808,18 @@
         <div class="tool-card">
             <div class="tool-card-accent"></div>
             <div class="tool-card-body">
-                <div class="tool-icon-wrap">💰</div>
-                <span class="tool-tag">Disponível</span>
-                <h3 class="tool-name">Fluxo de Caixa</h3>
+                <div class="tool-icon-wrap">💸</div>
+                <span class="tool-tag">Caixa</span>
+                <h3 class="tool-name">Fluxo de Caixa & Diagnóstico</h3>
                 <p class="tool-desc">
-                    Controle completo de entradas e saídas, custos fixos, projeções
-                    e dashboard interativo com gráficos em tempo real.
+                    Projeção de caixa com lançamentos manuais, custos fixos recorrentes
+                    e diagnóstico financeiro completo baseado nos seus dados reais.
                 </p>
                 <ul class="tool-features">
-                    <li>Dashboard com KPIs e gráficos</li>
-                    <li>Lançamentos de entradas e saídas</li>
-                    <li>Gestão de custos fixos mensais</li>
-                    <li>Projeções de fluxo futuro</li>
+                    <li>Lançamentos de entrada e saída com categorias</li>
+                    <li>Custos fixos automáticos com periodicidade</li>
+                    <li>Diagnóstico: capital de giro, ponto de equilíbrio</li>
+                    <li>Gráfico de saldo projetado mês a mês</li>
                 </ul>
                 <a class="tool-cta" href="fluxo-caixa-cliente.html">
                     <span>Acessar ferramenta</span>
@@ -564,48 +828,48 @@
             </div>
         </div>
 
-        <!-- 3. DRE Mensal -->
+        <!-- 3. Estoque -->
         <div class="tool-card">
             <div class="tool-card-accent"></div>
             <div class="tool-card-body">
-                <div class="tool-icon-wrap">📊</div>
-                <span class="tool-tag">DRE</span>
-                <h3 class="tool-name">DRE Mensal</h3>
+                <div class="tool-icon-wrap">📦</div>
+                <span class="tool-tag">Operacional</span>
+                <h3 class="tool-name">Controle de Estoque</h3>
                 <p class="tool-desc">
-                    Demonstração do Resultado do Exercício estruturada mês a mês —
-                    da receita bruta ao lucro líquido, com visão consolidada do ano.
+                    Controle de entradas e saídas com formação de preço de venda completa:
+                    custo + frete + impostos + margem = preço calculado automaticamente.
                 </p>
                 <ul class="tool-features">
-                    <li>Receita bruta e deduções</li>
-                    <li>Custos, despesas e margens</li>
-                    <li>Comparativo mensal e anual</li>
-                    <li>Exportação para relatório</li>
+                    <li>Formação de preço: custo, frete, impostos e margem</li>
+                    <li>Categorias personalizáveis e alertas de estoque mínimo</li>
+                    <li>Histórico de movimentações com rastreabilidade</li>
+                    <li>CMV automático integrado ao DRE</li>
                 </ul>
-                <a class="tool-cta" href="dre-mensal-cliente.html">
+                <a class="tool-cta" href="controle-estoque-cliente.html">
                     <span>Acessar ferramenta</span>
                     <span class="cta-arrow">→</span>
                 </a>
             </div>
         </div>
 
-        <!-- 4. Controle de Estoque e Precificação -->
+        <!-- 4. DRE Diagnóstico (Diagnóstico Financeiro) -->
         <div class="tool-card">
             <div class="tool-card-accent"></div>
             <div class="tool-card-body">
-                <div class="tool-icon-wrap">📦</div>
-                <span class="tool-tag">Estoque</span>
-                <h3 class="tool-name">Controle de Estoque e Precificação</h3>
+                <div class="tool-icon-wrap">🔬</div>
+                <span class="tool-tag">Diagnóstico</span>
+                <h3 class="tool-name">Diagnóstico Financeiro</h3>
                 <p class="tool-desc">
-                    Gestão de produtos e insumos com precificação inteligente —
-                    CMV, markup, ponto de equilíbrio e margem de contribuição.
+                    Análise diagnóstica completa da saúde financeira do negócio com
+                    pontuação automática, identificação de gargalos e plano de ação prioritizado.
                 </p>
                 <ul class="tool-features">
-                    <li>Cadastro de produtos e insumos</li>
-                    <li>Cálculo automático de CMV e markup</li>
-                    <li>Ponto de equilíbrio por produto</li>
-                    <li>Alertas de estoque mínimo</li>
+                    <li>Score de saúde financeira com nota de 0 a 100</li>
+                    <li>8 dimensões: fluxo, margem, capital, dívida e mais</li>
+                    <li>Gargalos identificados com plano de ação</li>
+                    <li>Relatório pronto para apresentação ao cliente</li>
                 </ul>
-                <a class="tool-cta" href="controle-estoque-cliente.html">
+                <a class="tool-cta" href="diagnostico-financeiro.html">
                     <span>Acessar ferramenta</span>
                     <span class="cta-arrow">→</span>
                 </a>
@@ -714,7 +978,7 @@
             <div class="tool-card-accent"></div>
             <div class="tool-card-body">
                 <div class="tool-icon-wrap">📊</div>
-                <span class="tool-tag">Diagnóstico</span>
+                <span class="tool-tag">KPIs</span>
                 <h3 class="tool-name">KPIs Financeiros</h3>
                 <p class="tool-desc">
                     Dashboard visual com os 15 principais indicadores financeiros do negócio.
@@ -742,8 +1006,32 @@
         <div class="footer-emblem">IAê</div>
         <div class="footer-name">IAê <span>Financeiro</span></div>
     </div>
-    <div class="footer-copy">BPO Financeiro &bull; Consultoria Financeira &bull; Todos os direitos reservados</div>
+    <div class="footer-copy">Consultoria Financeira &bull; Todos os direitos reservados</div>
 </footer>
+
+<script>
+    // Generate floating particles
+    (function(){
+        const container = document.getElementById('particles');
+        if (!container) return;
+        const count = 22;
+        for (let i = 0; i < count; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const size = Math.random() * 3 + 1;
+            p.style.cssText = [
+                `width:${size}px`,
+                `height:${size}px`,
+                `left:${Math.random() * 100}%`,
+                `bottom:${Math.random() * 10}%`,
+                `--dur:${Math.random() * 16 + 10}s`,
+                `--delay:${Math.random() * 12}s`,
+                `opacity:0`
+            ].join(';');
+            container.appendChild(p);
+        }
+    })();
+</script>
 
 </body>
 </html>

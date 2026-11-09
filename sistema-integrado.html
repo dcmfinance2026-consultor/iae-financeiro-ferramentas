@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IAê — Sistema Integrado Financeiro</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --verde:#1B3B28;--verde-m:#2D5A3D;--verde-c:#4A7A5A;
@@ -160,9 +161,196 @@ textarea{resize:vertical;min-height:64px}
   .stat-grid{grid-template-columns:1fr 1fr}
   .module{padding:16px}
 }
+
+/* ══ AUTH SCREEN ══════════════════════════════════════════════ */
+#auth-screen{
+  position:fixed;inset:0;z-index:9999;
+  background:#060E09;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Nunito',sans-serif;
+}
+#auth-screen .auth-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(196,154,60,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(196,154,60,.04) 1px,transparent 1px);
+  background-size:52px 52px;
+}
+#auth-screen .auth-glow{
+  position:absolute;width:700px;height:700px;
+  top:-200px;right:-150px;border-radius:50%;
+  background:radial-gradient(circle,rgba(196,154,60,.1) 0%,transparent 65%);
+  pointer-events:none;
+}
+.auth-card{
+  position:relative;z-index:2;
+  width:min(96vw,440px);
+  background:rgba(14,31,19,.9);
+  border:1px solid rgba(196,154,60,.18);
+  border-radius:18px;
+  padding:40px 38px 36px;
+  backdrop-filter:blur(12px);
+  box-shadow:0 24px 64px rgba(0,0,0,.7);
+}
+.auth-logo{
+  display:flex;align-items:center;gap:12px;
+  justify-content:center;margin-bottom:28px;
+}
+.auth-emblem{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,#C49A3C,#A07828);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:17px;font-weight:900;
+  color:#1B3B28;box-shadow:0 0 18px rgba(196,154,60,.45);
+}
+.auth-brand{
+  font-family:'Playfair Display',serif;font-size:22px;font-weight:700;
+  color:#FAF0D8;letter-spacing:1px;
+}
+.auth-brand span{color:#C49A3C;}
+.auth-tabs{
+  display:flex;border-radius:9px;overflow:hidden;
+  background:rgba(27,59,40,.4);border:1px solid rgba(196,154,60,.12);
+  margin-bottom:26px;
+}
+.auth-tab{
+  flex:1;padding:10px;font-size:13px;font-weight:700;
+  background:transparent;border:none;cursor:pointer;
+  color:rgba(250,240,216,.45);transition:.2s;
+  font-family:'Nunito',sans-serif;
+}
+.auth-tab.active{
+  background:rgba(196,154,60,.15);color:#E0B84A;
+}
+.auth-panel{display:none;}
+.auth-panel.active{display:block;}
+.auth-label{
+  display:block;font-size:11px;font-weight:700;
+  letter-spacing:.8px;color:rgba(250,240,216,.5);
+  text-transform:uppercase;margin-bottom:6px;
+}
+.auth-input{
+  width:100%;padding:11px 14px;border-radius:8px;
+  background:rgba(27,59,40,.5);
+  border:1px solid rgba(196,154,60,.18);
+  color:#FAF0D8;font-size:14px;font-family:'Nunito',sans-serif;
+  margin-bottom:14px;outline:none;transition:.2s;
+}
+.auth-input:focus{border-color:rgba(196,154,60,.5);background:rgba(27,59,40,.7);}
+.auth-input::placeholder{color:rgba(250,240,216,.25);}
+.auth-radio-group{
+  display:flex;flex-direction:column;gap:8px;margin-bottom:14px;
+}
+.auth-radio-label{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;border-radius:8px;cursor:pointer;
+  background:rgba(27,59,40,.4);
+  border:1px solid rgba(196,154,60,.12);
+  color:rgba(250,240,216,.7);font-size:13px;font-weight:600;
+  transition:.2s;
+}
+.auth-radio-label input[type=radio]{accent-color:#C49A3C;}
+.auth-radio-label:has(input:checked){
+  border-color:rgba(196,154,60,.4);
+  background:rgba(196,154,60,.1);color:#FAF0D8;
+}
+.auth-sub-input{
+  margin-top:8px;padding:9px 12px;border-radius:7px;
+  background:rgba(27,59,40,.5);
+  border:1px solid rgba(196,154,60,.14);
+  color:#FAF0D8;font-size:13px;font-family:'Nunito',sans-serif;
+  width:100%;outline:none;
+  display:none;transition:.2s;
+}
+.auth-sub-input:focus{border-color:rgba(196,154,60,.4);}
+.auth-sub-input.show{display:block;}
+.auth-sub-input::placeholder{color:rgba(250,240,216,.25);}
+.auth-btn{
+  width:100%;padding:13px;border-radius:9px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#C49A3C,#A07828);
+  color:#1B3B28;font-size:14px;font-weight:800;
+  font-family:'Nunito',sans-serif;letter-spacing:.3px;
+  box-shadow:0 0 24px rgba(196,154,60,.35);
+  transition:.25s;margin-top:4px;
+}
+.auth-btn:hover{box-shadow:0 0 40px rgba(196,154,60,.6);transform:translateY(-1px);}
+.auth-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;}
+.auth-error{
+  display:none;margin-bottom:12px;padding:10px 14px;
+  border-radius:8px;background:rgba(192,57,43,.15);
+  border:1px solid rgba(192,57,43,.3);
+  color:#F1948A;font-size:12.5px;font-weight:600;
+}
+.auth-error.show{display:block;}
+.auth-divider{
+  height:1px;background:rgba(196,154,60,.1);
+  margin:18px 0;
+}
+.auth-sep-text{
+  text-align:center;font-size:11px;color:rgba(250,240,216,.25);
+  margin:0 0 12px;
+}
+/* Topbar user info */
+.tb-user-info{
+  font-size:12px;font-weight:600;color:rgba(250,240,216,.55);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:200px;
+}
 </style>
 </head>
 <body>
+
+<!-- ══════════════ AUTH SCREEN ══════════════ -->
+<div id="auth-screen">
+  <div class="auth-grid"></div>
+  <div class="auth-glow"></div>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-emblem">IAê</div>
+      <div class="auth-brand">IAê <span>Financeiro</span></div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="authSwitchTab('login')">Entrar</button>
+      <button class="auth-tab" onclick="authSwitchTab('signup')">Criar conta</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="auth-panel active" id="auth-panel-login">
+      <div class="auth-error" id="login-error"></div>
+      <label class="auth-label">E-mail</label>
+      <input class="auth-input" id="login-email" type="email" placeholder="seu@email.com" autocomplete="email">
+      <label class="auth-label">Senha</label>
+      <input class="auth-input" id="login-senha" type="password" placeholder="••••••••" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter') authLogin()">
+      <button class="auth-btn" id="login-btn" onclick="authLogin()">Entrar →</button>
+    </div>
+
+    <!-- SIGNUP -->
+    <div class="auth-panel" id="auth-panel-signup">
+      <div class="auth-error" id="signup-error"></div>
+      <label class="auth-label">Nome completo</label>
+      <input class="auth-input" id="signup-nome" type="text" placeholder="Seu nome" autocomplete="name">
+      <label class="auth-label">E-mail</label>
+      <input class="auth-input" id="signup-email" type="email" placeholder="seu@email.com" autocomplete="email">
+      <label class="auth-label">Senha (mínimo 6 caracteres)</label>
+      <input class="auth-input" id="signup-senha" type="password" placeholder="••••••••" autocomplete="new-password">
+      <div class="auth-divider"></div>
+      <p class="auth-sep-text">Você pertence a qual empresa?</p>
+      <div class="auth-radio-group">
+        <label class="auth-radio-label">
+          <input type="radio" name="empresa-modo" value="criar" checked onchange="authToggleEmpresa()">
+          Criar nova empresa
+          <input class="auth-sub-input show" id="signup-empresa-nome" placeholder="Nome da empresa...">
+        </label>
+        <label class="auth-radio-label">
+          <input type="radio" name="empresa-modo" value="entrar" onchange="authToggleEmpresa()">
+          Entrar em empresa existente
+          <input class="auth-sub-input" id="signup-empresa-cod" placeholder="Código da empresa (ex: AB12CD)" style="text-transform:uppercase">
+        </label>
+      </div>
+      <button class="auth-btn" id="signup-btn" onclick="authSignup()">Criar conta →</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════ HOME VIEW ══════════════ -->
 <div id="view-home">
@@ -193,7 +381,9 @@ textarea{resize:vertical;min-height:64px}
     <span class="tb-sep">|</span>
     <div class="nav-tabs" id="nav-tabs"></div>
     <div class="tb-right">
+      <span id="tb-user" class="tb-user-info"></span>
       <button class="btn-ghost" onclick="exportBackup()">↓ Backup</button>
+      <button class="btn-ghost" style="color:rgba(250,240,216,.45)" onclick="authLogout()">Sair</button>
       <button class="btn-ghost" style="color:rgba(250,240,216,.45)" onclick="goHome()">← Voltar</button>
     </div>
   </header>
@@ -343,6 +533,21 @@ textarea{resize:vertical;min-height:64px}
 
 <script>
 // ══════════════════════════════════════════════
+// SUPABASE CONFIG — cole suas credenciais aqui
+// ══════════════════════════════════════════════
+// 1. Acesse https://supabase.com → seu projeto → Settings → API
+// 2. Copie "Project URL" e "anon public" key abaixo
+// 3. Execute o SQL em supabase-setup.sql no SQL Editor do seu projeto
+const SUPABASE_URL = 'COLE_SUA_URL_AQUI';
+const SUPABASE_KEY = 'COLE_SUA_ANON_KEY_AQUI';
+const _sb = (SUPABASE_URL !== 'COLE_SUA_URL_AQUI')
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  : null;
+
+let currentUser    = null;   // { id, email, name }
+let currentCompany = null;   // { id, name, code }
+
+// ══════════════════════════════════════════════
 // UTILS
 // ══════════════════════════════════════════════
 const uid = () => Math.random().toString(36).slice(2,10);
@@ -370,12 +575,37 @@ function toast(msg,tipo='ok'){
 // ══════════════════════════════════════════════
 const DB = {
   sid: null,
+  companyId: null,
   k(key){ return `iae_sys_${this.sid}_${key}`; },
   get(key,def=null){ try{ const v=localStorage.getItem(this.k(key)); return v!==null?JSON.parse(v):def; }catch{ return def; } },
-  set(key,val){ localStorage.setItem(this.k(key),JSON.stringify(val)); },
+  set(key,val){
+    localStorage.setItem(this.k(key),JSON.stringify(val));
+    if(_sb && this.companyId && this.sid){
+      _sb.from('system_data').upsert(
+        {company_id:this.companyId,sistema_id:this.sid,key,value:val,updated_at:new Date().toISOString()},
+        {onConflict:'company_id,sistema_id,key'}
+      ).then(()=>{});
+    }
+  },
 
   getSistemas(){ try{ return JSON.parse(localStorage.getItem('iae_sistemas_v1')||'[]'); }catch{ return []; } },
-  saveSistemas(s){ localStorage.setItem('iae_sistemas_v1',JSON.stringify(s)); },
+  saveSistemas(s){
+    localStorage.setItem('iae_sistemas_v1',JSON.stringify(s));
+    if(_sb && this.companyId){
+      _sb.from('sistemas').upsert(
+        s.map(si=>({...si,company_id:this.companyId}))
+      ).then(()=>{});
+    }
+  },
+
+  async pullAll(){
+    if(!_sb || !this.companyId) return;
+    const cid=this.companyId;
+    const {data:sists,error:e1}=await _sb.from('sistemas').select('*').eq('company_id',cid);
+    if(!e1) localStorage.setItem('iae_sistemas_v1',JSON.stringify(sists||[]));
+    const {data:rows,error:e2}=await _sb.from('system_data').select('*').eq('company_id',cid);
+    if(!e2)(rows||[]).forEach(r=>localStorage.setItem(`iae_sys_${r.sistema_id}_${r.key}`,JSON.stringify(r.value)));
+  },
 
   // CRM
   contatos(){ return this.get('crm',[]); },
@@ -605,6 +835,10 @@ function deletarSistema(sid){
   if(!confirm(`Deletar o sistema "${s?.nome||sid}" e TODOS os seus dados?\n\nEsta ação não pode ser desfeita.`)) return;
   DB.saveSistemas(DB.getSistemas().filter(x=>x.id!==sid));
   Object.keys(localStorage).filter(k=>k.startsWith(`iae_sys_${sid}_`)).forEach(k=>localStorage.removeItem(k));
+  if(_sb && DB.companyId){
+    _sb.from('system_data').delete().eq('company_id',DB.companyId).eq('sistema_id',sid).then(()=>{});
+    _sb.from('sistemas').delete().eq('company_id',DB.companyId).eq('id',sid).then(()=>{});
+  }
   renderSistemas();
 }
 
@@ -1684,9 +1918,197 @@ function v(id){ const el=document.getElementById(id); return el?el.value.trim():
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ══════════════════════════════════════════════
+// AUTH — UI helpers
+// ══════════════════════════════════════════════
+function authSwitchTab(tab){
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='login'?0:1)));
+  document.getElementById('auth-panel-login').classList.toggle('active',tab==='login');
+  document.getElementById('auth-panel-signup').classList.toggle('active',tab==='signup');
+}
+
+function authToggleEmpresa(){
+  const modo=document.querySelector('input[name="empresa-modo"]:checked')?.value;
+  document.getElementById('signup-empresa-nome').classList.toggle('show', modo==='criar');
+  document.getElementById('signup-empresa-cod').classList.toggle('show', modo==='entrar');
+}
+
+function authShowError(panel,msg){
+  const el=document.getElementById(panel+'-error');
+  if(el){el.textContent=msg;el.classList.add('show');}
+}
+function authClearError(panel){
+  const el=document.getElementById(panel+'-error');
+  if(el) el.classList.remove('show');
+}
+
+function authSetLoading(btnId,loading){
+  const btn=document.getElementById(btnId);
+  if(btn) btn.disabled=loading;
+}
+
+// ══════════════════════════════════════════════
+// AUTH — Login
+// ══════════════════════════════════════════════
+async function authLogin(){
+  if(!_sb){ authShowError('login','Configure as credenciais Supabase no topo do arquivo.'); return; }
+  const email=document.getElementById('login-email').value.trim();
+  const senha=document.getElementById('login-senha').value;
+  if(!email||!senha){ authShowError('login','Preencha e-mail e senha.'); return; }
+  authClearError('login'); authSetLoading('login-btn',true);
+  const {data,error}=await _sb.auth.signInWithPassword({email,password:senha});
+  authSetLoading('login-btn',false);
+  if(error){ authShowError('login',error.message==='Invalid login credentials'?'E-mail ou senha incorretos.':error.message); return; }
+  await _initSession(data.user);
+}
+
+// ══════════════════════════════════════════════
+// AUTH — Signup
+// ══════════════════════════════════════════════
+async function authSignup(){
+  if(!_sb){ authShowError('signup','Configure as credenciais Supabase no topo do arquivo.'); return; }
+  const nome=document.getElementById('signup-nome').value.trim();
+  const email=document.getElementById('signup-email').value.trim();
+  const senha=document.getElementById('signup-senha').value;
+  const modo=document.querySelector('input[name="empresa-modo"]:checked')?.value||'criar';
+  if(!nome||!email||!senha){ authShowError('signup','Preencha todos os campos.'); return; }
+  if(senha.length<6){ authShowError('signup','Senha deve ter ao menos 6 caracteres.'); return; }
+  authClearError('signup'); authSetLoading('signup-btn',true);
+
+  // Create Supabase Auth user
+  const {data:authData,error:authErr}=await _sb.auth.signUp({email,password:senha,options:{data:{name:nome}}});
+  if(authErr){ authSetLoading('signup-btn',false); authShowError('signup',authErr.message); return; }
+  const userId=authData.user.id;
+
+  try{
+    let companyId;
+    if(modo==='criar'){
+      const empNome=document.getElementById('signup-empresa-nome').value.trim();
+      if(!empNome){ authSetLoading('signup-btn',false); authShowError('signup','Informe o nome da empresa.'); return; }
+      const code=Math.random().toString(36).slice(2,8).toUpperCase();
+      const {data:comp,error:compErr}=await _sb.from('companies').insert({name:empNome,code,created_by:userId}).select().single();
+      if(compErr) throw compErr;
+      companyId=comp.id;
+    } else {
+      const cod=(document.getElementById('signup-empresa-cod').value.trim()).toUpperCase();
+      if(!cod){ authSetLoading('signup-btn',false); authShowError('signup','Informe o código da empresa.'); return; }
+      const {data:comp,error:compErr}=await _sb.from('companies').select('id,name,code').eq('code',cod).single();
+      if(compErr||!comp){ authSetLoading('signup-btn',false); authShowError('signup','Código de empresa não encontrado.'); return; }
+      companyId=comp.id;
+    }
+    await _sb.from('profiles').insert({id:userId,name:nome,company_id:companyId,role:modo==='criar'?'owner':'member'});
+    authSetLoading('signup-btn',false);
+    await _initSession(authData.user);
+  } catch(e){
+    authSetLoading('signup-btn',false);
+    authShowError('signup','Erro ao configurar empresa: '+e.message);
+  }
+}
+
+// ══════════════════════════════════════════════
+// AUTH — Logout
+// ══════════════════════════════════════════════
+async function authLogout(){
+  if(_sb) await _sb.auth.signOut();
+  currentUser=null; currentCompany=null; DB.companyId=null; DB.sid=null;
+  localStorage.removeItem('iae_sistemas_v1');
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('view-home').style.display='none';
+  document.getElementById('view-app').style.display='none';
+  document.getElementById('login-email').value='';
+  document.getElementById('login-senha').value='';
+  authSwitchTab('login');
+}
+
+// ══════════════════════════════════════════════
+// AUTH — Session init (called on login & page load)
+// ══════════════════════════════════════════════
+async function _initSession(authUser){
+  if(!_sb) return;
+  // Load profile + company
+  const {data:profile,error}=await _sb.from('profiles').select('*,companies(*)').eq('id',authUser.id).single();
+  if(error||!profile||!profile.companies){
+    // Profile not yet created (e.g. email verification pending) — show friendly message
+    authShowError('login','Perfil ainda não configurado. Verifique seu e-mail de confirmação ou recrie a conta.');
+    if(_sb) await _sb.auth.signOut();
+    return;
+  }
+  currentUser={id:authUser.id,email:authUser.email,name:profile.name};
+  currentCompany={id:profile.companies.id,name:profile.companies.name,code:profile.companies.code};
+  DB.companyId=currentCompany.id;
+
+  // Pull all company data into localStorage cache
+  await DB.pullAll();
+
+  // Hide auth, show home
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('view-home').style.display='';
+
+  // Show user info in topbar
+  document.getElementById('tb-user').textContent=`${currentUser.name} · ${currentCompany.name}`;
+
+  // Realtime sync for multi-user collaboration
+  if(_sb){
+    _sb.channel('iae-company-'+currentCompany.id)
+      .on('postgres_changes',{event:'*',schema:'public',table:'system_data',
+          filter:`company_id=eq.${currentCompany.id}`},
+          payload=>{
+            const nr=payload.new||{};
+            if(nr.sistema_id&&nr.key) localStorage.setItem(`iae_sys_${nr.sistema_id}_${nr.key}`,JSON.stringify(nr.value));
+            if(sistemaAtual&&nr.sistema_id===DB.sid) _renderModuloAtivo();
+          })
+      .on('postgres_changes',{event:'*',schema:'public',table:'sistemas',
+          filter:`company_id=eq.${currentCompany.id}`},
+          async ()=>{
+            const {data:sists}=await _sb.from('sistemas').select('*').eq('company_id',currentCompany.id);
+            localStorage.setItem('iae_sistemas_v1',JSON.stringify(sists||[]));
+            if(document.getElementById('view-home').style.display!=='none') renderSistemas();
+          })
+      .subscribe();
+  }
+
+  renderSistemas();
+
+  // Show company invite code to the owner in home
+  const homeNav=document.querySelector('.home-nav');
+  if(homeNav&&!document.getElementById('company-code-badge')){
+    const badge=document.createElement('div');
+    badge.id='company-code-badge';
+    badge.style.cssText='font-size:11px;color:rgba(250,240,216,.45);letter-spacing:1px;';
+    badge.innerHTML=`Empresa: <strong style="color:#C49A3C;letter-spacing:2px">${currentCompany.code}</strong> <span style="font-size:10px;opacity:.6">(código para novos usuários)</span>`;
+    homeNav.insertBefore(badge,homeNav.lastElementChild);
+  }
+}
+
+// Re-render the currently active module (used by realtime)
+function _renderModuloAtivo(){
+  if(!modAtivo) return;
+  const renders={
+    dashboard:renderDashboard,crm:renderCRM,estoque:renderEstoque,
+    contas:renderContas,dre:renderDRE,fluxo:renderFluxo,
+    orcamento:renderOrcamento,kpis:renderKPIs,projeto:renderProjetos
+  };
+  if(renders[modAtivo]) renders[modAtivo]();
+}
+
+// ══════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════
-window.addEventListener('load', renderSistemas);
+window.addEventListener('load', async function(){
+  if(!_sb){
+    // Supabase não configurado: modo offline (localStorage apenas)
+    document.getElementById('auth-screen').style.display='none';
+    document.getElementById('view-home').style.display='';
+    renderSistemas();
+    return;
+  }
+  const {data:{session}}=await _sb.auth.getSession();
+  if(session){
+    await _initSession(session.user);
+  } else {
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('view-home').style.display='none';
+  }
+});
 </script>
 </body>
 </html>

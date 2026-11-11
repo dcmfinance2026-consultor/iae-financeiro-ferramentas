@@ -340,6 +340,7 @@ textarea{resize:vertical;min-height:64px}
           <input type="radio" name="empresa-modo" value="criar" checked onchange="authToggleEmpresa()">
           Criar nova empresa
           <input class="auth-sub-input show" id="signup-empresa-nome" placeholder="Nome da empresa...">
+          <input class="auth-sub-input show" id="signup-acesso-cod" type="password" placeholder="Código de acesso IAê (fornecido pelo consultor)" style="margin-top:6px" autocomplete="off">
         </label>
         <label class="auth-radio-label">
           <input type="radio" name="empresa-modo" value="entrar" onchange="authToggleEmpresa()">
@@ -2682,6 +2683,7 @@ function authSwitchTab(tab){
 function authToggleEmpresa(){
   const modo=document.querySelector('input[name="empresa-modo"]:checked')?.value;
   document.getElementById('signup-empresa-nome').classList.toggle('show', modo==='criar');
+  document.getElementById('signup-acesso-cod').classList.toggle('show', modo==='criar');
   document.getElementById('signup-empresa-cod').classList.toggle('show', modo==='entrar');
 }
 
@@ -2735,6 +2737,8 @@ async function authSignup(){
   try{
     let companyId;
     if(modo==='criar'){
+      const acessoCod=document.getElementById('signup-acesso-cod')?.value||'';
+      if(acessoCod!=='iaefinanceiro2026'){ authSetLoading('signup-btn',false); authShowError('signup','Código de acesso IAê inválido. Solicite ao seu consultor.'); return; }
       const empNome=document.getElementById('signup-empresa-nome').value.trim();
       if(!empNome){ authSetLoading('signup-btn',false); authShowError('signup','Informe o nome da empresa.'); return; }
       const code=Math.random().toString(36).slice(2,8).toUpperCase();

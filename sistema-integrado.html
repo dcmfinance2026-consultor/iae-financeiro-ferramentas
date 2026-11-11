@@ -969,19 +969,29 @@ function renderDashboard(){
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:12px;align-items:center">
             <div>
               <div style="font-size:11px;color:var(--texto-s);text-transform:uppercase;font-weight:700;margin-bottom:4px">EBITDA do Mês</div>
-              <div style="font-size:24px;font-weight:800;color:${pl.ebitda>=0?'var(--ok)':'var(--danger)'}">${fmt(pl.ebitda)}</div>
+              <div style="font-size:24px;font-weight:800;color:${(pl.ebitda??0)>=0?'var(--ok)':'var(--danger)'}">
+                ${pl.bloqueado?`<span style="font-size:13px;color:var(--texto-s)" title="Abra o módulo DRE para ver o EBITDA atual">Ver DRE →</span>`:fmt(pl.ebitda)}
+              </div>
+              ${pl.bloqueado?`<div style="font-size:11px;color:var(--texto-s);margin-top:2px">Gerado em ${fmtData(pl.gerado.criado)}</div>`:''}
             </div>
             <div>
               <div style="font-size:11px;color:var(--texto-s);text-transform:uppercase;font-weight:700;margin-bottom:4px">Pró-labore (${cfg.percentual}% do EBITDA)</div>
-              <div style="font-size:24px;font-weight:800;color:#8e44ad">${pl.ebitda>0?fmt(pl.valor):'—'}</div>
-              <div style="font-size:11px;color:var(--texto-s);margin-top:2px">Salário estimado do empresário</div>
+              <div style="font-size:24px;font-weight:800;color:#8e44ad">${fmt(pl.valor)}</div>
+              <div style="font-size:11px;color:var(--texto-s);margin-top:2px">${pl.bloqueado?'🔒 Valor gerado — fixo para o mês':'Estimativa — gere a conta para fixar'}</div>
             </div>
             <div style="text-align:right">
               ${pl.gerado
-                ?`<div><span class="badge b-ok" style="font-size:12px;padding:6px 14px">✓ Conta gerada</span><br><small style="color:var(--texto-s);font-size:11px;display:inline-block;margin-top:4px">${fmt(pl.gerado.valor)} · Venc. ${fmtData(pl.gerado.vencimento)}</small></div>`
+                ?`<div>
+                    <span class="badge b-ok" style="font-size:12px;padding:6px 14px">✓ Conta gerada</span>
+                    <br><small style="color:var(--texto-s);font-size:11px;display:inline-block;margin-top:4px">
+                      ${fmt(pl.gerado.valor)} · Venc. ${fmtData(pl.gerado.vencimento)}
+                    </small>
+                    <br><small style="color:var(--texto-s);font-size:10px">Status: ${pl.gerado.status==='pago'?'✓ Pago':'Pendente'}</small>
+                  </div>`
                 :pl.ebitda>0
-                  ?`<button class="btn btn-primary btn-sm" onclick="gerarProlaboreContas(${ANO},${MES})">▶ Gerar Conta do Mês</button>`
-                  :`<span style="font-size:12px;color:var(--texto-s)">EBITDA negativo — pró-labore não disponível</span>`
+                  ?`<button class="btn btn-primary btn-sm" onclick="gerarProlaboreContas(${ANO},${MES})">▶ Gerar Conta do Mês</button>
+                    <div style="font-size:11px;color:var(--texto-s);margin-top:6px">Gera 1x por mês</div>`
+                  :`<span style="font-size:12px;color:var(--texto-s)">EBITDA negativo —<br>pró-labore não disponível</span>`
               }
             </div>
           </div>
@@ -1539,11 +1549,18 @@ function executarPagamento(id){
 // ══════════════════════════════════════════════
 function calcProlabore(ano,mes){
   const cfg=DB.prolaboreConfig();
-  const k=DB.calcKPIs(ano,mes);
-  const valor=k.ebitda>0?+(k.ebitda*(cfg.percentual/100)).toFixed(2):0;
   const ym=`${ano}-${String(mes).padStart(2,'0')}`;
   const gerado=DB.contas().find(c=>c.prolabore&&c.vencimento?.startsWith(ym));
-  return {cfg,ebitda:k.ebitda,valor,gerado,ym};
+  // Se já gerado, retorna o valor bloqueado (imutável) — evita referência circular
+  if(gerado) return {cfg,ebitda:null,valor:gerado.valor,gerado,ym,bloqueado:true};
+  // EBITDA sem pró-labore nas despesas (rompe dependência circular)
+  const dm=DB.dreDoMes(ano,mes);
+  const sum=arr=>(arr||[]).reduce((a,b)=>a+(+b.valor||0),0);
+  const rec=sum(dm.receitas), cmv=sum(dm.cmv);
+  const desp=sum((dm.despesas||[]).filter(e=>e.categoria!=='Pró-labore'));
+  const ebitda=rec-cmv-desp;
+  const valor=ebitda>0?+(ebitda*(cfg.percentual/100)).toFixed(2):0;
+  return {cfg,ebitda,valor,gerado:null,ym,bloqueado:false};
 }
 
 function gerarProlaboreContas(ano,mes){

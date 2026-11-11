@@ -2732,7 +2732,19 @@ async function authSignup(){
   // Create Supabase Auth user
   const {data:authData,error:authErr}=await _sb.auth.signUp({email,password:senha,options:{data:{name:nome}}});
   if(authErr){ authSetLoading('signup-btn',false); authShowError('signup',authErr.message); return; }
-  const userId=authData.user.id;
+
+  // Garante sessão ativa — signUp sem confirmação de e-mail pode retornar session=null
+  let userId=authData.user?.id;
+  if(!authData.session){
+    const {data:loginData,error:loginErr}=await _sb.auth.signInWithPassword({email,password:senha});
+    if(loginErr){
+      authSetLoading('signup-btn',false);
+      authShowError('signup','Conta criada! Confirme seu e-mail e depois faça login.');
+      authSwitchTab('login');
+      return;
+    }
+    userId=loginData.user.id;
+  }
 
   try{
     let companyId;

@@ -512,14 +512,17 @@ textarea{resize:vertical;min-height:64px}
 
     <!-- PROJETO -->
     <section id="mod-projeto" class="module">
-      <div class="page-hd">
-        <div><h2>Gestão de Projetos</h2><p>Controle financeiro por projeto. Lançamentos integrados com Contas a Pagar/Receber.</p></div>
-        <button class="btn btn-primary btn-sm" onclick="abrirProjetoForm()">+ Projeto</button>
+      <div class="page-hd" id="proj-hd">
+        <div><h2>Gestão de Projetos</h2><p id="proj-hd-sub">Clique num projeto para ver e lançar receitas, despesas e materiais.</p></div>
+        <div id="proj-hd-actions"><button class="btn btn-primary btn-sm" onclick="abrirProjetoForm()">+ Projeto</button></div>
       </div>
-      <div class="tbl-wrap">
-        <table><thead><tr><th>Projeto</th><th>Cliente</th><th>Orçado</th><th>Custo Real</th><th>Receita</th><th>Margem</th><th>Status</th><th></th></tr></thead>
-        <tbody id="proj-tbody"></tbody></table>
+      <div id="proj-lista">
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Projeto</th><th>Cliente</th><th>Orçado</th><th>Custo (Contas)</th><th>Receita (Contas)</th><th>Margem</th><th>Status</th><th></th></tr></thead>
+          <tbody id="proj-tbody"></tbody></table>
+        </div>
       </div>
+      <div id="proj-detalhe" style="display:none"></div>
     </section>
 
   </div><!-- /content -->
@@ -1421,7 +1424,12 @@ function salvarConta(id){
   const obj={id:id||uid(),tipo:v('ctf-tipo'),tipoCusto:v('ctf-tipocusto'),descricao:desc,valor,vencimento:venc,contatoId,contato,categoria:v('ctf-cat'),orcLinha:v('ctf-orcLinha')||'',projetoId:v('ctf-proj')||'',obs:v('ctf-obs'),status:exist.status||'pendente',dataPagamento:exist.dataPagamento||'',criado:exist.criado||hoje()};
   if(id){ const i=lista.findIndex(c=>c.id===id); lista[i]=obj; }
   else lista.push(obj);
-  DB.saveContas(lista); closeModal(); renderContas();
+  DB.saveContas(lista);
+  const pid=_projetoRetornoId;
+  _projetoRetornoId=null;
+  closeModal();
+  if(pid){ abrirProjetoDetalhe(pid); }
+  else { renderContas(); }
 }
 
 function pagarConta(id){
@@ -1431,9 +1439,10 @@ function pagarConta(id){
   lista[idx]={...lista[idx],status:'pago',dataPagamento:hoje()};
   DB.saveContas(lista);
   DB.syncContaToDRE(lista[idx]);
-  renderContas();
   const tipo=lista[idx].tipo==='receber'?'Recebimento':'Pagamento';
   toast(`✓ ${tipo} registrado. DRE atualizado automaticamente.`);
+  if(modAtivo==='projeto'){ renderProjetoLancamentos(); }
+  else { renderContas(); }
 }
 
 function deletarConta(id){
@@ -2156,29 +2165,151 @@ function renderKPIs(){
 // ══════════════════════════════════════════════
 // PROJETO MODULE
 // ══════════════════════════════════════════════
+let projetoDetTabAtiva='todos';
+let _projetoRetornoId=null;
+
 function renderProjeto(){
+  projetoDetTabAtiva='todos';
+  document.getElementById('proj-lista').style.display='';
+  document.getElementById('proj-detalhe').style.display='none';
+  document.getElementById('proj-hd-actions').innerHTML=`<button class="btn btn-primary btn-sm" onclick="abrirProjetoForm()">+ Projeto</button>`;
+  document.getElementById('proj-hd-sub').textContent='Clique num projeto para ver e lançar receitas, despesas e materiais.';
   const lista=DB.projetos();
+  const feats=sistemaAtual?.ferramentas||[];
   document.getElementById('proj-tbody').innerHTML=lista.length?lista.map(p=>{
-    const r=+p.receita||0, c=+p.custoReal||0;
+    const contas=feats.includes('contas')?DB.contas().filter(c=>c.projetoId===p.id):[];
+    const tCusto=contas.filter(c=>c.tipo==='pagar').reduce((a,b)=>a+(+b.valor||0),0);
+    const tReceita=contas.filter(c=>c.tipo==='receber').reduce((a,b)=>a+(+b.valor||0),0);
+    const r=tReceita||+p.receita||0, c=tCusto||+p.custoReal||0;
     const mg=r>0?(r-c)/r*100:0;
-    const feats=sistemaAtual?.ferramentas||[];
-    return `<tr>
+    return `<tr style="cursor:pointer" onclick="abrirProjetoDetalhe('${p.id}')">
       <td><strong>${esc(p.nome)}</strong>${p.desc?`<br><small style="color:var(--texto-s)">${esc(p.desc.slice(0,60))}${p.desc.length>60?'…':''}</small>`:''}</td>
       <td>${esc(p.clienteNome||'—')} ${p.clienteId?`<span class="int-badge">CRM</span>`:''}</td>
-      <td>${fmt(p.orcamento)}</td>
-      <td>${fmt(p.custoReal)}</td>
-      <td>${fmt(p.receita)}</td>
+      <td>${fmt(+p.orcamento||0)}</td>
+      <td style="color:${tCusto>0?'var(--danger)':''}">${fmt(tCusto||+p.custoReal||0)}</td>
+      <td style="color:${tReceita>0?'var(--ok)':''}">${fmt(tReceita||+p.receita||0)}</td>
       <td><strong style="color:${mg>=15?'var(--ok)':mg>=0?'var(--warn)':'var(--danger)'}">${pct(mg)}</strong></td>
       <td><span class="badge ${p.status==='ativo'?'b-ok':p.status==='concluido'?'b-info':'b-gray'}">${p.status==='ativo'?'Ativo':p.status==='concluido'?'Concluído':'Pausado'}</span></td>
-      <td style="white-space:nowrap;display:flex;gap:4px">
+      <td style="white-space:nowrap;display:flex;gap:4px" onclick="event.stopPropagation()">
         <button class="btn btn-outline btn-xs" onclick="abrirProjetoForm('${p.id}')">✏</button>
-        ${feats.includes('contas')?`
-          <button class="btn btn-xs" style="background:rgba(30,132,73,.1);color:var(--ok);border:1px solid var(--ok)" onclick="lancarReceita('${p.id}')" title="Lançar receita em Contas a Receber">💰</button>
-          <button class="btn btn-xs" style="background:rgba(192,57,43,.1);color:var(--danger);border:1px solid var(--danger)" onclick="lancarCusto('${p.id}')" title="Lançar custo em Contas a Pagar">💸</button>`:''}
         <button class="btn btn-xs" style="background:none;color:var(--danger);border:1px solid var(--danger)" onclick="deletarProjeto('${p.id}')">🗑</button>
       </td>
     </tr>`;
   }).join(''):`<tr><td colspan="8" style="text-align:center;color:var(--texto-s);padding:30px">Nenhum projeto. <button class="btn btn-primary btn-xs" onclick="abrirProjetoForm()">+ Criar</button></td></tr>`;
+}
+
+function abrirProjetoDetalhe(id){
+  const p=DB.projetos().find(x=>x.id===id); if(!p) return;
+  document.getElementById('proj-lista').style.display='none';
+  document.getElementById('proj-hd-actions').innerHTML=`<button class="btn btn-outline btn-sm" onclick="renderProjeto()">← Projetos</button>`;
+  document.getElementById('proj-hd-sub').textContent=`Projeto: ${p.nome}`;
+  const det=document.getElementById('proj-detalhe');
+  det.dataset.projetoId=id;
+  det.style.display='';
+  det.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <h3 style="margin:0;font-size:17px">${esc(p.nome)}</h3>
+        <span class="badge ${p.status==='ativo'?'b-ok':p.status==='concluido'?'b-info':'b-gray'}">${p.status==='ativo'?'Ativo':p.status==='concluido'?'Concluído':'Pausado'}</span>
+        ${p.clienteNome?`<span style="font-size:12px;color:var(--texto-s)">👤 ${esc(p.clienteNome)}</span>`:''}
+        ${p.inicio?`<span style="font-size:12px;color:var(--texto-s)">📅 ${fmtData(p.inicio)}${p.fim?` → ${fmtData(p.fim)}`:''}</span>`:''}
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="novaContaProjeto('${id}','receita')" title="Nova receita vinculada a este projeto">💰 Receita</button>
+        <button class="btn btn-outline btn-sm" onclick="novaContaProjeto('${id}','despesa')" title="Nova despesa operacional">💸 Despesa</button>
+        <button class="btn btn-outline btn-sm" onclick="novaContaProjeto('${id}','material')" title="Compra de material (CMV)">📦 Material</button>
+        <button class="btn btn-outline btn-sm" onclick="abrirProjetoForm('${id}')">✏ Editar</button>
+      </div>
+    </div>
+    ${p.desc?`<div style="background:var(--card-bg);border:1px solid rgba(27,59,40,.1);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--texto-s)">${esc(p.desc)}</div>`:''}
+    <div id="proj-det-stats" class="stat-grid" style="margin-bottom:16px"></div>
+    <div class="tabs" style="margin-bottom:10px">
+      <button class="tab${projetoDetTabAtiva==='todos'?' active':''}" onclick="projetoDetTab('todos',this)">Todos</button>
+      <button class="tab${projetoDetTabAtiva==='receber'?' active':''}" onclick="projetoDetTab('receber',this)">💰 Receitas</button>
+      <button class="tab${projetoDetTabAtiva==='pagar'?' active':''}" onclick="projetoDetTab('pagar',this)">💸 Despesas / Custos</button>
+    </div>
+    <div class="tbl-wrap">
+      <table><thead><tr><th>Descrição</th><th>Tipo</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr></thead>
+      <tbody id="proj-det-tbody"></tbody></table>
+    </div>
+  `;
+  renderProjetoLancamentos();
+}
+
+function projetoDetTab(tipo,el){
+  projetoDetTabAtiva=tipo;
+  document.querySelectorAll('#proj-detalhe .tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderProjetoLancamentos();
+}
+
+function renderProjetoLancamentos(){
+  const pid=document.getElementById('proj-detalhe')?.dataset?.projetoId;
+  if(!pid) return;
+  const hoje2=hoje();
+  const todos=DB.contas().filter(c=>c.projetoId===pid);
+  let lista=todos;
+  if(projetoDetTabAtiva!=='todos') lista=lista.filter(c=>c.tipo===projetoDetTabAtiva);
+  lista=lista.sort((a,b)=>(a.vencimento||'')>(b.vencimento||'')?1:-1);
+
+  const tbody=document.getElementById('proj-det-tbody');
+  if(tbody) tbody.innerHTML=lista.length?lista.map(c=>{
+    const st=(c.status==='pendente'&&c.vencimento&&c.vencimento<hoje2)?'vencido':c.status;
+    const dias=diffDias(c.vencimento);
+    return `<tr>
+      <td><strong>${esc(c.descricao)}</strong>${c.categoria?`<br><small style="color:var(--texto-s)">${esc(c.categoria)}</small>`:''}</td>
+      <td>
+        <span class="badge ${c.tipo==='receber'?'b-ok':'b-warn'}">${c.tipo==='receber'?'Receita':'Despesa'}</span>
+        ${c.tipoCusto==='cmv'?` <span class="badge b-info" style="font-size:9px">CMV</span>`:''}
+      </td>
+      <td><strong>${fmt(c.valor)}</strong></td>
+      <td>${fmtData(c.vencimento)}${st==='pendente'&&dias<=5&&dias>=0?` <span style="color:var(--warn);font-size:11px">(${dias}d)</span>`:''}</td>
+      <td><span class="badge ${stBadge(c.status,c.vencimento)}">${stLabel(st)}</span></td>
+      <td style="white-space:nowrap;display:flex;gap:4px">
+        ${st!=='pago'?`<button class="btn btn-success btn-xs" onclick="confirmarPagamento('${c.id}')" title="Marcar como ${c.tipo==='receber'?'recebido':'pago'}">✓</button>`:''}
+        <button class="btn btn-outline btn-xs" onclick="editarContaProjeto('${c.id}','${pid}')">✏</button>
+        <button class="btn btn-xs" style="background:none;color:var(--danger);border:1px solid var(--danger)" onclick="deletarContaProjeto('${c.id}','${pid}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="6" style="text-align:center;color:var(--texto-s);padding:20px">Nenhum lançamento. Use os botões acima para adicionar.</td></tr>`;
+
+  const tCusto=todos.filter(c=>c.tipo==='pagar').reduce((a,b)=>a+(+b.valor||0),0);
+  const tReceita=todos.filter(c=>c.tipo==='receber').reduce((a,b)=>a+(+b.valor||0),0);
+  const tCustoR=todos.filter(c=>c.tipo==='pagar'&&c.status==='pago').reduce((a,b)=>a+(+b.valor||0),0);
+  const tReceitaR=todos.filter(c=>c.tipo==='receber'&&c.status==='pago').reduce((a,b)=>a+(+b.valor||0),0);
+  const mg=tReceita>0?(tReceita-tCusto)/tReceita*100:0;
+  const mgR=tReceitaR>0?(tReceitaR-tCustoR)/tReceitaR*100:0;
+  const p=DB.projetos().find(x=>x.id===pid)||{};
+  const el=document.getElementById('proj-det-stats');
+  if(el) el.innerHTML=`
+    <div class="stat-card" style="border-left-color:var(--info)"><div class="stat-label">Orçamento</div><div class="stat-val">${fmt(+p.orcamento||0)}</div><div class="stat-sub">Valor contratado</div></div>
+    <div class="stat-card" style="border-left-color:var(--danger)"><div class="stat-label">Custo Total</div><div class="stat-val" style="color:var(--danger)">${fmt(tCusto)}</div><div class="stat-sub">Pago: ${fmt(tCustoR)}</div></div>
+    <div class="stat-card" style="border-left-color:var(--ok)"><div class="stat-label">Receita Total</div><div class="stat-val" style="color:var(--ok)">${fmt(tReceita)}</div><div class="stat-sub">Recebida: ${fmt(tReceitaR)}</div></div>
+    <div class="stat-card" style="border-left-color:${mg>=15?'var(--ok)':mg>=0?'var(--warn)':'var(--danger)'}"><div class="stat-label">Margem Prevista</div><div class="stat-val" style="color:${mg>=15?'var(--ok)':mg>=0?'var(--warn)':'var(--danger)'}">${pct(mg)}</div><div class="stat-sub">Realizada: ${pct(mgR)}</div></div>
+  `;
+}
+
+function novaContaProjeto(projetoId, subtipo){
+  const p=DB.projetos().find(x=>x.id===projetoId); if(!p) return;
+  _projetoRetornoId=projetoId;
+  const mapa={
+    receita:{tipo:'receber',tipoCusto:'receita_servico',descricao:`Receita — ${p.nome}`,contatoId:p.clienteId||'',contato:p.clienteNome||'',valor:p.orcamento||'',projetoId,orcLinha:'Receitas de Serviços'},
+    despesa:{tipo:'pagar',tipoCusto:'despesa',descricao:`Despesa — ${p.nome}`,projetoId,orcLinha:''},
+    material:{tipo:'pagar',tipoCusto:'cmv',descricao:`Material — ${p.nome}`,projetoId,orcLinha:'CMV / Custo de Mercadorias'},
+  };
+  abrirContaForm(null, mapa[subtipo]||{tipo:'pagar',projetoId});
+}
+
+function editarContaProjeto(contaId, projetoId){
+  _projetoRetornoId=projetoId;
+  abrirContaForm(contaId);
+}
+
+function deletarContaProjeto(contaId, projetoId){
+  if(!confirm('Deletar este lançamento?')) return;
+  DB.removeDREEntry(contaId);
+  DB.saveContas(DB.contas().filter(c=>c.id!==contaId));
+  renderProjetoLancamentos();
 }
 
 function abrirProjetoForm(id=null){
@@ -2192,12 +2323,8 @@ function abrirProjetoForm(id=null){
       </div>
     </div>
     <div class="fg" style="margin-bottom:12px"><label>Descrição / Escopo</label><textarea id="pf-desc">${esc(p.desc||'')}</textarea></div>
-    <div class="form-row c3">
+    <div class="form-row c2">
       <div class="fg"><label>Valor Orçado (R$)</label><input id="pf-orc" type="number" value="${p.orcamento||''}" min="0" step="any"></div>
-      <div class="fg"><label>Custo Real (R$)</label><input id="pf-custo" type="number" value="${p.custoReal||0}" min="0" step="any"></div>
-      <div class="fg"><label>Receita Confirmada (R$)</label><input id="pf-rec" type="number" value="${p.receita||''}" min="0" step="any"></div>
-    </div>
-    <div class="form-row c3">
       <div class="fg"><label>Status</label>
         <select id="pf-status">
           <option value="ativo"${(p.status||'ativo')==='ativo'?' selected':''}>Ativo</option>
@@ -2205,6 +2332,8 @@ function abrirProjetoForm(id=null){
           <option value="concluido"${p.status==='concluido'?' selected':''}>Concluído</option>
         </select>
       </div>
+    </div>
+    <div class="form-row c2">
       <div class="fg"><label>Data de Início</label><input id="pf-ini" type="date" value="${p.inicio||hoje()}"></div>
       <div class="fg"><label>Previsão de Fim</label><input id="pf-fim" type="date" value="${p.fim||''}"></div>
     </div>
@@ -2221,10 +2350,13 @@ function salvarProjeto(id){
   const clienteId=v('pf-cli');
   const cliente=clienteId?DB.contatos().find(c=>c.id===clienteId):null;
   const lista=DB.projetos();
-  const obj={id:id||uid(),nome,desc:v('pf-desc'),clienteId,clienteNome:cliente?.nome||'',orcamento:+v('pf-orc')||0,custoReal:+v('pf-custo')||0,receita:+v('pf-rec')||0,status:v('pf-status'),inicio:v('pf-ini'),fim:v('pf-fim')};
+  const obj={id:id||uid(),nome,desc:v('pf-desc'),clienteId,clienteNome:cliente?.nome||'',orcamento:+v('pf-orc')||0,status:v('pf-status'),inicio:v('pf-ini'),fim:v('pf-fim')};
   if(id){ const i=lista.findIndex(p=>p.id===id); lista[i]=obj; }
   else lista.push(obj);
-  DB.saveProjetos(lista); closeModal(); renderProjeto();
+  DB.saveProjetos(lista);
+  closeModal();
+  const pid=document.getElementById('proj-detalhe')?.dataset?.projetoId;
+  if(pid===id) abrirProjetoDetalhe(id); else renderProjeto();
 }
 
 function deletarProjeto(id){
@@ -2234,14 +2366,14 @@ function deletarProjeto(id){
 
 function lancarReceita(id){
   const p=DB.projetos().find(x=>x.id===id); if(!p) return;
-  goMod('contas');
-  setTimeout(()=>abrirContaForm(null,{tipo:'receber',descricao:`Receita — ${p.nome}`,contatoId:p.clienteId,contato:p.clienteNome,valor:p.receita||p.orcamento||'',tipoCusto:'despesa',projetoId:p.id,categoria:'Projetos'}),80);
+  abrirProjetoDetalhe(id);
+  setTimeout(()=>novaContaProjeto(id,'receita'),80);
 }
 
 function lancarCusto(id){
   const p=DB.projetos().find(x=>x.id===id); if(!p) return;
-  goMod('contas');
-  setTimeout(()=>abrirContaForm(null,{tipo:'pagar',descricao:`Custo — ${p.nome}`,valor:p.custoReal||'',tipoCusto:'despesa',projetoId:p.id,categoria:'Projetos'}),80);
+  abrirProjetoDetalhe(id);
+  setTimeout(()=>novaContaProjeto(id,'despesa'),80);
 }
 
 // ══════════════════════════════════════════════

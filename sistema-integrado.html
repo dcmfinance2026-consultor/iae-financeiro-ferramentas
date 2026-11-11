@@ -659,7 +659,7 @@ const DB = {
     if(!ref) return;
     const [ano,mes]=ref.split('-');
     const dm=this.dreDoMes(+ano,+mes);
-    const entry={id:'ct_'+conta.id,descricao:conta.descricao,contato:conta.contato||'',valor:conta.valor,categoria:conta.categoria||'',contaId:conta.id,auto:true};
+    const entry={id:'ct_'+conta.id,descricao:conta.descricao,contato:conta.contato||'',valor:conta.valor,categoria:conta.orcLinha||conta.categoria||'',contaId:conta.id,auto:true};
     if(conta.tipo==='receber'){
       dm.receitas=dm.receitas.filter(r=>r.contaId!==conta.id);
       dm.receitas.push(entry);
@@ -1995,7 +1995,20 @@ const ORC_CATS={
   exp:['Pessoal / Salários','Aluguel / Infraestrutura','Marketing / Vendas','Software / Ferramentas','Administrativo','Financeiro','Outros'],
 };
 
+function ressincronizarDRE(){
+  // Remove entradas auto (vindas de contas) e recria com orcLinha como categoria
+  const dre=DB.dre();
+  Object.keys(dre).forEach(k=>{
+    ['receitas','cmv','despesas'].forEach(s=>{
+      dre[k][s]=(dre[k][s]||[]).filter(e=>!e.auto);
+    });
+  });
+  DB.saveDRE(dre);
+  DB.contas().filter(c=>c.status==='pago').forEach(c=>DB.syncContaToDRE(c));
+}
+
 function renderOrcamento(){
+  ressincronizarDRE();
   const anoEl=document.getElementById('orc-ano');
   if(!anoEl.innerHTML){ for(let y=ANO-1;y<=ANO+1;y++){ const o=document.createElement('option'); o.value=y; o.textContent=y; if(y===ANO) o.selected=true; anoEl.appendChild(o); } }
   const ano=+anoEl.value||ANO;

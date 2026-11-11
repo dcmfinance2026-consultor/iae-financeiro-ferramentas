@@ -1313,7 +1313,7 @@ function renderContas(){
       <td>${fmtData(c.vencimento)}${st==='pendente'&&dias<=5&&dias>=0?` <span style="color:var(--warn);font-size:11px">(${dias}d)</span>`:''}</td>
       <td><span class="badge ${stBadge(c.status,c.vencimento)}">${stLabel(st)}</span></td>
       <td style="white-space:nowrap;display:flex;gap:4px">
-        ${st!=='pago'?`<button class="btn btn-success btn-xs" onclick="pagarConta('${c.id}')" title="Marcar como ${c.tipo==='receber'?'recebido':'pago'}">✓</button>`:''}
+        ${st!=='pago'?`<button class="btn btn-success btn-xs" onclick="confirmarPagamento('${c.id}')" title="Marcar como ${c.tipo==='receber'?'recebido':'pago'}">✓</button>`:''}
         <button class="btn btn-outline btn-xs" onclick="abrirContaForm('${c.id}')">✏</button>
         <button class="btn btn-xs" style="background:none;color:var(--danger);border:1px solid var(--danger)" onclick="deletarConta('${c.id}')">🗑</button>
       </td>
@@ -1321,25 +1321,52 @@ function renderContas(){
   }).join(''):`<tr><td colspan="7" style="text-align:center;color:var(--texto-s);padding:30px">Nenhum lançamento. <button class="btn btn-primary btn-xs" onclick="abrirContaForm()">+ Adicionar</button></td></tr>`;
 }
 
+function _dreOptsHtml(tipo, cur){
+  if(tipo==='receber') return `
+    <option value="receita_servico"${cur==='receita_servico'?' selected':''}>Receita de Serviços</option>
+    <option value="receita_produto"${cur==='receita_produto'?' selected':''}>Receita de Produtos / Venda</option>
+    <option value="receita_projeto"${cur==='receita_projeto'?' selected':''}>Receita de Projetos</option>
+    <option value="receita_outra"${(!cur||cur==='receita_outra'||cur==='despesa')&&tipo==='receber'?' selected':''}>Outras Receitas</option>
+  `;
+  return `
+    <option value="despesa"${(cur==='despesa'||!cur)?' selected':''}>Despesa Operacional</option>
+    <option value="cmv"${cur==='cmv'?' selected':''}>CMV / Custo de Mercadoria</option>
+    <option value="investimento"${cur==='investimento'?' selected':''}>Investimento</option>
+  `;
+}
+function _orcLinhaOptsHtml(tipo, cur){
+  const none=`<option value="">— Não vincular ao orçamento —</option>`;
+  if(tipo==='receber'){
+    return none+ORC_CATS.rev.map(i=>`<option value="${i}"${cur===i?' selected':''}>${i}</option>`).join('');
+  }
+  const cost=`<optgroup label="CMV / Custos">${ORC_CATS.cost.map(i=>`<option value="${i}"${cur===i?' selected':''}>${i}</option>`).join('')}</optgroup>`;
+  const exp=`<optgroup label="Despesas">${ORC_CATS.exp.map(i=>`<option value="${i}"${cur===i?' selected':''}>${i}</option>`).join('')}</optgroup>`;
+  return none+cost+exp;
+}
+function atualizarClassDRE(){
+  const tipo=document.getElementById('ctf-tipo')?.value||'pagar';
+  const sel=document.getElementById('ctf-tipocusto');
+  const orcSel=document.getElementById('ctf-orcLinha');
+  if(sel) sel.innerHTML=_dreOptsHtml(tipo,'');
+  if(orcSel) orcSel.innerHTML=_orcLinhaOptsHtml(tipo,'');
+}
+
 function abrirContaForm(id=null,prefill={}){
   const c=id?DB.contas().find(x=>x.id===id):{...prefill};
   const ctOpts=DB.contatos().map(ct=>`<option value="${ct.id}"${c.contatoId===ct.id?' selected':''}>${esc(ct.nome)} (${ct.tipo})</option>`).join('');
   const prjOpts=DB.projetos().map(p=>`<option value="${p.id}"${c.projetoId===p.id?' selected':''}>${esc(p.nome)}</option>`).join('');
   const feats=sistemaAtual?.ferramentas||[];
+  const tipoAtual=c.tipo||'pagar';
   openModal(id?'Editar Lançamento':'Novo Lançamento',`
     <div class="form-row c2">
       <div class="fg"><label>Tipo *</label>
-        <select id="ctf-tipo">
-          <option value="pagar"${(c.tipo||'pagar')==='pagar'?' selected':''}>💸 Conta a Pagar</option>
-          <option value="receber"${c.tipo==='receber'?' selected':''}>💰 Conta a Receber</option>
+        <select id="ctf-tipo" onchange="atualizarClassDRE()">
+          <option value="pagar"${tipoAtual==='pagar'?' selected':''}>💸 Conta a Pagar</option>
+          <option value="receber"${tipoAtual==='receber'?' selected':''}>💰 Conta a Receber</option>
         </select>
       </div>
       <div class="fg"><label>Classificação DRE</label>
-        <select id="ctf-tipocusto">
-          <option value="despesa"${(c.tipoCusto||'despesa')==='despesa'?' selected':''}>Despesa Operacional</option>
-          <option value="cmv"${c.tipoCusto==='cmv'?' selected':''}>CMV / Custo de Mercadoria</option>
-          <option value="investimento"${c.tipoCusto==='investimento'?' selected':''}>Investimento</option>
-        </select>
+        <select id="ctf-tipocusto">${_dreOptsHtml(tipoAtual,c.tipoCusto||'')}</select>
       </div>
     </div>
     <div class="fg" style="margin-bottom:12px"><label>Descrição *</label><input id="ctf-desc" value="${esc(c.descricao||'')}" placeholder="Ex: Compra de materiais, Serviço prestado..."></div>
@@ -1353,8 +1380,11 @@ function abrirContaForm(id=null,prefill={}){
       <div class="fg"><label>Valor (R$) *</label><input id="ctf-val" type="number" value="${c.valor||''}" min="0" step="any" placeholder="0,00"></div>
       <div class="fg"><label>Vencimento *</label><input id="ctf-venc" type="date" value="${c.vencimento||hoje()}"></div>
     </div>
+    <div class="fg" style="margin-bottom:12px"><label>Linha do Orçamento <span class="int-badge">Orçamento</span></label>
+      <select id="ctf-orcLinha">${_orcLinhaOptsHtml(tipoAtual,c.orcLinha||'')}</select>
+    </div>
     ${feats.includes('projeto')&&prjOpts?`
-    <div class="fg" style="margin-bottom:12px"><label>Projeto <span class="int-badge">Projeto</span></label>
+    <div class="fg" style="margin-bottom:12px"><label>Projeto <span class="int-badge">Proj.</span></label>
       <select id="ctf-proj"><option value="">— Sem projeto —</option>${prjOpts}</select>
     </div>`:'<input type="hidden" id="ctf-proj" value="">'}
     <div class="fg"><label>Observações</label><textarea id="ctf-obs">${esc(c.obs||'')}</textarea></div>
@@ -1372,7 +1402,7 @@ function salvarConta(id){
   const contato=contatoId?DB.contatos().find(c=>c.id===contatoId)?.nome:'';
   const lista=DB.contas();
   const exist=id?lista.find(c=>c.id===id):{};
-  const obj={id:id||uid(),tipo:v('ctf-tipo'),tipoCusto:v('ctf-tipocusto'),descricao:desc,valor,vencimento:venc,contatoId,contato,categoria:v('ctf-cat'),projetoId:v('ctf-proj')||'',obs:v('ctf-obs'),status:exist.status||'pendente',dataPagamento:exist.dataPagamento||'',criado:exist.criado||hoje()};
+  const obj={id:id||uid(),tipo:v('ctf-tipo'),tipoCusto:v('ctf-tipocusto'),descricao:desc,valor,vencimento:venc,contatoId,contato,categoria:v('ctf-cat'),orcLinha:v('ctf-orcLinha')||'',projetoId:v('ctf-proj')||'',obs:v('ctf-obs'),status:exist.status||'pendente',dataPagamento:exist.dataPagamento||'',criado:exist.criado||hoje()};
   if(id){ const i=lista.findIndex(c=>c.id===id); lista[i]=obj; }
   else lista.push(obj);
   DB.saveContas(lista); closeModal(); renderContas();
@@ -1394,6 +1424,39 @@ function deletarConta(id){
   if(!confirm('Deletar este lançamento?')) return;
   DB.removeDREEntry(id);
   DB.saveContas(DB.contas().filter(c=>c.id!==id)); renderContas();
+}
+
+function confirmarPagamento(id){
+  const c=DB.contas().find(x=>x.id===id);
+  if(!c) return;
+  const labelAcao=c.tipo==='receber'?'Recebido':'Pago';
+  openModal(`Confirmar ${labelAcao}`,`
+    <div style="background:var(--card-bg);border:1px solid rgba(27,59,40,.12);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px">
+      <div style="font-weight:600">${esc(c.descricao)}</div>
+      <div style="color:var(--texto-s);margin-top:3px">${fmt(c.valor)} &nbsp;·&nbsp; Venc. ${fmtData(c.vencimento)}</div>
+    </div>
+    <div class="fg"><label>Senha de confirmação</label>
+      <input id="cfp-senha" type="password" placeholder="Digite a senha..."
+        oninput="document.getElementById('cfp-erro').style.display='none'"
+        onkeydown="if(event.key==='Enter')executarPagamento('${id}')">
+    </div>
+    <p id="cfp-erro" style="color:var(--danger);font-size:12px;margin-top:6px;display:none">Senha incorreta. Tente novamente.</p>
+  `,`
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="executarPagamento('${id}')">Confirmar ${labelAcao}</button>
+  `);
+  setTimeout(()=>document.getElementById('cfp-senha')?.focus(),100);
+}
+
+function executarPagamento(id){
+  const senha=document.getElementById('cfp-senha')?.value||'';
+  if(senha!=='iaefinanceiro2026'){
+    const e=document.getElementById('cfp-erro');
+    if(e){ e.style.display='block'; document.getElementById('cfp-senha').select(); }
+    return;
+  }
+  closeModal();
+  pagarConta(id);
 }
 
 // ══════════════════════════════════════════════
@@ -1787,15 +1850,24 @@ function renderOrcamento(){
     return t;
   }
 
+  function committed(cat){
+    return DB.contas()
+      .filter(c=>c.orcLinha===cat&&c.status!=='pago'&&c.status!=='cancelado')
+      .reduce((a,b)=>a+(+b.valor||0),0);
+  }
+
+  const GCOLS='1fr 130px 110px 130px 80px';
   function secRows(secKey,cats,titulo,cor){
     const tBud=cats.reduce((a,c)=>a+(+orc[secKey]?.[c]||0),0);
     const tAct=actual(secKey);
+    const tCom=cats.reduce((a,c)=>a+committed(c),0);
     const tVar=tBud?((tAct-tBud)/tBud)*100:0;
     return `<div class="dre-sec" style="margin-bottom:14px">
       <div class="dre-sec-head" style="background:${cor}10">
-        <div style="display:grid;grid-template-columns:1fr 140px 140px 100px;gap:8px;width:100%;align-items:center">
+        <div style="display:grid;grid-template-columns:${GCOLS};gap:8px;width:100%;align-items:center">
           <strong style="color:${cor}">${titulo}</strong>
           <span style="font-size:11px;color:var(--texto-s);font-weight:700;text-transform:uppercase">Budget Anual</span>
+          <span style="font-size:11px;color:var(--warn);font-weight:700;text-transform:uppercase" title="Contas pendentes vinculadas a esta linha">Comprometido</span>
           <span style="font-size:11px;color:var(--texto-s);font-weight:700;text-transform:uppercase">Realizado (DRE)</span>
           <span style="font-size:11px;color:var(--texto-s);font-weight:700;text-transform:uppercase">Variação</span>
         </div>
@@ -1804,17 +1876,19 @@ function renderOrcamento(){
         ${cats.map(cat=>{
           const bud=+orc[secKey]?.[cat]||0;
           const act=actual(secKey,cat);
+          const com=committed(cat);
           const varP=bud?(act-bud)/bud*100:0;
           const vCor=secKey==='rev'?(varP>0?'var(--ok)':varP>-10?'var(--warn)':'var(--danger)'):(varP>10?'var(--danger)':varP>0?'var(--warn)':'var(--ok)');
-          return `<div style="display:grid;grid-template-columns:1fr 140px 140px 100px;gap:8px;padding:9px 16px;border-bottom:1px solid rgba(27,59,40,.05);align-items:center;font-size:13px">
+          return `<div style="display:grid;grid-template-columns:${GCOLS};gap:8px;padding:9px 16px;border-bottom:1px solid rgba(27,59,40,.05);align-items:center;font-size:13px">
             <span>${cat}</span>
             <span class="orc-editable" data-sec="${secKey}" data-cat="${encodeURIComponent(cat)}" data-ano="${ano}" style="font-weight:600;color:var(--verde);cursor:pointer;text-decoration:underline dotted" title="Clique para editar">${fmt(bud)}</span>
+            <span style="font-weight:600;color:${com>0?'var(--warn)':'var(--texto-s)'}" title="${com>0?'Contas a pagar/receber pendentes vinculadas':'Nenhuma conta pendente vinculada'}">${com>0?fmt(com):'—'}</span>
             <span style="font-weight:600">${fmt(act)}</span>
             <span style="color:${vCor};font-weight:700">${varP>0?'+':''}${pct(varP)}</span>
           </div>`;
         }).join('')}
-        <div style="display:grid;grid-template-columns:1fr 140px 140px 100px;gap:8px;padding:10px 16px;background:${cor}08;font-weight:700;font-size:13px">
-          <span>Total</span><span>${fmt(tBud)}</span><span>${fmt(tAct)}</span>
+        <div style="display:grid;grid-template-columns:${GCOLS};gap:8px;padding:10px 16px;background:${cor}08;font-weight:700;font-size:13px">
+          <span>Total</span><span>${fmt(tBud)}</span><span style="color:${tCom>0?'var(--warn)':'var(--texto-s)'}">${tCom>0?fmt(tCom):'—'}</span><span>${fmt(tAct)}</span>
           <span style="color:${tVar>10?'var(--danger)':tVar>0?'var(--warn)':'var(--ok)'}">${tVar>0?'+':''}${pct(tVar)}</span>
         </div>
       </div>

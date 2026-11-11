@@ -1613,6 +1613,7 @@ function novaRetiradaInespPJ(){
 // DRE MODULE
 // ══════════════════════════════════════════════
 function renderDRE(){
+  ressincronizarDRE();
   populateMesAno('dre-mes','dre-ano');
   const mes=+document.getElementById('dre-mes')?.value||MES;
   const ano=+document.getElementById('dre-ano')?.value||ANO;
@@ -2205,11 +2206,49 @@ function renderOrcamento(){
     </div>`;
   }
 
+  const tBudRev  = ORC_CATS.rev.reduce((a,c)=>a+(+orc.rev?.[c]||0),0);
+  const tBudCost = ORC_CATS.cost.reduce((a,c)=>a+(+orc.cost?.[c]||0),0);
+  const tBudExp  = ORC_CATS.exp.reduce((a,c)=>a+(+orc.exp?.[c]||0),0);
+  const tActRev  = actual('rev');
+  const tActCost = actual('cost');
+  const tActExp  = actual('exp');
+  const tBudMB   = tBudRev - tBudCost;
+  const tActMB   = tActRev - tActCost;
+  const tBudRes  = tBudMB - tBudExp;
+  const tActRes  = tActMB - tActExp;
+  const pctVar   = (b,a)=>b?(((a-b)/b)*100):0;
+  const varCor   = (v,inv=false)=>{ const ok=inv?v<0:v>=0; return ok?'var(--ok)':'var(--danger)'; };
+  function resRow(label,bud,act,inv=false,bold=false,percent=null){
+    const v=pctVar(bud,act);
+    const vc=varCor(v,inv);
+    const style=bold?'font-weight:700;font-size:14px':'font-size:13px';
+    const actCor=act<0?'var(--danger)':bold?'var(--verde)':'var(--texto)';
+    return `<div style="display:grid;grid-template-columns:1fr 150px 150px 90px;gap:8px;padding:${bold?'12px':'9px'} 18px;border-bottom:1px solid rgba(27,59,40,.06);align-items:center;${style}${bold?';background:rgba(30,132,73,.05)':''}">
+      <span>${label}</span>
+      <span style="font-weight:600;color:${bud<0?'var(--danger)':'var(--texto-s)'}">${fmt(bud)}</span>
+      <span style="font-weight:600;color:${actCor}">${fmt(act)}${percent!==null?`<span style="font-size:11px;color:var(--texto-s);margin-left:6px">${pct(percent*100)}</span>`:''}</span>
+      <span style="color:${vc};font-weight:700">${v>0?'+':''}${pct(v)}</span>
+    </div>`;
+  }
+
   document.getElementById('orc-body').innerHTML=`
     <div class="alert alert-info" style="margin-bottom:16px">ℹ️ O <strong>Realizado</strong> é puxado automaticamente do DRE. Clique nos valores de <u>Budget</u> (sublinhados) para editar.</div>
     ${secRows('rev',ORC_CATS.rev,'💰 Receitas Orçadas','#1E8449')}
     ${secRows('cost',ORC_CATS.cost,'📦 CMV Orçado','#A04000')}
     ${secRows('exp',ORC_CATS.exp,'📋 Despesas Orçadas','#922B21')}
+    <div class="card" style="margin-top:24px;border-left:4px solid var(--verde)">
+      <div class="card-header" style="margin-bottom:0">
+        <div class="card-title" style="font-size:14px">📊 Resultado Corporativo — ${ano}</div>
+        <div style="display:grid;grid-template-columns:1fr 150px 150px 90px;gap:8px;padding:6px 18px 0;font-size:11px;font-weight:700;color:var(--texto-s);text-transform:uppercase">
+          <span></span><span>Budget Anual</span><span>Realizado (DRE)</span><span>Variação</span>
+        </div>
+      </div>
+      ${resRow('💰 Receita Total',tBudRev,tActRev,false,false)}
+      ${resRow('📦 (−) CMV Total',tBudCost,tActCost,true,false)}
+      ${resRow('= Margem Bruta',tBudMB,tActMB,false,true,tActRev>0?tActMB/tActRev:null)}
+      ${resRow('📋 (−) Despesas Operacionais',tBudExp,tActExp,true,false)}
+      ${resRow('= Resultado Final (EBITDA)',tBudRes,tActRes,false,true,tActRev>0?tActRes/tActRev:null)}
+    </div>
   `;
 
   document.querySelectorAll('.orc-editable').forEach(el=>{

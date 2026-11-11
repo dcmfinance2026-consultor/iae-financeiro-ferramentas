@@ -456,6 +456,7 @@ textarea{resize:vertical;min-height:64px}
           <option value="vencido">Vencido</option>
         </select>
       </div>
+      <div id="ct-rec-alert"></div>
       <div class="tbl-wrap">
         <table><thead><tr><th>Descrição</th><th>Contato</th><th>Tipo / DRE</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr></thead>
         <tbody id="ct-tbody"></tbody></table>
@@ -1290,6 +1291,21 @@ function renderContas(){
   const mesF=+document.getElementById('ct-mes')?.value||0;
   const stF=document.getElementById('ct-status')?.value||'';
   const hoje2=hoje();
+
+  // Alerta de recorrentes pendentes para o mês filtrado (ou mês atual se sem filtro)
+  const alertEl=document.getElementById('ct-rec-alert');
+  if(alertEl){
+    const anoAlert=ANO; const mesAlert=mesF||MES;
+    const ym=`${anoAlert}-${String(mesAlert).padStart(2,'0')}`;
+    const fixosPendentes=DB.fluxoFixos().filter(f=>f.ativo&&!DB.contas().some(c=>c.fixoId===f.id&&c.vencimento?.startsWith(ym)));
+    alertEl.innerHTML=fixosPendentes.length
+      ?`<div class="alert" style="background:rgba(200,130,0,.08);border:1px solid rgba(200,130,0,.25);color:var(--warn);padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px;display:flex;justify-content:space-between;align-items:center">
+          <span>🔄 <strong>${fixosPendentes.length}</strong> item(ns) recorrente(s) ainda sem conta em ${MESES_F[mesAlert-1]} ${anoAlert}</span>
+          <button class="btn btn-sm" style="background:var(--warn);color:#fff;border:none" onclick="gerarTodasContas(${anoAlert},${mesAlert})">▶ Gerar agora</button>
+        </div>`
+      :'';
+  }
+
   let lista=DB.contas().filter(c=>{
     const matchT=contasTabAtiva==='todos'||c.tipo===contasTabAtiva;
     const matchM=!mesF||new Date(c.vencimento+'T12:00').getMonth()+1===mesF;
@@ -1303,7 +1319,7 @@ function renderContas(){
     const dias=diffDias(c.vencimento);
     const feats=sistemaAtual?.ferramentas||[];
     return `<tr>
-      <td><strong>${esc(c.descricao)}</strong>${c.categoria?`<br><small style="color:var(--texto-s)">${esc(c.categoria)}</small>`:''}</td>
+      <td><strong>${esc(c.descricao)}</strong>${c.categoria?`<br><small style="color:var(--texto-s)">${esc(c.categoria)}</small>`:''}${c.fixoId?` <span class="int-badge" title="Gerado de item recorrente">🔄</span>`:''}</td>
       <td>${esc(c.contato||'—')} ${c.contatoId?`<span class="int-badge" title="Vinculado ao CRM">CRM</span>`:''} ${c.projetoId?`<span class="int-badge" title="Vinculado a projeto">Proj.</span>`:''}</td>
       <td>
         <span class="badge ${c.tipo==='receber'?'b-ok':'b-warn'}">${c.tipo==='receber'?'Receber':'Pagar'}</span>
@@ -1583,9 +1599,13 @@ function renderFluxo(){
 // ── Modo derivado de Contas ─────────────────────
 function renderFluxoDeContas(){
   document.getElementById('fc-subtitle').textContent='Gerado automaticamente a partir das Contas a Pagar e Receber';
-  document.getElementById('fc-actions').innerHTML=`<button class="btn btn-outline btn-sm" onclick="goMod('contas')">+ Lançamento →</button>`;
   const mes=+document.getElementById('fc-mes')?.value||MES;
   const ano=+document.getElementById('fc-ano')?.value||ANO;
+  document.getElementById('fc-actions').innerHTML=`
+    <button class="btn btn-outline btn-sm" onclick="goMod('contas')">+ Lançamento →</button>
+    <button class="btn btn-outline btn-sm" onclick="abrirFixosModal()">⚙ Recorrentes</button>
+    <button class="btn btn-primary btn-sm" onclick="gerarTodasContas(${ano},${mes})" title="Gera contas pendentes do mês para todos os itens recorrentes ativos">▶ Gerar do Mês</button>
+  `;
   const ym=`${ano}-${String(mes).padStart(2,'0')}`;
   const contas=DB.contas().filter(c=>c.vencimento?.startsWith(ym)||c.dataPagamento?.startsWith(ym));
   const entradas=contas.filter(c=>c.tipo==='receber');
@@ -1595,12 +1615,46 @@ function renderFluxoDeContas(){
   const entReal=entradas.filter(c=>c.status==='pago'),entPrev=entradas.filter(c=>c.status!=='pago');
   const saiReal=saidas.filter(c=>c.status==='pago'),saiPrev=saidas.filter(c=>c.status!=='pago');
 
+  const fixosAtivos=DB.fluxoFixos().filter(f=>f.ativo);
+  const fixoStatus=fixosAtivos.map(f=>{
+    const gerado=DB.contas().find(c=>c.fixoId===f.id&&c.vencimento?.startsWith(ym));
+    return {f,gerado};
+  });
+  const naoGerados=fixoStatus.filter(x=>!x.gerado);
+  const recSection=fixosAtivos.length?`
+    <div class="dre-sec" style="margin-bottom:16px">
+      <div class="dre-sec-head" style="background:rgba(40,100,200,.07)">
+        <strong style="color:#1a6fc4">🔄 Recorrentes — ${MESES_F[mes-1]} ${ano}</strong>
+        <span style="font-size:12px;color:var(--texto-s)">${fixoStatus.filter(x=>x.gerado).length}/${fixosAtivos.length} validados</span>
+      </div>
+      <div class="dre-sec-body" style="padding:0">
+        ${fixoStatus.map(({f,gerado})=>`
+          <div style="display:grid;grid-template-columns:1fr 70px 90px 80px 110px;gap:8px;padding:9px 16px;border-bottom:1px solid rgba(27,59,40,.05);align-items:center;font-size:13px">
+            <span>
+              <strong>${esc(f.nome)}</strong>
+              ${f.categoria?`<div style="font-size:11px;color:var(--texto-s)">${esc(f.categoria)}</div>`:''}
+              <span class="badge" style="font-size:9px;margin-top:2px;display:inline-block;${f.tipo==='receita'?'background:rgba(30,132,73,.12);color:var(--ok)':'background:rgba(180,30,30,.1);color:var(--danger)'}">${f.tipo==='receita'?'Receita':'Custo'}</span>
+            </span>
+            <span style="font-weight:600">${fmt(f.valor)}</span>
+            <span style="font-size:11px;color:var(--texto-s)">Dia ${f.diaVencimento||1}</span>
+            <span><span class="badge ${gerado?'b-ok':'b-warn'}">${gerado?'✓ Gerado':'Pendente'}</span></span>
+            <span style="white-space:nowrap">
+              ${gerado
+                ?`<button class="btn btn-outline btn-xs" onclick="closeModal?.();abrirContaForm('${gerado.id}')">✏ Ver Conta</button>`
+                :`<button class="btn btn-primary btn-xs" onclick="gerarContaRecorrente('${f.id}',${ano},${mes})">▶ Gerar</button>`}
+            </span>
+          </div>`).join('')}
+        ${naoGerados.length?`<div style="padding:8px 16px;font-size:12px;color:var(--texto-s);background:rgba(200,130,0,.05)">⚠️ ${naoGerados.length} item(ns) ainda sem conta gerada neste mês. <button class="btn btn-primary btn-xs" style="margin-left:6px" onclick="gerarTodasContas(${ano},${mes})">Gerar todos</button></div>`:`<div style="padding:8px 16px;font-size:12px;color:var(--ok)">✓ Todos os itens recorrentes foram gerados neste mês.</div>`}
+      </div>
+    </div>
+  `:'';
+
   function tbl(titulo,lista,cor){
     if(!lista.length) return '';
     return `<div style="margin-bottom:14px">
       <div style="font-weight:700;color:${cor};font-size:12px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${titulo} (${fmt(sumV(lista))})</div>
       <div class="tbl-wrap"><table><thead><tr><th>Descrição</th><th>Contato</th><th>Data</th><th>Valor</th><th>Status</th></tr></thead><tbody>
-        ${lista.map(c=>`<tr><td>${esc(c.descricao)}</td><td>${esc(c.contato||'—')}</td><td>${fmtData(c.vencimento)}</td><td>${fmt(c.valor)}</td><td><span class="badge ${stBadge(c.status,c.vencimento)}">${stLabel(c.status)}</span></td></tr>`).join('')}
+        ${lista.map(c=>`<tr><td>${esc(c.descricao)}${c.fixoId?` <span class="int-badge" title="Gerado de item recorrente">🔄</span>`:''}</td><td>${esc(c.contato||'—')}</td><td>${fmtData(c.vencimento)}</td><td>${fmt(c.valor)}</td><td><span class="badge ${stBadge(c.status,c.vencimento)}">${stLabel(c.status)}</span></td></tr>`).join('')}
       </tbody></table></div>
     </div>`;
   }
@@ -1612,12 +1666,12 @@ function renderFluxoDeContas(){
       <div class="stat-card" style="border-left-color:${saldo>=0?'var(--ok)':'var(--danger)'}"><div class="stat-label">Saldo do Período</div><div class="stat-val" style="color:${saldo>=0?'var(--ok)':'var(--danger)'}">${fmt(saldo)}</div><div class="stat-sub">${saldo>=0?'Fluxo positivo':'⚠️ Fluxo negativo'}</div></div>
       <div class="stat-card"><div class="stat-label">Realizado (Entradas)</div><div class="stat-val">${fmt(sumV(entReal))}</div><div class="stat-sub">${fmt(sumV(entPrev))} pendente</div></div>
     </div>
-    <div class="alert alert-info">ℹ️ Este fluxo é gerado automaticamente pelas <strong>Contas a Pagar e Receber</strong>. Para adicionar lançamentos, use o módulo Contas.</div>
+    ${recSection}
     ${tbl('✅ Recebimentos Realizados',entReal,'var(--ok)')}
     ${tbl('⏳ A Receber (Previsto)',entPrev,'var(--info)')}
     ${tbl('✅ Pagamentos Realizados',saiReal,'var(--ok)')}
     ${tbl('⏳ A Pagar (Previsto)',saiPrev,'var(--warn)')}
-    ${!contas.length?`<div class="alert alert-info">Nenhum lançamento para ${MESES[mes-1]}/${ano}. <button class="btn btn-outline btn-xs" onclick="goMod('contas')">Ir para Contas →</button></div>`:''}
+    ${!contas.length&&!fixosAtivos.length?`<div class="alert alert-info">Nenhum lançamento para ${MESES_F[mes-1]} ${ano}. <button class="btn btn-outline btn-xs" onclick="goMod('contas')">Ir para Contas →</button></div>`:''}
   `;
 }
 
@@ -1635,11 +1689,12 @@ function renderFluxoAutonomo(){
   // Lançamentos manuais do mês
   const lanc=DB.fluxoLanc().filter(l=>l.data?.startsWith(ym));
 
-  // Custos fixos ativos → geram saídas previstas para o mês
+  // Itens recorrentes ativos → entradas/saídas previstas para o mês
   const fixosAtivos=DB.fluxoFixos().filter(f=>f.ativo);
   const lancFixos=fixosAtivos.map(f=>{
     const dia=String(f.diaVencimento||1).padStart(2,'0');
-    return {id:'fix_'+f.id,descricao:f.nome,categoria:f.categoria||'Custo Fixo',valor:f.valor,data:`${ym}-${dia}`,tipo:'saida',status:'previsto',fixo:true};
+    const tipoRec=f.tipo||'custo';
+    return {id:'fix_'+f.id,descricao:f.nome,categoria:f.categoria||'Recorrente',valor:f.valor,data:`${ym}-${dia}`,tipo:tipoRec==='receita'?'entrada':'saida',status:'previsto',fixo:true};
   });
 
   const tudo=[...lanc,...lancFixos];
@@ -1680,7 +1735,7 @@ function renderFluxoAutonomo(){
       <div class="stat-card" style="border-left-color:${saldo>=0?'var(--ok)':'var(--danger)'}"><div class="stat-label">Saldo do Período</div><div class="stat-val" style="color:${saldo>=0?'var(--ok)':'var(--danger)'}">${fmt(saldo)}</div><div class="stat-sub">${saldo>=0?'Fluxo positivo':'⚠️ Fluxo negativo'}</div></div>
       <div class="stat-card"><div class="stat-label">Realizado (Líquido)</div><div class="stat-val">${fmt(sumV(entReal)-sumV(saiReal))}</div><div class="stat-sub">${fmt(sumV(entPrev)-sumV(saiPrev))} previsto</div></div>
     </div>
-    ${fixosAtivos.length?`<div class="alert alert-info">⚙️ <strong>${fixosAtivos.length} custo(s) fixo(s) ativo(s)</strong> gerando ${fmt(sumV(lancFixos))} de saídas previstas neste mês. <button class="btn btn-outline btn-xs" onclick="abrirFixosModal()">Gerenciar →</button></div>`:''}
+    ${fixosAtivos.length?`<div class="alert alert-info">⚙️ <strong>${fixosAtivos.length} item(ns) recorrente(s) ativo(s)</strong> gerando projeções neste mês. <button class="btn btn-outline btn-xs" onclick="abrirFixosModal()">Gerenciar →</button></div>`:''}
     ${tbl('✅ Entradas Realizadas',entReal,'var(--ok)')}
     ${tbl('⏳ Entradas Previstas',entPrev,'var(--info)')}
     ${tbl('✅ Saídas Realizadas',saiReal,'var(--ok)')}
@@ -1747,33 +1802,77 @@ function deletarFluxoEntry(id){
 
 function abrirFixosModal(){
   const fixos=DB.fluxoFixos();
-  const rows=fixos.length?fixos.map(f=>`
-    <div style="display:grid;grid-template-columns:1fr 100px 80px 60px auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(27,59,40,.07);font-size:13px">
-      <span><strong>${esc(f.nome)}</strong><div style="font-size:11px;color:var(--texto-s)">${f.categoria||''} · dia ${f.diaVencimento||1}</div></span>
-      <span>${fmt(f.valor)}</span>
-      <span>${{mensal:'Mensal',semanal:'Semanal',quinzenal:'Quinzenal',anual:'Anual'}[f.frequencia]||f.frequencia}</span>
-      <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" ${f.ativo?'checked':''} onchange="toggleFixo('${f.id}',this.checked)" style="width:auto;accent-color:var(--verde)"><span style="font-size:11px">${f.ativo?'Ativo':'Off'}</span></label>
-      <div style="display:flex;gap:4px">
-        <button class="btn btn-outline btn-xs" onclick="abrirFixoForm('${f.id}')">✏</button>
-        <button class="btn btn-xs" style="background:none;color:var(--danger);border:1px solid var(--danger)" onclick="deletarFixo('${f.id}')">🗑</button>
-      </div>
-    </div>`).join('')
-  :`<p style="color:var(--texto-s);font-size:13px;padding:10px 0">Nenhum custo fixo cadastrado.</p>`;
+  const feats=sistemaAtual?.ferramentas||[];
+  const temContas=feats.includes('contas');
+  const mes=+document.getElementById('fc-mes')?.value||MES;
+  const ano=+document.getElementById('fc-ano')?.value||ANO;
+  const ym=`${ano}-${String(mes).padStart(2,'0')}`;
+  const custos=fixos.filter(f=>!f.tipo||f.tipo==='custo');
+  const receitas=fixos.filter(f=>f.tipo==='receita');
 
-  openModal('Custos Fixos',`
-    <div class="alert alert-info" style="margin-bottom:14px">Custos fixos ativos geram saídas <strong>previstas</strong> automaticamente em todos os meses.</div>
-    ${rows}
-    <div style="margin-top:14px">
-      <button class="btn btn-primary btn-sm" onclick="abrirFixoForm()">+ Novo Custo Fixo</button>
+  function renderLista(items){
+    if(!items.length) return `<p style="color:var(--texto-s);font-size:13px;padding:6px 0 4px">Nenhum item cadastrado.</p>`;
+    return items.map(f=>{
+      const gerado=temContas?DB.contas().find(c=>c.fixoId===f.id&&c.vencimento?.startsWith(ym)):null;
+      return `<div style="display:grid;grid-template-columns:1fr 90px 60px ${temContas?'100px ':''} auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(27,59,40,.07);font-size:13px">
+        <span>
+          <strong>${esc(f.nome)}</strong>
+          <div style="font-size:11px;color:var(--texto-s)">${f.categoria||''} · dia ${f.diaVencimento||1} · ${({mensal:'Mensal',quinzenal:'Quinzenal',semanal:'Semanal',anual:'Anual'})[f.frequencia]||'Mensal'}</div>
+        </span>
+        <span style="font-weight:600">${fmt(f.valor)}</span>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+          <input type="checkbox" ${f.ativo?'checked':''} onchange="toggleFixo('${f.id}',this.checked)" style="width:auto;accent-color:var(--verde)">
+          <span style="font-size:11px">${f.ativo?'Ativo':'Off'}</span>
+        </label>
+        ${temContas?`<span><span class="badge ${gerado?'b-ok':'b-warn'}" style="font-size:10px">${gerado?'✓ Gerado':'Pendente'}</span></span>`:''}
+        <div style="display:flex;gap:4px">
+          ${temContas&&f.ativo&&!gerado?`<button class="btn btn-primary btn-xs" onclick="gerarContaRecorrente('${f.id}',${ano},${mes})" title="Gerar conta para ${MESES_F[mes-1]} ${ano}">▶</button>`:''}
+          <button class="btn btn-outline btn-xs" onclick="abrirFixoForm('${f.id}')">✏</button>
+          <button class="btn btn-xs" style="background:none;color:var(--danger);border:1px solid var(--danger)" onclick="deletarFixo('${f.id}')">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  openModal('Itens Recorrentes',`
+    <div class="alert alert-info" style="margin-bottom:16px">Itens ativos projetam entradas/saídas automaticamente. ${temContas?`Use <strong>▶</strong> para gerar a conta de ${MESES_F[mes-1]} ${ano} e validar com a fatura real.`:''}</div>
+    <div style="margin-bottom:20px">
+      <div style="font-weight:700;color:var(--danger);font-size:12px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+        <span>💸 Custos Fixos</span>
+        <button class="btn btn-outline btn-xs" onclick="abrirFixoForm(null,'custo')">+ Custo</button>
+      </div>
+      ${renderLista(custos)}
     </div>
+    <div>
+      <div style="font-weight:700;color:var(--ok);font-size:12px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+        <span>💰 Receitas Recorrentes</span>
+        <button class="btn btn-outline btn-xs" onclick="abrirFixoForm(null,'receita')">+ Receita</button>
+      </div>
+      ${renderLista(receitas)}
+    </div>
+    ${temContas?`<div style="margin-top:16px"><button class="btn btn-primary btn-sm" onclick="gerarTodasContas(${ano},${mes})">▶ Gerar todas para ${MESES_F[mes-1]} ${ano}</button></div>`:''}
   `);
 }
 
-function abrirFixoForm(id=null){
+function abrirFixoForm(id=null, tipoDefault='custo'){
   const f=id?DB.fluxoFixos().find(x=>x.id===id):{};
-  openModal(id?'Editar Custo Fixo':'Novo Custo Fixo',`
+  const tipoAtual=f.tipo||tipoDefault||'custo';
+  const dreRole=tipoAtual==='receita'?'receber':'pagar';
+  const ctOpts=DB.contatos().map(ct=>`<option value="${ct.id}"${f.contatoId===ct.id?' selected':''}>${esc(ct.nome)} (${ct.tipo})</option>`).join('');
+  openModal(id?'Editar Item Recorrente':'Novo Item Recorrente',`
+    <div class="form-row c2" style="margin-bottom:12px">
+      <div class="fg"><label>Tipo *</label>
+        <select id="ff-tipo" onchange="atualizarFixoTipo()">
+          <option value="custo"${tipoAtual==='custo'?' selected':''}>💸 Custo Fixo (Saída)</option>
+          <option value="receita"${tipoAtual==='receita'?' selected':''}>💰 Receita Recorrente (Entrada)</option>
+        </select>
+      </div>
+      <div class="fg"><label>Classificação DRE</label>
+        <select id="ff-tipocusto">${_dreOptsHtml(dreRole, f.tipoCusto||'')}</select>
+      </div>
+    </div>
     <div class="form-row c2">
-      <div class="fg"><label>Nome *</label><input id="ff-nome" value="${esc(f.nome||'')}" placeholder="Ex: Aluguel, Salário, Seguro..."></div>
+      <div class="fg"><label>Nome *</label><input id="ff-nome" value="${esc(f.nome||'')}" placeholder="Ex: Aluguel, Assinatura, Mensalidade..."></div>
       <div class="fg"><label>Valor (R$) *</label><input id="ff-val" type="number" value="${f.valor||''}" min="0" step="any" placeholder="0,00"></div>
     </div>
     <div class="form-row c3">
@@ -1786,25 +1885,44 @@ function abrirFixoForm(id=null){
         </select>
       </div>
       <div class="fg"><label>Dia do Vencimento</label><input id="ff-dia" type="number" value="${f.diaVencimento||1}" min="1" max="28"></div>
-      <div class="fg"><label>Categoria</label><input id="ff-cat" value="${esc(f.categoria||'')}" placeholder="Ex: Infraestrutura, Pessoal..."></div>
+      <div class="fg"><label>Categoria</label><input id="ff-cat" value="${esc(f.categoria||'')}" placeholder="Ex: Infraestrutura, Vendas..."></div>
+    </div>
+    <div class="fg" style="margin-bottom:12px"><label>Linha do Orçamento <span class="int-badge">Orçamento</span></label>
+      <select id="ff-orcLinha">${_orcLinhaOptsHtml(dreRole, f.orcLinha||'')}</select>
+    </div>
+    <div class="fg" style="margin-bottom:12px"><label>Contato <span class="int-badge">CRM</span></label>
+      <select id="ff-contato"><option value="">— Sem contato —</option>${ctOpts}</select>
     </div>
     <div class="fg" style="margin-top:4px">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0">
         <input type="checkbox" id="ff-ativo" ${f.ativo!==false?'checked':''} style="width:auto;accent-color:var(--verde)">
-        Ativo (gera saídas previstas automaticamente)
+        Ativo (projeta automaticamente no fluxo de caixa)
       </label>
     </div>
   `,`
     <button class="btn btn-outline" onclick="${id?'abrirFixosModal':'closeModal'}()">Cancelar</button>
     <button class="btn btn-primary" onclick="salvarFixo('${id||''}')">Salvar</button>
   `);
+  if(f.contatoId) setTimeout(()=>{ const s=document.getElementById('ff-contato'); if(s) s.value=f.contatoId; },30);
+}
+
+function atualizarFixoTipo(){
+  const tipo=document.getElementById('ff-tipo')?.value||'custo';
+  const dreRole=tipo==='receita'?'receber':'pagar';
+  const sel=document.getElementById('ff-tipocusto');
+  const orcSel=document.getElementById('ff-orcLinha');
+  if(sel) sel.innerHTML=_dreOptsHtml(dreRole,'');
+  if(orcSel) orcSel.innerHTML=_orcLinhaOptsHtml(dreRole,'');
 }
 
 function salvarFixo(id){
   const nome=v('ff-nome').trim(), valor=+v('ff-val');
   if(!nome||!valor){ alert('Preencha nome e valor.'); return; }
+  const tipo=v('ff-tipo')||'custo';
+  const contatoId=v('ff-contato');
+  const contato=contatoId?DB.contatos().find(c=>c.id===contatoId)?.nome:'';
   const lista=DB.fluxoFixos();
-  const obj={id:id||uid(),nome,valor,frequencia:v('ff-freq'),diaVencimento:+v('ff-dia')||1,categoria:v('ff-cat'),ativo:document.getElementById('ff-ativo').checked};
+  const obj={id:id||uid(),tipo,nome,valor,frequencia:v('ff-freq'),diaVencimento:+v('ff-dia')||1,categoria:v('ff-cat'),tipoCusto:v('ff-tipocusto')||'despesa',orcLinha:v('ff-orcLinha')||'',contatoId,contato,ativo:document.getElementById('ff-ativo').checked};
   if(id){ const i=lista.findIndex(x=>x.id===id); lista[i]=obj; }
   else lista.push(obj);
   DB.saveFluxoFixos(lista); closeModal(); renderFluxo();
@@ -1819,8 +1937,53 @@ function toggleFixo(id,ativo){
 }
 
 function deletarFixo(id){
-  if(!confirm('Deletar este custo fixo?')) return;
+  if(!confirm('Deletar este item recorrente?')) return;
   DB.saveFluxoFixos(DB.fluxoFixos().filter(x=>x.id!==id)); closeModal(); renderFluxo();
+}
+
+function gerarContaRecorrente(fixoId,ano,mes){
+  const f=DB.fluxoFixos().find(x=>x.id===fixoId);
+  if(!f) return;
+  const ym=`${ano}-${String(mes).padStart(2,'0')}`;
+  const jaExiste=DB.contas().some(c=>c.fixoId===fixoId&&c.vencimento?.startsWith(ym));
+  if(jaExiste){ toast('Conta já gerada para este mês.'); renderFluxo(); return; }
+  const dia=String(f.diaVencimento||1).padStart(2,'0');
+  const lista=DB.contas();
+  lista.push({
+    id:uid(),tipo:f.tipo==='receita'?'receber':'pagar',
+    tipoCusto:f.tipoCusto||'despesa',descricao:f.nome,valor:f.valor,
+    vencimento:`${ym}-${dia}`,contatoId:f.contatoId||'',contato:f.contato||'',
+    categoria:f.categoria||'',orcLinha:f.orcLinha||'',
+    obs:`Recorrente — ${MESES_F[mes-1]} ${ano}`,fixoId:fixoId,
+    status:'pendente',dataPagamento:'',criado:hoje()
+  });
+  DB.saveContas(lista);
+  renderFluxo();
+  toast(`✓ Conta gerada: ${f.nome} — ${MESES_F[mes-1]} ${ano}`);
+}
+
+function gerarTodasContas(ano,mes){
+  const ym=`${ano}-${String(mes).padStart(2,'0')}`;
+  const fixos=DB.fluxoFixos().filter(f=>f.ativo);
+  if(!fixos.length){ toast('Nenhum item recorrente ativo cadastrado.'); return; }
+  const contas=DB.contas();
+  let count=0;
+  fixos.forEach(f=>{
+    if(!contas.some(c=>c.fixoId===f.id&&c.vencimento?.startsWith(ym))){
+      const dia=String(f.diaVencimento||1).padStart(2,'0');
+      contas.push({
+        id:uid(),tipo:f.tipo==='receita'?'receber':'pagar',
+        tipoCusto:f.tipoCusto||'despesa',descricao:f.nome,valor:f.valor,
+        vencimento:`${ym}-${dia}`,contatoId:f.contatoId||'',contato:f.contato||'',
+        categoria:f.categoria||'',orcLinha:f.orcLinha||'',
+        obs:`Recorrente — ${MESES_F[mes-1]} ${ano}`,fixoId:f.id,
+        status:'pendente',dataPagamento:'',criado:hoje()
+      });
+      count++;
+    }
+  });
+  if(count>0){ DB.saveContas(contas); renderFluxo(); toast(`✓ ${count} conta(s) gerada(s) para ${MESES_F[mes-1]} ${ano}`); }
+  else toast(`Todas as contas recorrentes já foram geradas para ${MESES_F[mes-1]} ${ano}.`);
 }
 
 // ══════════════════════════════════════════════

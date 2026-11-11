@@ -382,7 +382,7 @@ textarea{resize:vertical;min-height:64px}
     <div class="nav-tabs" id="nav-tabs"></div>
     <div class="tb-right">
       <span id="tb-user" class="tb-user-info"></span>
-      <button class="btn-ghost" onclick="exportBackup()">↓ Backup</button>
+      <button id="btn-backup" class="btn-ghost" onclick="exportBackup()" title="Salvar backup no computador">↓ Backup</button><button class="btn-ghost" style="color:rgba(250,240,216,.45);font-size:12px;padding:4px 7px" onclick="abrirConfigBackup()" title="Configurar backup automático">⚙</button>
       <button class="btn-ghost" style="color:rgba(250,240,216,.45)" onclick="authLogout()">Sair</button>
       <button class="btn-ghost" style="color:rgba(250,240,216,.45)" onclick="goHome()">← Voltar</button>
     </div>
@@ -568,12 +568,12 @@ const MES = new Date().getMonth()+1;
 
 function fmtData(d){ if(!d) return '—'; const p=d.slice(0,10).split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
 function diffDias(d){ if(!d) return 9999; return Math.ceil((new Date(d+'T12:00:00')-new Date())/(864e5)); }
-function toast(msg,tipo='ok'){
+function toast(msg,tipo='ok',duracao=3100){
   const el=document.createElement('div');
   el.className=`alert alert-${tipo} toast`;
   el.textContent=msg;
   document.body.appendChild(el);
-  setTimeout(()=>el.remove(),3100);
+  setTimeout(()=>el.remove(),duracao);
 }
 
 // ══════════════════════════════════════════════
@@ -653,6 +653,10 @@ const DB = {
   // Pró-labore
   prolaboreConfig(){ return this.get('prolabore_config',{percentual:30,diaVencimento:5,ativo:false}); },
   saveProlaboreConfig(v){ this.set('prolabore_config',v); },
+
+  // Backup automático
+  backupConfig(){ return this.get('backup_config',{ativo:true,intervalo:'diario',ultimoBackup:null}); },
+  saveBackupConfig(v){ this.set('backup_config',v); },
 
   // Fluxo autônomo (usado quando módulo Contas não está ativo)
   fluxoLanc(){ return this.get('fluxo_lanc',[]); },
@@ -746,6 +750,7 @@ function abrirSistema(sid){
   document.getElementById('tb-nome').textContent=sis.nome;
   renderNavTabs();
   goMod('dashboard');
+  verificarAutoBackup();
 }
 
 function renderNavTabs(){
@@ -2543,7 +2548,9 @@ function lancarCusto(id){
 // ══════════════════════════════════════════════
 // BACKUP
 // ══════════════════════════════════════════════
-function exportBackup(){
+let _backupTimer=null;
+
+function exportBackup(silencioso=false){
   const prefix=`iae_sys_${DB.sid}_`;
   const dados={};
   Object.keys(localStorage).filter(k=>k.startsWith(prefix)).forEach(k=>{ try{dados[k]=JSON.parse(localStorage.getItem(k))}catch{dados[k]=localStorage.getItem(k)}});
@@ -2552,6 +2559,92 @@ function exportBackup(){
   a.href='data:application/json,'+encodeURIComponent(JSON.stringify(bkp,null,2));
   a.download=`iae-${(sistemaAtual?.nome||'sistema').replace(/\s+/g,'-').toLowerCase()}-${hoje()}.json`;
   a.click();
+  const cfg=DB.backupConfig();
+  cfg.ultimoBackup=new Date().toISOString();
+  DB.saveBackupConfig(cfg);
+  atualizarBotaoBackup();
+  if(!silencioso) toast('✓ Backup salvo no seu computador.');
+}
+
+function backupDue(cfg){
+  if(!cfg.ativo||cfg.intervalo==='manual') return false;
+  if(!cfg.ultimoBackup) return true;
+  const ms={horario:3600000,diario:86400000,semanal:604800000};
+  return (Date.now()-new Date(cfg.ultimoBackup).getTime())>=(ms[cfg.intervalo]||86400000);
+}
+
+function atualizarBotaoBackup(){
+  const btn=document.getElementById('btn-backup');
+  if(!btn) return;
+  const cfg=DB.backupConfig();
+  const vencido=backupDue(cfg);
+  btn.style.color=vencido?'#F39C12':'';
+  btn.title=vencido
+    ?`⚠ Backup pendente — último: ${cfg.ultimoBackup?fmtData(cfg.ultimoBackup.split('T')[0]):'nunca'}\nClique para salvar agora`
+    :`Último backup: ${cfg.ultimoBackup?fmtData(cfg.ultimoBackup.split('T')[0]):'nunca'}`;
+  btn.innerHTML=vencido?'⚠ Backup':'↓ Backup';
+}
+
+function verificarAutoBackup(){
+  atualizarBotaoBackup();
+  const cfg=DB.backupConfig();
+  if(!cfg.ativo||cfg.intervalo==='manual') return;
+  if(backupDue(cfg)){
+    const dias=cfg.ultimoBackup
+      ?Math.floor((Date.now()-new Date(cfg.ultimoBackup).getTime())/86400000)
+      :null;
+    const msg=dias===null
+      ?'💾 Nenhum backup realizado ainda. Clique em "⚠ Backup" para proteger seus dados.'
+      :dias===0
+        ?'💾 Backup pendente para hoje. Clique em "⚠ Backup" na barra superior.'
+        :`💾 Último backup há ${dias} dia(s). Clique em "⚠ Backup" para atualizar.`;
+    toast(msg,'warn',6000);
+  }
+  clearInterval(_backupTimer);
+  const ms={horario:3600000,diario:86400000,semanal:604800000};
+  const tick=Math.min(ms[cfg.intervalo]||86400000, 3600000);
+  _backupTimer=setInterval(()=>{
+    if(backupDue(DB.backupConfig())){ atualizarBotaoBackup(); }
+  }, tick);
+}
+
+function abrirConfigBackup(){
+  const cfg=DB.backupConfig();
+  const ultimo=cfg.ultimoBackup
+    ?`${fmtData(cfg.ultimoBackup.split('T')[0])} às ${cfg.ultimoBackup.split('T')[1]?.slice(0,5)||''}`
+    :'<span style="color:var(--danger)">Nenhum backup realizado ainda</span>';
+  openModal('💾 Configurar Backup Automático',`
+    <div class="alert alert-info" style="margin-bottom:16px">O backup salva <strong>todos os dados do sistema</strong> em um arquivo <code>.json</code> no seu computador. Em caso de perda ou reinstalação, basta importar o arquivo para restaurar tudo.</div>
+    <div class="fg" style="margin-bottom:6px">
+      <label>Intervalo de backup automático</label>
+      <select id="bkp-intervalo" style="margin-top:6px">
+        <option value="manual"${cfg.intervalo==='manual'?' selected':''}>Apenas manual (sem lembretes)</option>
+        <option value="horario"${cfg.intervalo==='horario'?' selected':''}>A cada hora</option>
+        <option value="diario"${cfg.intervalo==='diario'?' selected':''}>Diariamente ⭐ recomendado</option>
+        <option value="semanal"${cfg.intervalo==='semanal'?' selected':''}>Semanalmente</option>
+      </select>
+      <p style="font-size:12px;color:var(--texto-s);margin-top:6px">O sistema avisa quando estiver na hora — o backup só é salvo quando você clicar no botão.</p>
+    </div>
+    <div class="fg" style="margin-bottom:20px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400;margin-top:4px">
+        <input type="checkbox" id="bkp-ativo"${cfg.ativo?' checked':''}> Habilitar lembretes de backup
+      </label>
+    </div>
+    <div style="padding:12px 16px;background:var(--card-bg);border-radius:8px;font-size:13px;border-left:3px solid var(--verde)">
+      <span style="color:var(--texto-s)">Último backup:</span> <strong>${ultimo}</strong>
+    </div>
+  `,`<button class="btn btn-outline" onclick="exportBackup();closeModal()">↓ Fazer Backup Agora</button>
+     <button class="btn btn-primary" onclick="salvarConfigBackup()">Salvar Configuração</button>`);
+}
+
+function salvarConfigBackup(){
+  const cfg=DB.backupConfig();
+  cfg.intervalo=document.getElementById('bkp-intervalo').value;
+  cfg.ativo=document.getElementById('bkp-ativo').checked;
+  DB.saveBackupConfig(cfg);
+  closeModal();
+  verificarAutoBackup();
+  toast('✓ Configuração de backup salva.');
 }
 
 // ══════════════════════════════════════════════

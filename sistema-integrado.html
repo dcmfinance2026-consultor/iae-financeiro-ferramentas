@@ -425,12 +425,13 @@ textarea{resize:vertical;min-height:64px}
         <button class="btn btn-primary btn-sm" onclick="abrirEstoqueForm()">+ Item</button>
       </div>
       <div class="filters">
-        <input id="est-busca" placeholder="Buscar item ou fornecedor..." oninput="renderEstoque()" style="width:220px">
+        <input id="est-busca" placeholder="Buscar item, lote ou fornecedor..." oninput="renderEstoque()" style="width:220px">
+        <select id="est-tipo" onchange="renderEstoque()"><option value="">Todos os tipos</option><option value="inventario">Inventário</option><option value="material_novo">Material Novo</option></select>
         <select id="est-cat" onchange="renderEstoque()"><option value="">Todas categorias</option></select>
         <select id="est-forn" onchange="renderEstoque()"><option value="">Todos fornecedores</option></select>
       </div>
       <div class="tbl-wrap">
-        <table><thead><tr><th>Descrição</th><th>Categoria</th><th>Fornecedor</th><th>Qtd</th><th>Custo Unit.</th><th>Preço Venda</th><th>Margem</th><th>Status</th><th></th></tr></thead>
+        <table><thead><tr><th>Lote</th><th>Descrição</th><th>Categoria</th><th>Fornecedor</th><th>Qtd</th><th>Custo Unit.</th><th>Preço Venda</th><th>Margem</th><th>Status</th><th></th></tr></thead>
         <tbody id="est-tbody"></tbody></table>
       </div>
     </section>
@@ -1056,13 +1057,14 @@ function calcPV(custo,frete,outros,imp,mg){
 
 function renderEstoque(){
   const busca=(document.getElementById('est-busca')?.value||'').toLowerCase();
+  const tipoF=document.getElementById('est-tipo')?.value||'';
   const cat=document.getElementById('est-cat')?.value||'';
   const fornF=document.getElementById('est-forn')?.value||'';
   const lista=DB.estoque().filter(i=>
-    (!busca||(i.descricao||'').toLowerCase().includes(busca)||(i.fornecedorNome||'').toLowerCase().includes(busca))&&
+    (!busca||(i.descricao||'').toLowerCase().includes(busca)||(i.fornecedorNome||'').toLowerCase().includes(busca)||(i.lote||'').toLowerCase().includes(busca))&&
+    (!tipoF||i.tipo===tipoF)&&
     (!cat||i.categoria===cat)&&(!fornF||i.fornecedorId===fornF)
   );
-  // populate selects
   const cats=[...new Set(DB.estoque().map(i=>i.categoria).filter(Boolean))];
   const fEl=document.getElementById('est-cat');
   if(fEl){ const cur=fEl.value; fEl.innerHTML='<option value="">Todas categorias</option>'+cats.map(c=>`<option${c===cur?' selected':''}>${c}</option>`).join(''); }
@@ -1073,8 +1075,12 @@ function renderEstoque(){
     const pv=calcPV(i.custoUnit,i.frete,i.outros,i.impostos,i.margem);
     const baixo=i.qtdMin>0&&+i.quantidade<+i.qtdMin;
     const feats=sistemaAtual?.ferramentas||[];
+    const tipoBadge=i.tipo==='material_novo'
+      ?`<span class="badge" style="background:rgba(196,154,60,.15);color:var(--marrom);border:1px solid rgba(196,154,60,.3);font-size:10px">🆕 Novo</span>`
+      :`<span class="badge" style="background:rgba(27,59,40,.08);color:var(--verde);font-size:10px">📦 Inv.</span>`;
     return `<tr>
-      <td><strong>${esc(i.descricao)}</strong>${i.obs?`<br><small style="color:var(--texto-s)">${esc(i.obs)}</small>`:''}</td>
+      <td style="font-family:monospace;font-size:11px;white-space:nowrap;color:var(--texto-s)">${esc(i.lote||'—')}</td>
+      <td><strong>${esc(i.descricao)}</strong> ${tipoBadge}${i.obs?`<br><small style="color:var(--texto-s)">${esc(i.obs)}</small>`:''}</td>
       <td>${i.categoria||'—'}</td>
       <td>${esc(i.fornecedorNome||'—')} ${i.fornecedorId?`<span class="int-badge" title="Vinculado ao CRM">CRM</span>`:''}</td>
       <td>${fmtN(i.quantidade)} ${i.unidade||''} ${baixo?`<span class="badge b-danger" title="Abaixo do mínimo de ${i.qtdMin}">⚠</span>`:''}</td>
@@ -1088,27 +1094,54 @@ function renderEstoque(){
         <button class="btn btn-xs" style="background:none;color:var(--danger);border:1px solid var(--danger)" onclick="deletarEstoque('${i.id}')">🗑</button>
       </td>
     </tr>`;
-  }).join(''):`<tr><td colspan="9" style="text-align:center;color:var(--texto-s);padding:30px">Nenhum item. <button class="btn btn-primary btn-xs" onclick="abrirEstoqueForm()">+ Adicionar</button></td></tr>`;
+  }).join(''):`<tr><td colspan="10" style="text-align:center;color:var(--texto-s);padding:30px">Nenhum item. <button class="btn btn-primary btn-xs" onclick="abrirEstoqueForm()">+ Adicionar</button></td></tr>`;
 }
 
 function abrirEstoqueForm(id=null){
   const i=id?DB.estoque().find(x=>x.id===id):{};
   const fOpts=DB.fornecedores().map(f=>`<option value="${f.id}"${i.fornecedorId===f.id?' selected':''}>${esc(f.nome)}${f.fantasia?' ('+esc(f.fantasia)+')':''}</option>`).join('');
+  const tipoAtual=i.tipo||'inventario';
+  const loteSugerido=i.lote||gerarLote();
+  const feats=sistemaAtual?.ferramentas||[];
+  const temContas=feats.includes('contas');
+  const showPag=tipoAtual==='material_novo'&&temContas;
   openModal(id?'Editar Item':'Novo Item no Estoque',`
-    <div class="form-row c2">
-      <div class="fg"><label>Descrição *</label><input id="ef-desc" value="${esc(i.descricao||'')}" placeholder="Nome do produto/material"></div>
-      <div class="fg"><label>Categoria</label><input id="ef-cat" value="${esc(i.categoria||'')}" placeholder="Ex: Matéria-Prima"></div>
+    <div style="background:rgba(27,59,40,.06);border:1px solid rgba(27,59,40,.12);border-radius:8px;padding:12px 16px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--verde);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Tipo do Item</div>
+      <div style="display:flex;gap:24px">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:600">
+          <input type="radio" name="ef-tipo" value="inventario" ${tipoAtual==='inventario'?'checked':''} onchange="toggleEstoqueTipo()">
+          📦 Inventário <small style="font-weight:400;color:var(--texto-s)">(já em estoque)</small>
+        </label>
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:600">
+          <input type="radio" name="ef-tipo" value="material_novo" ${tipoAtual==='material_novo'?'checked':''} onchange="toggleEstoqueTipo()">
+          🆕 Material Novo <small style="font-weight:400;color:var(--texto-s)">(nova compra)</small>
+        </label>
+      </div>
     </div>
     <div class="form-row c2">
+      <div class="fg"><label>Descrição *</label><input id="ef-desc" value="${esc(i.descricao||'')}" placeholder="Nome do produto/material"></div>
+      <div class="fg"><label>Nº de Lote <small style="color:var(--texto-s);font-weight:400">— auto-gerado, editável</small></label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input id="ef-lote" value="${esc(loteSugerido)}" placeholder="LOT-202611-001" style="font-family:monospace;flex:1">
+          <button type="button" class="btn btn-outline btn-xs" onclick="document.getElementById('ef-lote').value=gerarLote()" title="Gerar novo número">↺</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-row c2">
+      <div class="fg"><label>Categoria</label><input id="ef-cat" value="${esc(i.categoria||'')}" placeholder="Ex: Matéria-Prima"></div>
       <div class="fg"><label>Fornecedor <span class="int-badge">CRM</span></label>
         <select id="ef-forn"><option value="">— Selecionar —</option>${fOpts}${!fOpts?'<option disabled>Cadastre fornecedores no CRM primeiro</option>':''}</select>
       </div>
-      <div class="fg"><label>Unidade</label><input id="ef-un" value="${esc(i.unidade||'')}" placeholder="un, kg, m², caixa..."></div>
     </div>
     <div class="form-row c3">
+      <div class="fg"><label>Unidade</label><input id="ef-un" value="${esc(i.unidade||'')}" placeholder="un, kg, m², caixa..."></div>
       <div class="fg"><label>Quantidade</label><input id="ef-qtd" type="number" value="${i.quantidade||0}" min="0" step="any"></div>
       <div class="fg"><label>Qtd Mínima (alerta)</label><input id="ef-qtdmin" type="number" value="${i.qtdMin||0}" min="0" step="any"></div>
+    </div>
+    <div class="form-row c2">
       <div class="fg"><label>Data de Entrada</label><input id="ef-data" type="date" value="${i.dataEntrada||hoje()}"></div>
+      <div></div>
     </div>
     <hr style="border:none;border-top:1px solid rgba(27,59,40,.1);margin:12px 0">
     <div style="font-size:11px;font-weight:700;color:var(--verde);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">💰 Formação de Preço de Venda</div>
@@ -1124,6 +1157,28 @@ function abrirEstoqueForm(id=null){
     <div class="alert alert-info" id="ef-pv-box">
       <strong>Preço de Venda Calculado: <span id="ef-pv-val">${fmt(calcPV(i.custoUnit,i.frete,i.outros,i.impostos,i.margem||30))}</span></strong>
       <small style="display:block;margin-top:3px">Fórmula: (Custo + Frete + Outros) × (1 + Impostos%) ÷ (1 − Margem%)</small>
+    </div>
+    <div id="ef-pagamento-section" style="display:${showPag?'block':'none'}">
+      <hr style="border:none;border-top:1px solid rgba(196,154,60,.25);margin:12px 0">
+      <div style="font-size:11px;font-weight:700;color:var(--marrom);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">💳 Pagamento — Material Novo</div>
+      <div class="form-row c2">
+        <div class="fg"><label>Vencimento do Pagamento</label><input id="ef-vencpag" type="date" value="${i.vencPagamento||''}"></div>
+        <div class="fg" style="display:flex;align-items:flex-end;padding-bottom:4px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600">
+            <input type="checkbox" id="ef-criar-conta" ${!id?'checked':''} style="width:16px;height:16px;accent-color:var(--verde)">
+            Lançar automaticamente em Contas a Pagar
+          </label>
+        </div>
+      </div>
+      <div class="alert" style="background:rgba(196,154,60,.07);border:1px solid rgba(196,154,60,.2);font-size:12px;color:var(--marrom)">
+        ⚡ Ao salvar, o valor total <strong>(Custo × Qtd + Frete + Outros Custos)</strong> será criado como conta a pagar, vinculada ao fornecedor e identificada pelo número do lote.
+      </div>
+    </div>
+    <div id="ef-pagamento-notice" style="display:${tipoAtual==='material_novo'&&!temContas?'block':'none'}">
+      <hr style="border:none;border-top:1px solid rgba(196,154,60,.2);margin:12px 0">
+      <div class="alert" style="background:rgba(196,154,60,.07);border:1px solid rgba(196,154,60,.2);font-size:12px;color:var(--marrom)">
+        💡 Ative o módulo <strong>Contas a Pagar / Receber</strong> neste sistema para conectar automaticamente o pagamento de materiais novos.
+      </div>
     </div>
     <div class="fg"><label>Observações</label><textarea id="ef-obs">${esc(i.obs||'')}</textarea></div>
   `,`
@@ -1141,18 +1196,60 @@ function atualizaPV(){
 function salvarEstoque(id){
   const desc=v('ef-desc').trim();
   if(!desc){ alert('Descrição obrigatória.'); return; }
+  const tipo=document.querySelector('input[name="ef-tipo"]:checked')?.value||'inventario';
   const fornId=v('ef-forn');
   const forn=fornId?DB.contatos().find(c=>c.id===fornId):null;
+  const lote=v('ef-lote').trim()||gerarLote();
+  const vencPag=v('ef-vencpag');
+  const criarConta=tipo==='material_novo'&&document.getElementById('ef-criar-conta')?.checked&&(sistemaAtual?.ferramentas||[]).includes('contas');
   const lista=DB.estoque();
-  const obj={id:id||uid(),descricao:desc,categoria:v('ef-cat'),fornecedorId:fornId||'',fornecedorNome:forn?forn.nome:'',unidade:v('ef-un'),quantidade:+v('ef-qtd')||0,qtdMin:+v('ef-qtdmin')||0,dataEntrada:v('ef-data'),custoUnit:+v('ef-custo')||0,frete:+v('ef-frete')||0,outros:+v('ef-outros')||0,impostos:+v('ef-imp')||0,margem:+v('ef-mg')||0,obs:v('ef-obs')};
-  if(id){ const i=lista.findIndex(x=>x.id===id); lista[i]=obj; }
+  const obj={
+    id:id||uid(),descricao:desc,tipo,lote,categoria:v('ef-cat'),
+    fornecedorId:fornId||'',fornecedorNome:forn?forn.nome:'',
+    unidade:v('ef-un'),quantidade:+v('ef-qtd')||0,qtdMin:+v('ef-qtdmin')||0,
+    dataEntrada:v('ef-data'),vencPagamento:vencPag,
+    custoUnit:+v('ef-custo')||0,frete:+v('ef-frete')||0,
+    outros:+v('ef-outros')||0,impostos:+v('ef-imp')||0,
+    margem:+v('ef-mg')||0,obs:v('ef-obs')
+  };
+  if(id){ const idx=lista.findIndex(x=>x.id===id); lista[idx]=obj; }
   else lista.push(obj);
   DB.saveEstoque(lista); closeModal(); renderEstoque();
+  if(criarConta){
+    const total=((obj.custoUnit||0)+(obj.frete||0)+(obj.outros||0))*(obj.quantidade||1);
+    goMod('contas');
+    setTimeout(()=>abrirContaForm(null,{
+      tipo:'pagar',
+      descricao:`[Lote ${obj.lote}] Compra: ${obj.descricao}`,
+      contatoId:obj.fornecedorId,
+      contato:obj.fornecedorNome,
+      valor:total.toFixed(2),
+      vencimento:vencPag||'',
+      tipoCusto:'cmv',
+      categoria:'Estoque / Materiais'
+    }),80);
+  }
 }
 
 function deletarEstoque(id){
   if(!confirm('Remover este item?')) return;
   DB.saveEstoque(DB.estoque().filter(i=>i.id!==id)); renderEstoque();
+}
+
+function gerarLote(){
+  const d=new Date();
+  const ym=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;
+  const cnt=DB.estoque().filter(i=>i.lote&&i.lote.startsWith(`LOT-${ym}`)).length+1;
+  return `LOT-${ym}-${String(cnt).padStart(3,'0')}`;
+}
+
+function toggleEstoqueTipo(){
+  const tipo=document.querySelector('input[name="ef-tipo"]:checked')?.value||'inventario';
+  const temContas=(sistemaAtual?.ferramentas||[]).includes('contas');
+  const sec=document.getElementById('ef-pagamento-section');
+  const notice=document.getElementById('ef-pagamento-notice');
+  if(sec) sec.style.display=tipo==='material_novo'&&temContas?'block':'none';
+  if(notice) notice.style.display=tipo==='material_novo'&&!temContas?'block':'none';
 }
 
 function estoqueParaConta(itemId){

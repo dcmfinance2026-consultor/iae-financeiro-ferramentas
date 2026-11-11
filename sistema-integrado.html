@@ -396,6 +396,7 @@ textarea{resize:vertical;min-height:64px}
         <div id="dash-actions"></div>
       </div>
       <div class="stat-grid" id="dash-kpis"></div>
+      <div id="dash-prolabore" style="margin:0 0 18px"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px" id="dash-panels"></div>
     </section>
 
@@ -648,6 +649,10 @@ const DB = {
   // Projetos
   projetos(){ return this.get('projetos',[]); },
   saveProjetos(v){ this.set('projetos',v); },
+
+  // Pró-labore
+  prolaboreConfig(){ return this.get('prolabore_config',{percentual:30,diaVencimento:5,ativo:false}); },
+  saveProlaboreConfig(v){ this.set('prolabore_config',v); },
 
   // Fluxo autônomo (usado quando módulo Contas não está ativo)
   fluxoLanc(){ return this.get('fluxo_lanc',[]); },
@@ -944,6 +949,43 @@ function renderDashboard(){
     ${feats.includes('projeto')?`<div class="stat-card"><div class="stat-label">Projetos Ativos</div><div class="stat-val">${projetos.filter(p=>p.status==='ativo').length}</div><div class="stat-sub">${projetos.length} total</div></div>`:''}
   `;
 
+  // Card pró-labore
+  const plDiv=document.getElementById('dash-prolabore');
+  if(plDiv && feats.includes('contas')){
+    const pl=calcProlabore(ANO,MES);
+    const cfg=pl.cfg;
+    if(cfg.ativo){
+      plDiv.innerHTML=`
+        <div class="card" style="border-left:4px solid #8e44ad;margin-bottom:18px">
+          <div class="card-header">
+            <div class="card-title" style="color:#8e44ad;font-size:14px">👤 Pró-labore — ${MESES_F[MES-1]} ${ANO}</div>
+            <button class="btn btn-outline btn-xs" onclick="abrirConfigProlabore()">⚙ Configurar</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:12px;align-items:center">
+            <div>
+              <div style="font-size:11px;color:var(--texto-s);text-transform:uppercase;font-weight:700;margin-bottom:4px">EBITDA do Mês</div>
+              <div style="font-size:24px;font-weight:800;color:${pl.ebitda>=0?'var(--ok)':'var(--danger)'}">${fmt(pl.ebitda)}</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--texto-s);text-transform:uppercase;font-weight:700;margin-bottom:4px">Pró-labore (${cfg.percentual}% do EBITDA)</div>
+              <div style="font-size:24px;font-weight:800;color:#8e44ad">${pl.ebitda>0?fmt(pl.valor):'—'}</div>
+              <div style="font-size:11px;color:var(--texto-s);margin-top:2px">Salário estimado do empresário</div>
+            </div>
+            <div style="text-align:right">
+              ${pl.gerado
+                ?`<div><span class="badge b-ok" style="font-size:12px;padding:6px 14px">✓ Conta gerada</span><br><small style="color:var(--texto-s);font-size:11px;display:inline-block;margin-top:4px">${fmt(pl.gerado.valor)} · Venc. ${fmtData(pl.gerado.vencimento)}</small></div>`
+                :pl.ebitda>0
+                  ?`<button class="btn btn-primary btn-sm" onclick="gerarProlaboreContas(${ANO},${MES})">▶ Gerar Conta do Mês</button>`
+                  :`<span style="font-size:12px;color:var(--texto-s)">EBITDA negativo — pró-labore não disponível</span>`
+              }
+            </div>
+          </div>
+        </div>`;
+    } else {
+      plDiv.innerHTML=`<div class="alert alert-info" style="margin-bottom:18px">💼 <strong>Pró-labore não configurado.</strong> Configure um percentual do EBITDA para calcular o salário do empresário automaticamente. <button class="btn btn-outline btn-xs" style="margin-left:8px" onclick="abrirConfigProlabore()">⚙ Configurar agora</button></div>`;
+    }
+  } else if(plDiv){ plDiv.innerHTML=''; }
+
   const ultContas=[...contas].reverse().slice(0,6);
   const alertas=[];
   if(vencidos.length) alertas.push(`<div class="alert alert-danger">⚠️ <strong>${vencidos.length} conta(s) vencida(s)</strong> — ${fmt(vencidos.reduce((a,b)=>a+(+b.valor||0),0))} em atraso.</div>`);
@@ -969,6 +1011,7 @@ function renderDashboard(){
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
         ${feats.includes('crm')?`<button class="btn btn-outline btn-xs" onclick="goMod('crm');setTimeout(abrirContatoForm,80)">+ Contato</button>`:''}
         ${feats.includes('contas')?`<button class="btn btn-outline btn-xs" onclick="goMod('contas');setTimeout(abrirContaForm,80)">+ Lançamento</button>`:''}
+        ${feats.includes('contas')?`<button class="btn btn-outline btn-xs" style="color:var(--danger);border-color:var(--danger)" onclick="goMod('contas');setTimeout(novaRetiradaInespPJ,80)" title="Registrar uma retirada inesperada da conta PJ">💸 Retirada Inesperada</button>`:''}
         ${feats.includes('estoque')?`<button class="btn btn-outline btn-xs" onclick="goMod('estoque');setTimeout(abrirEstoqueForm,80)">+ Item Estoque</button>`:''}
         ${feats.includes('projeto')?`<button class="btn btn-outline btn-xs" onclick="goMod('projeto');setTimeout(abrirProjetoForm,80)">+ Projeto</button>`:''}
         ${feats.includes('dre')?`<button class="btn btn-outline btn-xs" onclick="goMod('dre')">Ver DRE →</button>`:''}
@@ -1349,6 +1392,8 @@ function _dreOptsHtml(tipo, cur){
   `;
   return `
     <option value="despesa"${(cur==='despesa'||!cur)?' selected':''}>Despesa Operacional</option>
+    <option value="prolabore"${cur==='prolabore'?' selected':''}>Pró-labore</option>
+    <option value="retirada"${cur==='retirada'?' selected':''}>Retirada conta PJ</option>
     <option value="cmv"${cur==='cmv'?' selected':''}>CMV / Custo de Mercadoria</option>
     <option value="investimento"${cur==='investimento'?' selected':''}>Investimento</option>
   `;
@@ -1482,6 +1527,86 @@ function executarPagamento(id){
   }
   closeModal();
   pagarConta(id);
+}
+
+// ══════════════════════════════════════════════
+// PRÓ-LABORE
+// ══════════════════════════════════════════════
+function calcProlabore(ano,mes){
+  const cfg=DB.prolaboreConfig();
+  const k=DB.calcKPIs(ano,mes);
+  const valor=k.ebitda>0?+(k.ebitda*(cfg.percentual/100)).toFixed(2):0;
+  const ym=`${ano}-${String(mes).padStart(2,'0')}`;
+  const gerado=DB.contas().find(c=>c.prolabore&&c.vencimento?.startsWith(ym));
+  return {cfg,ebitda:k.ebitda,valor,gerado,ym};
+}
+
+function gerarProlaboreContas(ano,mes){
+  const {cfg,ebitda,valor,gerado,ym}=calcProlabore(ano,mes);
+  if(!cfg.ativo){ toast('Pró-labore inativo. Configure primeiro.'); return; }
+  if(gerado){ toast('Pró-labore já gerado para este mês.'); renderDashboard(); return; }
+  if(ebitda<=0){ toast('EBITDA negativo ou zero — pró-labore não gerado.'); return; }
+  const dia=String(cfg.diaVencimento||5).padStart(2,'0');
+  const lista=DB.contas();
+  lista.push({
+    id:uid(),tipo:'pagar',tipoCusto:'prolabore',
+    descricao:`Pró-labore — ${MESES_F[mes-1]} ${ano}`,
+    valor,vencimento:`${ym}-${dia}`,
+    contatoId:'',contato:'',categoria:'Pró-labore',
+    orcLinha:'Pró-labore',
+    obs:`${cfg.percentual}% do EBITDA (${fmt(ebitda)})`,
+    prolabore:true,status:'pendente',dataPagamento:'',criado:hoje()
+  });
+  DB.saveContas(lista);
+  renderDashboard();
+  toast(`✓ Pró-labore gerado: ${fmt(valor)} (${cfg.percentual}% do EBITDA ${fmt(ebitda)})`);
+}
+
+function abrirConfigProlabore(){
+  const cfg=DB.prolaboreConfig();
+  openModal('Configurar Pró-labore',`
+    <div class="alert alert-info" style="margin-bottom:16px">💡 O pró-labore é calculado como um percentual do EBITDA mensal — o salário do empresário baseado no resultado real do negócio. Gere a conta no final de cada mês após fechar o DRE.</div>
+    <div class="form-row c2">
+      <div class="fg"><label>% do EBITDA *</label>
+        <input id="plc-pct" type="number" value="${cfg.percentual||30}" min="1" max="100" step="0.5" placeholder="30">
+        <small style="color:var(--texto-s)">Ex: 30% = empresário retira 30% do lucro operacional</small>
+      </div>
+      <div class="fg"><label>Dia do Vencimento</label>
+        <input id="plc-dia" type="number" value="${cfg.diaVencimento||5}" min="1" max="28">
+        <small style="color:var(--texto-s)">Dia do mês para vencimento da conta</small>
+      </div>
+    </div>
+    <div class="fg" style="margin-top:8px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0">
+        <input type="checkbox" id="plc-ativo" ${cfg.ativo?'checked':''} style="width:auto;accent-color:var(--verde)">
+        Ativo — calcular pró-labore mensalmente
+      </label>
+    </div>
+  `,`
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="salvarConfigProlabore()">Salvar</button>
+  `);
+}
+
+function salvarConfigProlabore(){
+  const pct=+document.getElementById('plc-pct').value;
+  if(!pct||pct<1||pct>100){ alert('Percentual deve ser entre 1% e 100%.'); return; }
+  DB.saveProlaboreConfig({
+    percentual:pct,
+    diaVencimento:+document.getElementById('plc-dia').value||5,
+    ativo:document.getElementById('plc-ativo').checked
+  });
+  closeModal();
+  renderDashboard();
+  toast('✓ Configuração do pró-labore salva.');
+}
+
+function novaRetiradaInespPJ(){
+  abrirContaForm(null,{
+    tipo:'pagar',tipoCusto:'retirada',
+    descricao:'Retirada inesperada conta PJ',
+    categoria:'Retiradas conta PJ',orcLinha:'Retiradas conta PJ'
+  });
 }
 
 // ══════════════════════════════════════════════
@@ -2001,7 +2126,7 @@ function gerarTodasContas(ano,mes){
 const ORC_CATS={
   rev:['Receitas de Serviços','Receitas de Produtos','Receitas de Projetos','Outras Receitas'],
   cost:['CMV / Custo de Mercadorias','Custo de Produção','Custo de Serviços'],
-  exp:['Pessoal / Salários','Aluguel / Infraestrutura','Marketing / Vendas','Software / Ferramentas','Administrativo','Financeiro','Outros'],
+  exp:['Pessoal / Salários','Pró-labore','Aluguel / Infraestrutura','Marketing / Vendas','Software / Ferramentas','Administrativo','Financeiro','Retiradas conta PJ','Outros'],
 };
 
 function ressincronizarDRE(){

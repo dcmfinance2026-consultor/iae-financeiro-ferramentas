@@ -1,0 +1,67 @@
+name: Supabase Migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**.sql'
+
+jobs:
+  migrate:
+    name: Aplicar migrations no Supabase
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Identificar migrations novas
+        id: diff
+        run: |
+          CHANGED=$(git diff --name-only HEAD^ HEAD -- 'supabase/migrations/*.sql' | sort)
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "Migrations alteradas: $CHANGED"
+
+      - name: Aplicar migrations via Supabase API
+        if: steps.diff.outputs.files != ''
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+        run: |
+          python3 - << 'PYEOF'
+          import os, urllib.request, json, sys, glob, pathlib
+
+          PAT    = os.environ['SUPABASE_ACCESS_TOKEN']
+          PROJ   = os.environ['SUPABASE_PROJECT_ID']
+          URL    = f'https://api.supabase.com/v1/projects/{PROJ}/database/query'
+          CHANGED = """${{ steps.diff.outputs.files }}""".strip().splitlines()
+
+          errors = []
+          for path in CHANGED:
+              path = path.strip()
+              if not path or not pathlib.Path(path).exists():
+                  continue
+              sql = pathlib.Path(path).read_text(encoding='utf-8')
+              print(f'→ Aplicando {path}...')
+              body = json.dumps({'query': sql}).encode()
+              req  = urllib.request.Request(URL, data=body,
+                        headers={'Authorization': f'Bearer {PAT}',
+                                 'Content-Type': 'application/json'},
+                        method='POST')
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      print(f'  ✓ {r.status}')
+              except urllib.error.HTTPError as e:
+                  msg = e.read().decode()
+                  print(f'  ✗ {e.code}: {msg}')
+                  errors.append(f'{path}: {msg}')
+
+          if errors:
+              print('\nErros:\n' + '\n'.join(errors))
+              sys.exit(1)
+          print('\nTodas as migrations aplicadas com sucesso.')
+          PYEOF

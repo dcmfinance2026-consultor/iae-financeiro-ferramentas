@@ -788,6 +788,7 @@ const DB = {
 // ══════════════════════════════════════════════
 let sistemaAtual=null;
 let modAtivo='dashboard';
+let _fcView='extrato';
 
 const TOOLS=[
   {id:'crm',     label:'CRM',                  icon:'👥'},
@@ -1858,7 +1859,15 @@ function renderFluxoDeContas(){
   document.getElementById('fc-subtitle').textContent='Gerado automaticamente a partir das Contas a Pagar e Receber';
   const mes=+document.getElementById('fc-mes')?.value||MES;
   const ano=+document.getElementById('fc-ano')?.value||ANO;
-  document.getElementById('fc-actions').innerHTML=`
+  const tabs=`<div style="display:flex;gap:0;border:1px solid var(--borda);border-radius:8px;overflow:hidden;margin-right:4px">
+    <button class="btn btn-sm ${_fcView==='extrato'?'btn-primary':'btn-outline'}" onclick="_fcView='extrato';renderFluxo()" style="border-radius:0;border:none;border-right:1px solid var(--borda)">Extrato</button>
+    <button class="btn btn-sm ${_fcView==='projecao'?'btn-primary':'btn-outline'}" onclick="_fcView='projecao';renderFluxo()" style="border-radius:0;border:none">📈 Projeção</button>
+  </div>`;
+  if(_fcView==='projecao'){
+    document.getElementById('fc-actions').innerHTML=tabs;
+    renderFluxoProjecao(); return;
+  }
+  document.getElementById('fc-actions').innerHTML=tabs+`
     <button class="btn btn-outline btn-sm" onclick="goMod('contas')">+ Lançamento →</button>
     <button class="btn btn-outline btn-sm" onclick="abrirFixosModal()">⚙ Recorrentes</button>
     <button class="btn btn-primary btn-sm" onclick="gerarTodasContas(${ano},${mes})" title="Gera contas pendentes do mês para todos os itens recorrentes ativos">▶ Gerar do Mês</button>
@@ -1935,7 +1944,15 @@ function renderFluxoDeContas(){
 // ── Modo autônomo (sem módulo Contas) ──────────
 function renderFluxoAutonomo(){
   document.getElementById('fc-subtitle').textContent='Lançamentos manuais e custos fixos';
-  document.getElementById('fc-actions').innerHTML=`
+  const tabs=`<div style="display:flex;gap:0;border:1px solid var(--borda);border-radius:8px;overflow:hidden;margin-right:4px">
+    <button class="btn btn-sm ${_fcView==='extrato'?'btn-primary':'btn-outline'}" onclick="_fcView='extrato';renderFluxo()" style="border-radius:0;border:none;border-right:1px solid var(--borda)">Extrato</button>
+    <button class="btn btn-sm ${_fcView==='projecao'?'btn-primary':'btn-outline'}" onclick="_fcView='projecao';renderFluxo()" style="border-radius:0;border:none">📈 Projeção</button>
+  </div>`;
+  if(_fcView==='projecao'){
+    document.getElementById('fc-actions').innerHTML=tabs;
+    renderFluxoProjecao(); return;
+  }
+  document.getElementById('fc-actions').innerHTML=tabs+`
     <button class="btn btn-primary btn-sm" onclick="abrirFluxoForm()">+ Lançamento</button>
     <button class="btn btn-outline btn-sm" onclick="abrirFixosModal()">⚙ Custos Fixos</button>
   `;
@@ -2243,8 +2260,125 @@ function gerarTodasContas(ano,mes){
   else toast(`Todas as contas recorrentes já foram geradas para ${MESES_F[mes-1]} ${ano}.`);
 }
 
-// ══════════════════════════════════════════════
-// ORÇAMENTO
+// ── Projeção de Fluxo de Caixa ─────────────────
+function renderFluxoProjecao(){
+  const mes=+document.getElementById('fc-mes')?.value||MES;
+  const ano=+document.getElementById('fc-ano')?.value||ANO;
+  const horizonte=+(document.getElementById('fc-horizonte')?.value||6);
+  const feats=sistemaAtual?.ferramentas||[];
+  const usaContas=feats.includes('contas');
+  const ymStart=`${ano}-${String(mes).padStart(2,'0')}`;
+  const todasContas=DB.contas();
+  const fixosAtivos=DB.fluxoFixos().filter(f=>f.ativo);
+  const sumV=arr=>arr.reduce((a,b)=>a+(+b.valor||0),0);
+
+  // Saldo inicial: contas pagas antes do mês selecionado
+  let saldoInicial=0;
+  if(usaContas){
+    todasContas.filter(c=>c.status==='pago'&&c.dataPagamento&&c.dataPagamento<ymStart)
+      .forEach(c=>{ saldoInicial+=c.tipo==='receber'?+c.valor:-(+c.valor); });
+  } else {
+    DB.fluxoLanc().filter(l=>l.status==='realizado'&&l.data&&l.data<ymStart)
+      .forEach(l=>{ saldoInicial+=l.tipo==='entrada'?+l.valor:-(+l.valor); });
+  }
+
+  const meses=[];
+  let saldoAcum=saldoInicial;
+
+  for(let i=0;i<horizonte;i++){
+    let m=mes+i, a=ano;
+    while(m>12){m-=12;a++;}
+    const ym=`${a}-${String(m).padStart(2,'0')}`;
+
+    let entTotal=0, saiTotal=0, nEntradas=0, nSaidas=0, nProj=0;
+
+    if(usaContas){
+      const contas=todasContas.filter(c=>c.vencimento?.startsWith(ym)||c.dataPagamento?.startsWith(ym));
+      const ent=contas.filter(c=>c.tipo==='receber');
+      const sai=contas.filter(c=>c.tipo==='pagar');
+      const fixosProj=fixosAtivos.filter(f=>!todasContas.some(c=>c.fixoId===f.id&&c.vencimento?.startsWith(ym)));
+      const fEnt=fixosProj.filter(f=>f.tipo==='receita');
+      const fSai=fixosProj.filter(f=>f.tipo!=='receita');
+      entTotal=sumV(ent)+sumV(fEnt);
+      saiTotal=sumV(sai)+sumV(fSai);
+      nEntradas=ent.length; nSaidas=sai.length; nProj=fEnt.length+fSai.length;
+    } else {
+      const lanc=DB.fluxoLanc().filter(l=>l.data?.startsWith(ym));
+      const ent=lanc.filter(l=>l.tipo==='entrada');
+      const sai=lanc.filter(l=>l.tipo==='saida');
+      entTotal=sumV(ent)+sumV(fixosAtivos.filter(f=>f.tipo==='receita'));
+      saiTotal=sumV(sai)+sumV(fixosAtivos.filter(f=>f.tipo!=='receita'));
+      nEntradas=ent.length; nSaidas=sai.length; nProj=fixosAtivos.length;
+    }
+
+    const saldoPeriodo=entTotal-saiTotal;
+    saldoAcum+=saldoPeriodo;
+    meses.push({a,m,ym,entTotal,saiTotal,saldoPeriodo,saldoAcum,nEntradas,nSaidas,nProj});
+  }
+
+  const maxAbs=Math.max(...meses.map(x=>Math.abs(x.saldoAcum)),1);
+  const bars=meses.map(({m,a,saldoAcum})=>{
+    const pct=Math.max(Math.abs(saldoAcum)/maxAbs*90,4);
+    const cor=saldoAcum>=0?'var(--ok)':'var(--danger)';
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:0">
+      <div style="font-size:10px;color:var(--texto-s);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center">${fmt(saldoAcum)}</div>
+      <div style="width:100%;background:rgba(27,59,40,.07);border-radius:4px 4px 0 0;height:70px;display:flex;align-items:flex-end">
+        <div style="width:100%;height:${pct}%;background:${cor};border-radius:4px 4px 0 0"></div>
+      </div>
+      <div style="font-size:11px;font-weight:600">${MESES[m-1].slice(0,3)}</div>
+      <div style="font-size:10px;color:var(--texto-s)">${a}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('fc-body').innerHTML=`
+    <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+      <label style="font-size:13px;color:var(--texto-s)">Horizonte:</label>
+      <select id="fc-horizonte" onchange="renderFluxoProjecao()">
+        <option value="3"${horizonte===3?' selected':''}>3 meses</option>
+        <option value="6"${horizonte===6?' selected':''}>6 meses</option>
+        <option value="12"${horizonte===12?' selected':''}>12 meses</option>
+      </select>
+      <span style="font-size:12px;color:var(--texto-s)">Saldo inicial (acumulado até ${MESES[mes===1?11:mes-2]}/${mes===1?ano-1:ano}): <strong style="color:${saldoInicial>=0?'var(--ok)':'var(--danger)'}">${fmt(saldoInicial)}</strong></span>
+    </div>
+    <div style="display:flex;gap:6px;padding:16px;background:var(--card-bg);border:1px solid var(--borda);border-radius:12px;margin-bottom:18px;align-items:flex-end">
+      ${bars}
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Mês</th>
+          <th style="color:var(--ok)">Entradas</th>
+          <th style="color:var(--danger)">Saídas</th>
+          <th>Saldo Período</th>
+          <th>Saldo Acumulado</th>
+          <th>Lançamentos</th>
+        </tr></thead>
+        <tbody>
+          ${meses.map(({a,m,ym,entTotal,saiTotal,saldoPeriodo,saldoAcum,nEntradas,nSaidas,nProj})=>`
+            <tr>
+              <td><strong>${MESES[m-1]}/${a}</strong>${ym===ymStart?` <span class="int-badge">Mês base</span>`:''}</td>
+              <td style="color:var(--ok)">${fmt(entTotal)}</td>
+              <td style="color:var(--danger)">${fmt(saiTotal)}</td>
+              <td style="color:${saldoPeriodo>=0?'var(--ok)':'var(--danger)'};font-weight:600">${saldoPeriodo>=0?'+':''}${fmt(saldoPeriodo)}</td>
+              <td style="color:${saldoAcum>=0?'var(--ok)':'var(--danger)'};font-weight:700">${fmt(saldoAcum)}</td>
+              <td style="font-size:12px;color:var(--texto-s)">${nEntradas} rec. · ${nSaidas} pag.${nProj?` · <span title="Itens recorrentes projetados">${nProj} recorrentes</span>`:''}</td>
+            </tr>`).join('')}
+        </tbody>
+        <tfoot>
+          <tr style="font-weight:700">
+            <td>Total ${horizonte} meses</td>
+            <td style="color:var(--ok)">${fmt(meses.reduce((a,x)=>a+x.entTotal,0))}</td>
+            <td style="color:var(--danger)">${fmt(meses.reduce((a,x)=>a+x.saiTotal,0))}</td>
+            <td colspan="3"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    ${meses.some(x=>x.nProj>0)?`<div class="alert alert-info" style="margin-top:12px">📌 <strong>Recorrentes</strong> são itens fixos ativos incluídos na projeção independente de terem conta gerada. <button class="btn btn-outline btn-xs" onclick="abrirFixosModal()">Gerenciar recorrentes</button></div>`:''}
+  `;
+}
+
+
 // ══════════════════════════════════════════════
 const ORC_CATS={
   rev:['Receitas de Serviços','Receitas de Produtos','Receitas de Projetos','Outras Receitas'],

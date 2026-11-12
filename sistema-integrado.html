@@ -512,6 +512,7 @@ textarea{resize:vertical;min-height:64px}
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <select id="dre-mes" onchange="renderDRE()"></select>
           <select id="dre-ano" onchange="renderDRE()"></select>
+          <select id="dre-cc" onchange="renderDRE()" style="display:none"></select>
           <button class="btn btn-outline btn-sm" onclick="abrirDREEntry()">+ Manual</button>
         </div>
       </div>
@@ -538,6 +539,31 @@ textarea{resize:vertical;min-height:64px}
         <select id="orc-ano" onchange="renderOrcamento()"></select>
       </div>
       <div id="orc-body"></div>
+    </section>
+
+    <!-- PONTO DE EQUILÍBRIO -->
+    <section id="mod-pe" class="module">
+      <div class="page-hd">
+        <div><h2>⚖️ Ponto de Equilíbrio</h2><p>Faturamento mínimo para cobrir todos os custos e margem de segurança</p></div>
+        <div style="display:flex;gap:8px">
+          <select id="pe-mes" onchange="renderPE()"></select>
+          <select id="pe-ano" onchange="renderPE()"></select>
+        </div>
+      </div>
+      <div id="pe-body"></div>
+    </section>
+
+    <!-- CENTRO DE CUSTOS -->
+    <section id="mod-cc" class="module">
+      <div class="page-hd">
+        <div><h2>🏷️ Centro de Custos</h2><p>Analise receitas, custos e resultados por área ou departamento</p></div>
+        <div style="display:flex;gap:8px" id="cc-hd-actions">
+          <select id="cc-mes" onchange="renderCCAnalise()"></select>
+          <select id="cc-ano" onchange="renderCCAnalise()"></select>
+          <button class="btn btn-primary btn-sm" onclick="abrirCCForm()">+ Centro de Custo</button>
+        </div>
+      </div>
+      <div id="cc-body"></div>
     </section>
 
     <!-- KPIs -->
@@ -699,6 +725,14 @@ const DB = {
   backupConfig(){ return this.get('backup_config',{ativo:true,intervalo:'diario',ultimoBackup:null}); },
   saveBackupConfig(v){ this.set('backup_config',v); },
 
+  // Ponto de Equilíbrio
+  peConfig(){ return this.get('pe_config',{classificacoes:{}}); },
+  savePeConfig(v){ this.set('pe_config',v); },
+
+  // Centro de Custos
+  centrosCusto(){ return this.get('centros_custo',[]); },
+  saveCentrosCusto(v){ this.set('centros_custo',v); },
+
   // Fluxo autônomo (usado quando módulo Contas não está ativo)
   fluxoLanc(){ return this.get('fluxo_lanc',[]); },
   saveFluxoLanc(v){ this.set('fluxo_lanc',v); },
@@ -712,7 +746,7 @@ const DB = {
     if(!ref) return;
     const [ano,mes]=ref.split('-');
     const dm=this.dreDoMes(+ano,+mes);
-    const entry={id:'ct_'+conta.id,descricao:conta.descricao,contato:conta.contato||'',valor:conta.valor,categoria:conta.orcLinha||conta.categoria||'',contaId:conta.id,auto:true};
+    const entry={id:'ct_'+conta.id,descricao:conta.descricao,contato:conta.contato||'',valor:conta.valor,categoria:conta.orcLinha||conta.categoria||'',contaId:conta.id,centroCusto:conta.centroCusto||'',auto:true};
     if(conta.tipo==='receber'){
       dm.receitas=dm.receitas.filter(r=>r.contaId!==conta.id);
       dm.receitas.push(entry);
@@ -756,14 +790,16 @@ let sistemaAtual=null;
 let modAtivo='dashboard';
 
 const TOOLS=[
-  {id:'crm',     label:'CRM',           icon:'👥'},
-  {id:'estoque', label:'Estoque',        icon:'📦'},
-  {id:'contas',  label:'Contas',         icon:'💳'},
-  {id:'dre',     label:'DRE',            icon:'📊'},
-  {id:'fluxo',   label:'Fluxo de Caixa', icon:'💰'},
-  {id:'orcamento',label:'Orçamento',     icon:'📋'},
-  {id:'kpis',    label:'KPIs',           icon:'📈'},
-  {id:'projeto', label:'Projetos',       icon:'🏗️'},
+  {id:'crm',     label:'CRM',                  icon:'👥'},
+  {id:'estoque', label:'Estoque',               icon:'📦'},
+  {id:'contas',  label:'Contas',                icon:'💳'},
+  {id:'dre',     label:'DRE',                   icon:'📊'},
+  {id:'fluxo',   label:'Fluxo de Caixa',        icon:'💰'},
+  {id:'orcamento',label:'Orçamento',            icon:'📋'},
+  {id:'kpis',    label:'KPIs',                  icon:'📈'},
+  {id:'projeto', label:'Projetos',              icon:'🏗️'},
+  {id:'pe',      label:'Ponto de Equilíbrio',   icon:'⚖️'},
+  {id:'cc',      label:'Centro de Custos',      icon:'🏷️'},
 ];
 const TOOLS_DESC={
   crm:'Contatos, fornecedores e clientes',
@@ -774,6 +810,8 @@ const TOOLS_DESC={
   orcamento:'Planejamento anual vs realizado',
   kpis:'Indicadores financeiros automáticos',
   projeto:'Gestão de projeto e rentabilidade',
+  pe:'Faturamento mínimo e margem de segurança',
+  cc:'Análise por área, linha ou departamento',
 };
 
 function goHome(){
@@ -809,7 +847,7 @@ function goMod(id){
   const tab=document.getElementById('navtab-'+id);
   if(tab) tab.classList.add('active');
   modAtivo=id;
-  const R={dashboard:renderDashboard,crm:renderCRM,estoque:renderEstoque,contas:renderContas,dre:renderDRE,fluxo:renderFluxo,orcamento:renderOrcamento,kpis:renderKPIs,projeto:renderProjeto};
+  const R={dashboard:renderDashboard,crm:renderCRM,estoque:renderEstoque,contas:renderContas,dre:renderDRE,fluxo:renderFluxo,orcamento:renderOrcamento,kpis:renderKPIs,projeto:renderProjeto,pe:renderPE,cc:renderCC};
   if(R[id]) R[id]();
 }
 
@@ -1507,6 +1545,13 @@ function abrirContaForm(id=null,prefill={}){
     <div class="fg" style="margin-bottom:12px"><label>Projeto <span class="int-badge">Proj.</span></label>
       <select id="ctf-proj"><option value="">— Sem projeto —</option>${prjOpts}</select>
     </div>`:'<input type="hidden" id="ctf-proj" value="">'}
+    ${feats.includes('cc')&&DB.centrosCusto().length?`
+    <div class="fg" style="margin-bottom:12px"><label>Centro de Custo <span class="int-badge">CC</span></label>
+      <select id="ctf-cc">
+        <option value="">— Sem centro de custo —</option>
+        ${DB.centrosCusto().map(cc=>`<option value="${cc.id}"${(c.centroCusto===cc.id)?' selected':''}>${esc(cc.nome)}</option>`).join('')}
+      </select>
+    </div>`:'<input type="hidden" id="ctf-cc" value="">'}
     <div class="fg"><label>Observações</label><textarea id="ctf-obs">${esc(c.obs||'')}</textarea></div>
   `,`
     <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
@@ -1522,7 +1567,7 @@ function salvarConta(id){
   const contato=contatoId?DB.contatos().find(c=>c.id===contatoId)?.nome:'';
   const lista=DB.contas();
   const exist=id?lista.find(c=>c.id===id):{};
-  const obj={id:id||uid(),tipo:v('ctf-tipo'),tipoCusto:v('ctf-tipocusto'),descricao:desc,valor,vencimento:venc,contatoId,contato,categoria:v('ctf-cat'),orcLinha:v('ctf-orcLinha')||'',projetoId:v('ctf-proj')||'',obs:v('ctf-obs'),status:exist.status||'pendente',dataPagamento:exist.dataPagamento||'',criado:exist.criado||hoje()};
+  const obj={id:id||uid(),tipo:v('ctf-tipo'),tipoCusto:v('ctf-tipocusto'),descricao:desc,valor,vencimento:venc,contatoId,contato,categoria:v('ctf-cat'),orcLinha:v('ctf-orcLinha')||'',projetoId:v('ctf-proj')||'',centroCusto:v('ctf-cc')||'',obs:v('ctf-obs'),status:exist.status||'pendente',dataPagamento:exist.dataPagamento||'',criado:exist.criado||hoje()};
   if(id){ const i=lista.findIndex(c=>c.id===id); lista[i]=obj; }
   else lista.push(obj);
   DB.saveContas(lista);
@@ -1681,8 +1726,22 @@ function renderDRE(){
   const mes=+document.getElementById('dre-mes')?.value||MES;
   const ano=+document.getElementById('dre-ano')?.value||ANO;
   const dm=DB.dreDoMes(ano,mes);
+
+  // CC filter
+  const ccs=DB.centrosCusto();
+  const ccSel=document.getElementById('dre-cc');
+  if(ccSel){
+    if(ccs.length){
+      ccSel.style.display='';
+      const prev=ccSel.value;
+      ccSel.innerHTML='<option value="">Todos os CCs</option>'+ccs.map(cc=>`<option value="${cc.id}"${cc.id===prev?' selected':''}>${esc(cc.nome)}</option>`).join('');
+    } else { ccSel.style.display='none'; ccSel.value=''; }
+  }
+  const ccFilter=ccSel?.value||'';
+  function filterCC(arr){ return ccFilter?arr.filter(e=>e.centroCusto===ccFilter):arr; }
+
   const sum=arr=>(arr||[]).reduce((a,b)=>a+(+b.valor||0),0);
-  const rec=sum(dm.receitas), cmv=sum(dm.cmv), desp=sum(dm.despesas);
+  const rec=sum(filterCC(dm.receitas||[])), cmv=sum(filterCC(dm.cmv||[])), desp=sum(filterCC(dm.despesas||[]));
   const mb=rec-cmv, mgb=rec>0?mb/rec:0;
   const ebitda=mb-desp, mge=rec>0?ebitda/rec:0;
 
@@ -1716,9 +1775,9 @@ function renderDRE(){
     <div class="alert alert-info">ℹ️ Lançamentos com badge <strong>Contas</strong> foram sincronizados ao marcar como pago em <strong>Contas a Pagar/Receber</strong>. Itens manuais podem ser removidos.</div>
     <div style="display:grid;grid-template-columns:1fr 290px;gap:18px;align-items:start">
       <div>
-        ${secao('💰 Receitas Brutas',dm.receitas||[],'receitas','rgba(30,132,73,.08)','var(--ok)')}
-        ${secao('📦 CMV — Custo das Mercadorias/Serviços',dm.cmv||[],'cmv','rgba(160,64,0,.06)','#A04000')}
-        ${secao('📋 Despesas Operacionais',dm.despesas||[],'despesas','rgba(146,43,33,.06)','var(--danger)')}
+        ${secao('💰 Receitas Brutas',filterCC(dm.receitas||[]),'receitas','rgba(30,132,73,.08)','var(--ok)')}
+        ${secao('📦 CMV — Custo das Mercadorias/Serviços',filterCC(dm.cmv||[]),'cmv','rgba(160,64,0,.06)','#A04000')}
+        ${secao('📋 Despesas Operacionais',filterCC(dm.despesas||[]),'despesas','rgba(146,43,33,.06)','var(--danger)')}
       </div>
       <div>
         <div class="card" style="position:sticky;top:20px">
@@ -2601,6 +2660,312 @@ function lancarCusto(id){
   const p=DB.projetos().find(x=>x.id===id); if(!p) return;
   abrirProjetoDetalhe(id);
   setTimeout(()=>novaContaProjeto(id,'despesa'),80);
+}
+
+// ══════════════════════════════════════════════
+// CENTRO DE CUSTOS MODULE
+// ══════════════════════════════════════════════
+const CC_CORES=['#3498DB','#2ECC71','#E67E22','#9B59B6','#E74C3C','#1ABC9C','#F39C12','#34495E'];
+
+function renderCC(){
+  populateMesAno('cc-mes','cc-ano');
+  renderCCAnalise();
+}
+
+function renderCCAnalise(){
+  const mes=+document.getElementById('cc-mes')?.value||MES;
+  const ano=+document.getElementById('cc-ano')?.value||ANO;
+  const ccs=DB.centrosCusto();
+  const dm=DB.dreDoMes(ano,mes);
+  const sum=arr=>(arr||[]).reduce((a,b)=>a+(+b.valor||0),0);
+
+  function totalCC(arr,ccId){
+    return sum((arr||[]).filter(e=>e.centroCusto===ccId));
+  }
+  function totalSemCC(arr){
+    return sum((arr||[]).filter(e=>!e.centroCusto));
+  }
+
+  const tRecTot=sum(dm.receitas), tCmvTot=sum(dm.cmv), tDespTot=sum(dm.despesas);
+
+  const linhas=ccs.map(cc=>{
+    const rec=totalCC(dm.receitas,cc.id);
+    const cmv=totalCC(dm.cmv,cc.id);
+    const desp=totalCC(dm.despesas,cc.id);
+    const res=rec-cmv-desp;
+    return {cc,rec,cmv,desp,res};
+  });
+
+  // Linha "sem CC"
+  const recSem=totalSemCC(dm.receitas);
+  const cmvSem=totalSemCC(dm.cmv);
+  const despSem=totalSemCC(dm.despesas);
+  const resSem=recSem-cmvSem-despSem;
+
+  function badge(cor){ return `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${cor};margin-right:6px"></span>`; }
+
+  function valor(v,bold=false){
+    const cor=v<0?'var(--danger)':v>0?'var(--texto)':'var(--texto-s)';
+    return `<span style="color:${cor};${bold?'font-weight:700':''};">${v===0?'—':fmt(v)}</span>`;
+  }
+
+  document.getElementById('cc-body').innerHTML=`
+    ${!ccs.length?`
+      <div class="alert alert-info">
+        💡 Crie Centros de Custo para classificar seus lançamentos por área (ex.: Produção, Comercial, Administrativo).
+        Em seguida, vincule cada Conta a um Centro de Custo ao lançar.
+      </div>
+      <div style="text-align:center;padding:32px">
+        <button class="btn btn-primary" onclick="abrirCCForm()">+ Criar Primeiro Centro de Custo</button>
+      </div>`:
+    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px">
+        ${ccs.map(cc=>{
+          const l=linhas.find(x=>x.cc.id===cc.id);
+          if(!l) return '';
+          const margem=l.rec>0?((l.res/l.rec)*100):null;
+          return `<div class="card" style="border-left:4px solid ${cc.cor}">
+            <div class="card-header">
+              <div class="card-title" style="color:${cc.cor}">${badge(cc.cor)}${esc(cc.nome)}</div>
+              <button class="btn btn-outline btn-xs" onclick="abrirCCForm('${cc.id}')">✏️</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
+              <div><div style="font-size:11px;color:var(--texto-s);font-weight:700;text-transform:uppercase">Receita</div><div style="font-size:18px;font-weight:700;color:var(--ok)">${l.rec?fmt(l.rec):'—'}</div></div>
+              <div><div style="font-size:11px;color:var(--texto-s);font-weight:700;text-transform:uppercase">Resultado</div><div style="font-size:18px;font-weight:700;color:${l.res>=0?'var(--ok)':'var(--danger)'}">${fmt(l.res)}</div></div>
+              <div><div style="font-size:11px;color:var(--texto-s);font-weight:700;text-transform:uppercase">CMV</div><div style="font-size:15px;font-weight:600;color:var(--warn)">${l.cmv?fmt(l.cmv):'—'}</div></div>
+              <div><div style="font-size:11px;color:var(--texto-s);font-weight:700;text-transform:uppercase">Despesas</div><div style="font-size:15px;font-weight:600;color:var(--warn)">${l.desp?fmt(l.desp):'—'}</div></div>
+            </div>
+            ${margem!==null?`<div style="margin-top:8px;font-size:12px;color:var(--texto-s)">Margem: <strong style="color:${l.res>=0?'var(--ok)':'var(--danger)'}">${pct(margem)}</strong></div>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title" style="font-size:13px">Resumo — ${MESES_F[mes-1]} ${ano}</div></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr>
+            <th>Centro de Custo</th>
+            <th style="text-align:right">Receita</th>
+            <th style="text-align:right">CMV</th>
+            <th style="text-align:right">Despesas</th>
+            <th style="text-align:right">Resultado</th>
+            <th style="text-align:right">Margem</th>
+          </tr></thead>
+          <tbody>
+            ${linhas.map(l=>`<tr>
+              <td>${badge(l.cc.cor)}<strong>${esc(l.cc.nome)}</strong></td>
+              <td style="text-align:right">${valor(l.rec)}</td>
+              <td style="text-align:right">${valor(l.cmv)}</td>
+              <td style="text-align:right">${valor(l.desp)}</td>
+              <td style="text-align:right">${valor(l.res,true)}</td>
+              <td style="text-align:right">${l.rec>0?`<span style="color:${l.res>=0?'var(--ok)':'var(--danger)'}">${pct((l.res/l.rec)*100)}</span>`:'—'}</td>
+            </tr>`).join('')}
+            ${(recSem||cmvSem||despSem)?`<tr style="color:var(--texto-s);font-style:italic">
+              <td>Sem centro de custo</td>
+              <td style="text-align:right">${valor(recSem)}</td>
+              <td style="text-align:right">${valor(cmvSem)}</td>
+              <td style="text-align:right">${valor(despSem)}</td>
+              <td style="text-align:right">${valor(resSem,true)}</td>
+              <td style="text-align:right">—</td>
+            </tr>`:''}
+            <tr style="font-weight:700;border-top:2px solid rgba(27,59,40,.15)">
+              <td>Total</td>
+              <td style="text-align:right">${fmt(tRecTot)}</td>
+              <td style="text-align:right">${fmt(tCmvTot)}</td>
+              <td style="text-align:right">${fmt(tDespTot)}</td>
+              <td style="text-align:right;color:${(tRecTot-tCmvTot-tDespTot)>=0?'var(--ok)':'var(--danger)'}">${fmt(tRecTot-tCmvTot-tDespTot)}</td>
+              <td style="text-align:right">${tRecTot>0?`<span style="color:${(tRecTot-tCmvTot-tDespTot)>=0?'var(--ok)':'var(--danger)'}">${pct(((tRecTot-tCmvTot-tDespTot)/tRecTot)*100)}</span>`:'—'}</td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>`
+    }
+  `;
+}
+
+function abrirCCForm(id=null){
+  const lista=DB.centrosCusto();
+  const exist=id?lista.find(c=>c.id===id):{};
+  const coresBtns=CC_CORES.map((cor,i)=>`
+    <button type="button" onclick="document.getElementById('cc-cor-sel').value='${cor}';document.querySelectorAll('.cc-cor-btn').forEach(b=>b.style.outline='none');this.style.outline='3px solid white'"
+      class="cc-cor-btn"
+      style="width:28px;height:28px;border-radius:50%;background:${cor};border:none;cursor:pointer;${exist.cor===cor?'outline:3px solid white':''}"></button>
+  `).join('');
+  openModal(id?'Editar Centro de Custo':'Novo Centro de Custo',`
+    <div class="fg">
+      <label>Nome do Centro de Custo</label>
+      <input id="ccf-nome" class="form-input" value="${esc(exist.nome||'')}" placeholder="Ex.: Produção, Comercial, Administrativo">
+    </div>
+    <div class="fg" style="margin-top:14px">
+      <label>Cor de identificação</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center">
+        ${coresBtns}
+        <input type="hidden" id="cc-cor-sel" value="${exist.cor||CC_CORES[0]}">
+      </div>
+    </div>
+  `,`${id?`<button class="btn btn-outline" style="color:var(--danger)" onclick="excluirCC('${id}')">Excluir</button>`:''}
+     <button class="btn btn-primary" onclick="salvarCC('${id||''}')">Salvar</button>`);
+}
+
+function salvarCC(id){
+  const nome=document.getElementById('ccf-nome')?.value.trim();
+  const cor=document.getElementById('cc-cor-sel')?.value||CC_CORES[0];
+  if(!nome){ alert('Informe o nome do Centro de Custo.'); return; }
+  const lista=DB.centrosCusto();
+  if(id){
+    const idx=lista.findIndex(c=>c.id===id);
+    if(idx>=0) lista[idx]={...lista[idx],nome,cor};
+  } else {
+    lista.push({id:uid(),nome,cor,ativo:true});
+  }
+  DB.saveCentrosCusto(lista);
+  closeModal(); renderCC();
+  toast(`✓ Centro de Custo ${id?'atualizado':'criado'}.`);
+}
+
+function excluirCC(id){
+  if(!confirm('Excluir este Centro de Custo? Os lançamentos vinculados perdem o vínculo.')) return;
+  DB.saveCentrosCusto(DB.centrosCusto().filter(c=>c.id!==id));
+  closeModal(); renderCC();
+  toast('Centro de Custo removido.');
+}
+
+// ══════════════════════════════════════════════
+// PONTO DE EQUILÍBRIO MODULE
+// ══════════════════════════════════════════════
+// Default: CMV = variável; Despesas = fixo
+function _peClassDefault(cat){
+  return ORC_CATS.cost.includes(cat)?'variavel':'fixo';
+}
+
+function renderPE(){
+  ressincronizarDRE();
+  populateMesAno('pe-mes','pe-ano');
+  const mes=+document.getElementById('pe-mes')?.value||MES;
+  const ano=+document.getElementById('pe-ano')?.value||ANO;
+  const cfg=DB.peConfig();
+  const cl=cfg.classificacoes||{};
+  const dm=DB.dreDoMes(ano,mes);
+  const sum=arr=>(arr||[]).reduce((a,b)=>a+(+b.valor||0),0);
+
+  // Separa fixo vs variável por categoria
+  const todasCats=[...ORC_CATS.cost,...ORC_CATS.exp];
+  let custoFixo=0, custoVariavel=0;
+
+  // Receitas = base
+  const receita=sum(dm.receitas);
+
+  // CMV e despesas: classifica cada entrada pela categoria da conta
+  [...(dm.cmv||[]),...(dm.despesas||[])].forEach(e=>{
+    const cat=e.categoria||'';
+    const tipo=cl[cat]??_peClassDefault(cat);
+    if(tipo==='fixo') custoFixo+=+e.valor||0;
+    else custoVariavel+=+e.valor||0;
+  });
+
+  const mc=receita-custoVariavel;
+  const mcPct=receita>0?mc/receita:0;
+  const pe=mcPct>0?custoFixo/mcPct:null;
+  const margSeg=pe!==null?receita-pe:null;
+  const grauSeg=pe!==null&&receita>0?(margSeg/receita)*100:null;
+  const acimaPE=pe!==null&&receita>=pe;
+
+  // Barra visual
+  function barraVisual(){
+    if(pe===null||receita===0) return '';
+    const maxVal=Math.max(receita,pe)*1.15;
+    const pePct=Math.min((pe/maxVal)*100,100);
+    const recPct=Math.min((receita/maxVal)*100,100);
+    return `<div style="position:relative;height:48px;background:rgba(27,59,40,.06);border-radius:10px;overflow:hidden;margin:18px 0">
+      <div style="position:absolute;left:0;top:0;height:100%;width:${recPct}%;background:${acimaPE?'rgba(30,132,73,.25)':'rgba(192,57,43,.25)'};border-radius:10px;transition:.4s"></div>
+      <div style="position:absolute;left:${pePct}%;top:0;height:100%;width:3px;background:#F39C12;z-index:2"></div>
+      <div style="position:absolute;left:${pePct+1}%;top:4px;font-size:11px;color:#F39C12;font-weight:700;white-space:nowrap">PE ${fmt(pe)}</div>
+      <div style="position:absolute;left:${Math.max(recPct-20,2)}%;top:50%;transform:translateY(-50%);font-size:12px;color:white;font-weight:700;white-space:nowrap">${fmt(receita)}</div>
+    </div>`;
+  }
+
+  // Tabela de classificação
+  function tabelaClass(){
+    const linhas=[...ORC_CATS.cost.map(c=>({cat:c,grupo:'CMV'})),...ORC_CATS.exp.map(c=>({cat:c,grupo:'Despesa'}))];
+    return `<div class="card" style="margin-top:20px">
+      <div class="card-header"><div class="card-title" style="font-size:13px">Classificação de Custos — Fixo vs Variável</div></div>
+      <p style="font-size:12px;color:var(--texto-s);padding:4px 0 12px">Defina se cada categoria escala com as vendas (variável) ou é constante (fixo). Afeta diretamente o cálculo do Ponto de Equilíbrio.</p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Categoria</th><th>Grupo</th><th style="text-align:center">Classificação</th></tr></thead>
+        <tbody>
+          ${linhas.map(({cat,grupo})=>{
+            const tipo=cl[cat]??_peClassDefault(cat);
+            return `<tr>
+              <td>${cat}</td>
+              <td><span style="font-size:11px;color:var(--texto-s)">${grupo}</span></td>
+              <td style="text-align:center">
+                <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;margin-right:12px">
+                  <input type="radio" name="pecl_${encodeURIComponent(cat)}" value="fixo" onchange="salvarClassPE('${encodeURIComponent(cat)}','fixo')" ${tipo==='fixo'?'checked':''}> Fixo
+                </label>
+                <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--info)">
+                  <input type="radio" name="pecl_${encodeURIComponent(cat)}" value="variavel" onchange="salvarClassPE('${encodeURIComponent(cat)}','variavel')" ${tipo==='variavel'?'checked':''}> Variável
+                </label>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table></div>
+    </div>`;
+  }
+
+  document.getElementById('pe-body').innerHTML=`
+    ${pe===null?`<div class="alert alert-warn">⚠️ Margem de Contribuição zero ou negativa — verifique se há receitas e custos variáveis lançados no DRE.</div>`:''}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:20px">
+      <div class="stat-card" style="border-left-color:var(--ok)">
+        <div class="stat-label">Receita do Mês</div>
+        <div class="stat-val">${fmt(receita)}</div>
+        <div class="stat-sub">${MESES_F[mes-1]} ${ano}</div>
+      </div>
+      <div class="stat-card" style="border-left-color:#E67E22">
+        <div class="stat-label">Custos Fixos</div>
+        <div class="stat-val" style="color:#E67E22">${fmt(custoFixo)}</div>
+        <div class="stat-sub">Independem do volume</div>
+      </div>
+      <div class="stat-card" style="border-left-color:#3498DB">
+        <div class="stat-label">Margem de Contribuição</div>
+        <div class="stat-val" style="color:#3498DB">${pct(mcPct*100)}</div>
+        <div class="stat-sub">MC = ${fmt(mc)}</div>
+      </div>
+      <div class="stat-card" style="border-left-color:#F39C12">
+        <div class="stat-label">⚖️ Ponto de Equilíbrio</div>
+        <div class="stat-val" style="color:#F39C12">${pe!==null?fmt(pe):'—'}</div>
+        <div class="stat-sub">Faturamento mínimo</div>
+      </div>
+      <div class="stat-card" style="border-left-color:${acimaPE?'var(--ok)':'var(--danger)'}">
+        <div class="stat-label">Margem de Segurança</div>
+        <div class="stat-val" style="color:${acimaPE?'var(--ok)':'var(--danger)'}">${margSeg!==null?fmt(margSeg):'—'}</div>
+        <div class="stat-sub">${grauSeg!==null?pct(grauSeg)+' de folga':''}</div>
+      </div>
+    </div>
+    ${pe!==null?`
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title" style="font-size:13px">Posição em relação ao Ponto de Equilíbrio</div>
+        <span class="badge ${acimaPE?'b-ok':'b-danger'}" style="font-size:12px;padding:4px 12px">
+          ${acimaPE?'✓ Acima do PE':'⚠ Abaixo do PE'}
+        </span>
+      </div>
+      ${barraVisual()}
+      ${acimaPE
+        ?`<p style="font-size:13px;color:var(--ok);margin:4px 0">Você está <strong>${fmt(margSeg)}</strong> (${pct(grauSeg)}) acima do ponto de equilíbrio este mês.</p>`
+        :`<p style="font-size:13px;color:var(--danger);margin:4px 0">Faltam <strong>${fmt(Math.abs(margSeg))}</strong> em receitas para cobrir todos os custos fixos este mês.</p>`
+      }
+    </div>`:''}
+    ${tabelaClass()}
+  `;
+}
+
+function salvarClassPE(catEncoded,tipo){
+  const cat=decodeURIComponent(catEncoded);
+  const cfg=DB.peConfig();
+  cfg.classificacoes=cfg.classificacoes||{};
+  cfg.classificacoes[cat]=tipo;
+  DB.savePeConfig(cfg);
+  // Re-render sem resetar selects
+  renderPE();
 }
 
 // ══════════════════════════════════════════════

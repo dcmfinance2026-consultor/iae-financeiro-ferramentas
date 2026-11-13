@@ -482,7 +482,10 @@ textarea{resize:vertical;min-height:64px}
     <section id="mod-contas" class="module">
       <div class="page-hd">
         <div><h2>Contas a Pagar / Receber</h2><p>Ao marcar como pago, o DRE e o Fluxo de Caixa são atualizados automaticamente</p></div>
-        <button class="btn btn-primary btn-sm" onclick="abrirContaForm()">+ Lançamento</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="abrirImportacaoCSV()">↑ Importar CSV</button>
+          <button class="btn btn-primary btn-sm" onclick="abrirContaForm()">+ Lançamento</button>
+        </div>
       </div>
       <div class="tabs">
         <button class="tab active" onclick="contasTab('pagar',this)">💸 A Pagar</button>
@@ -1598,7 +1601,250 @@ function deletarConta(id){
   DB.saveContas(DB.contas().filter(c=>c.id!==id)); renderContas();
 }
 
-function confirmarPagamento(id){
+// ══════════════════════════════════════════════
+// IMPORTAÇÃO CSV — Omie / Conta Azul / Genérico
+// ══════════════════════════════════════════════
+
+const _IMP_FIELDS={
+  descricao:['fornecedor','cliente','nome do cliente','nome do fornecedor','razão social','razao social','descrição','descricao','histórico','historico','documento','nome','description'],
+  valor:['valor','valor previsto','valor do título','valor do titulo','total','montante','amount','value','vlr'],
+  vencimento:['data prevista','vencimento','data de vencimento','data vencimento','dt. vencimento','dt vencimento','due date'],
+  dataPagamento:['data pagamento','data do pagamento','data de pagamento','data liquidação','data liquidacao','dt. pagamento','dt pagamento','data baixa','data recebimento','payment date'],
+  status:['status','situação','situacao'],
+  categoria:['categoria','classificação','classificacao','plano de contas','category','tipo de despesa'],
+  contato:['pessoa','contato'],
+  tipo:['tipo','natureza','type'],
+};
+
+let _impDados=null;
+
+function _impFindCol(headers,candidates){
+  const h=headers.map(x=>(x||'').toLowerCase().trim());
+  for(const c of candidates){
+    const i=h.findIndex(x=>x===c||x.startsWith(c)||c.startsWith(x));
+    if(i>=0) return i;
+  }
+  return -1;
+}
+
+function _impParseCSV(text){
+  const lines=text.trim().split(/\r?\n/);
+  if(!lines.length) return null;
+  const first=lines[0];
+  const semi=(first.match(/;/g)||[]).length;
+  const com=(first.match(/,/g)||[]).length;
+  const sep=semi>=com?';':',';
+  function parseLine(line){
+    const res=[]; let f='',q=false;
+    for(let i=0;i<line.length;i++){
+      const c=line[i];
+      if(c==='"'){q=!q;}
+      else if(c===sep&&!q){res.push(f.trim());f='';}
+      else f+=c;
+    }
+    res.push(f.trim()); return res;
+  }
+  const headers=parseLine(lines[0]);
+  const rows=lines.slice(1).filter(l=>l.trim()).map(l=>parseLine(l));
+  return {headers,rows};
+}
+
+function _impParseDataBR(val){
+  if(!val) return '';
+  val=String(val).trim().replace(/["']/g,'');
+  const m1=val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(m1) return `${m1[3]}-${m1[2].padStart(2,'0')}-${m1[1].padStart(2,'0')}`;
+  if(/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+  const m2=val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+  if(m2) return `20${m2[3]}-${m2[2].padStart(2,'0')}-${m2[1].padStart(2,'0')}`;
+  return '';
+}
+
+function _impParseValor(val){
+  if(!val) return 0;
+  let s=String(val).trim().replace(/\s/g,'').replace(/[R$]/g,'');
+  if(s.includes(',')&&s.includes('.')){
+    const lastDot=s.lastIndexOf('.');
+    const lastCom=s.lastIndexOf(',');
+    if(lastCom>lastDot) s=s.replace(/\./g,'').replace(',','.');
+    else s=s.replace(/,/g,'');
+  } else if(s.includes(',')) s=s.replace(',','.');
+  return +s||0;
+}
+
+function _impMapStatus(val){
+  if(!val) return 'pendente';
+  const v=(val||'').toLowerCase();
+  if(['pago','liquidado','recebido','baixado','quitado','concluído','concluido','realizado','settled','paid'].some(s=>v.includes(s))) return 'pago';
+  return 'pendente';
+}
+
+function _impMapTipo(val,defaultTipo){
+  if(!val) return defaultTipo||'pagar';
+  const v=(val||'').toLowerCase();
+  if(['receita','receber','entrada','income','credit','crédito','credito'].some(s=>v.includes(s))) return 'receber';
+  if(['despesa','pagar','saída','saida','expense','debit','débito','debito'].some(s=>v.includes(s))) return 'pagar';
+  return defaultTipo||'pagar';
+}
+
+function abrirImportacaoCSV(){
+  _impDados=null;
+  openModal('↑ Importar CSV — Contas',`
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="alert alert-info" style="font-size:12px">
+        📄 Exporte as contas a pagar/receber do <strong>Omie</strong> ou <strong>Conta Azul</strong> em CSV e importe aqui. Os campos são mapeados automaticamente.
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="fg">
+          <label>Origem do arquivo</label>
+          <select id="imp-source">
+            <option value="omie">Omie</option>
+            <option value="contaazul">Conta Azul</option>
+            <option value="generico">Outro / Genérico</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Tipo de conta</label>
+          <select id="imp-tipo">
+            <option value="auto">Detectar automaticamente</option>
+            <option value="pagar">Contas a Pagar</option>
+            <option value="receber">Contas a Receber</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Arquivo CSV <span style="color:var(--texto-s);font-size:11px">(.csv ou .txt com separador ; ou ,)</span></label>
+        <input type="file" id="imp-file" accept=".csv,.txt" style="cursor:pointer"
+          onchange="lerArquivoCSV(this)">
+      </div>
+      <div id="imp-preview"></div>
+    </div>
+  `,`
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" id="imp-btn-confirmar" onclick="confirmarImportacaoCSV()" disabled>Importar</button>
+  `);
+}
+
+function lerArquivoCSV(input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const source=v('imp-source'), tipoDefault=v('imp-tipo');
+    const parsed=_impParseCSV(e.target.result);
+    if(!parsed||!parsed.headers.length){
+      document.getElementById('imp-preview').innerHTML=`<div class="alert" style="background:rgba(220,50,50,.08);color:var(--danger)">❌ Não foi possível ler o arquivo. Verifique se é um CSV válido.</div>`;
+      return;
+    }
+    const {headers,rows}=parsed;
+    // Auto-map columns
+    const map={};
+    for(const [field,cands] of Object.entries(_IMP_FIELDS)){
+      const idx=_impFindCol(headers,cands);
+      map[field]=idx;
+    }
+    // Convert rows to contas
+    const contas=rows.map(row=>{
+      const get=i=>i>=0&&i<row.length?(row[i]||''):'';
+      const tipoRaw=map.tipo>=0?get(map.tipo):'';
+      const tipo=tipoDefault==='auto'?_impMapTipo(tipoRaw):tipoDefault;
+      const status=_impMapStatus(get(map.status));
+      const dataPag=_impParseDataBR(get(map.dataPagamento));
+      return {
+        _desc:get(map.descricao)||'(sem descrição)',
+        _valor:_impParseValor(get(map.valor)),
+        _venc:_impParseDataBR(get(map.vencimento)),
+        _dataPag:status==='pago'?dataPag:'',
+        _status:status,
+        _tipo:tipo,
+        _categoria:get(map.categoria),
+        _contato:get(map.contato)||(map.descricao>=0?get(map.descricao):''),
+      };
+    }).filter(c=>c._valor>0);
+
+    _impDados={contas,source,tipoDefault};
+
+    const erros=contas.filter(c=>!c._venc).length;
+    const dupl=contas.filter(c=>{
+      const existe=DB.contas().some(x=>x.descricao===c._desc&&x.vencimento===c._venc&&x.valor===c._valor);
+      return existe;
+    }).length;
+
+    // Mapeamento encontrado
+    const colMapped=Object.entries(map).filter(([,v])=>v>=0).map(([k])=>k);
+    const colMissing=Object.entries(map).filter(([k,v])=>v<0&&['descricao','valor','vencimento'].includes(k)).map(([k])=>k);
+
+    document.getElementById('imp-preview').innerHTML=`
+      <div style="border:1px solid var(--borda);border-radius:8px;overflow:hidden">
+        <div style="padding:10px 14px;background:var(--fundo);font-size:12px;display:flex;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--borda)">
+          <span>📋 <strong>${contas.length}</strong> lançamentos encontrados</span>
+          <span style="color:var(--ok)">✅ Campos mapeados: ${colMapped.join(', ')}</span>
+          ${colMissing.length?`<span style="color:var(--danger)">⚠ Não encontrado: ${colMissing.join(', ')}</span>`:''}
+          ${erros?`<span style="color:var(--warn)">⚠ ${erros} sem data de vencimento (serão ignorados)</span>`:''}
+          ${dupl?`<span style="color:var(--warn)">⚠ ${dupl} possível(is) duplicata(s)</span>`:''}
+        </div>
+        <div style="max-height:220px;overflow-y:auto">
+          <table style="width:100%;font-size:12px;border-collapse:collapse">
+            <thead><tr style="background:var(--fundo)">
+              <th style="padding:6px 10px;text-align:left">Descrição</th>
+              <th style="padding:6px 10px;text-align:left">Tipo</th>
+              <th style="padding:6px 10px;text-align:left">Vencimento</th>
+              <th style="padding:6px 10px;text-align:right">Valor</th>
+              <th style="padding:6px 10px;text-align:left">Status</th>
+            </tr></thead>
+            <tbody>
+              ${contas.slice(0,20).map(c=>`
+                <tr style="border-top:1px solid var(--borda)">
+                  <td style="padding:5px 10px">${esc(c._desc.slice(0,40))}</td>
+                  <td style="padding:5px 10px"><span class="badge ${c._tipo==='receber'?'b-ok':'b-warn'}" style="font-size:10px">${c._tipo==='receber'?'Receber':'Pagar'}</span></td>
+                  <td style="padding:5px 10px;${!c._venc?'color:var(--danger)':''}">${c._venc?fmtData(c._venc):'⚠ inválida'}</td>
+                  <td style="padding:5px 10px;text-align:right">${fmt(c._valor)}</td>
+                  <td style="padding:5px 10px"><span class="badge ${c._status==='pago'?'b-ok':'b-warn'}" style="font-size:10px">${c._status==='pago'?'Pago':'Pendente'}</span></td>
+                </tr>`).join('')}
+              ${contas.length>20?`<tr><td colspan="5" style="padding:6px 10px;color:var(--texto-s);font-size:11px">... e mais ${contas.length-20} lançamentos</td></tr>`:''}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      ${colMissing.length?`<div class="alert" style="background:rgba(220,50,50,.06);color:var(--danger);font-size:12px;margin-top:8px">⚠ Campos obrigatórios não encontrados (<strong>${colMissing.join(', ')}</strong>). A importação pode estar incompleta.</div>`:''}
+    `;
+
+    const btn=document.getElementById('imp-btn-confirmar');
+    if(btn){ btn.disabled=contas.filter(c=>c._venc).length===0; btn.textContent=`Importar ${contas.filter(c=>c._venc).length} lançamentos`; }
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+function confirmarImportacaoCSV(){
+  if(!_impDados) return;
+  const {contas}=_impDados;
+  const validos=contas.filter(c=>c._venc&&c._valor>0);
+  if(!validos.length){ toast('Nenhum lançamento válido para importar.'); return; }
+
+  const lista=DB.contas();
+  let importados=0, ignorados=0;
+  validos.forEach(c=>{
+    const dupl=lista.some(x=>x.descricao===c._desc&&x.vencimento===c._venc&&Math.abs(x.valor-c._valor)<0.01);
+    if(dupl){ ignorados++; return; }
+    const obj={
+      id:uid(), tipo:c._tipo, tipoCusto:c._tipo==='receber'?'receita':'despesa',
+      descricao:c._desc, valor:c._valor, vencimento:c._venc,
+      contatoId:'', contato:c._contato||'',
+      categoria:c._categoria||'', orcLinha:c._categoria||'',
+      projetoId:'', centroCusto:'', obs:'Importado via CSV',
+      status:c._status, dataPagamento:c._dataPag||'', criado:hoje(), importado:true,
+    };
+    lista.push(obj);
+    if(obj.status==='pago') DB.syncContaToDRE(obj);
+    importados++;
+  });
+  DB.saveContas(lista);
+  closeModal();
+  renderContas();
+  toast(`✓ ${importados} lançamento(s) importado(s)${ignorados?` · ${ignorados} duplicata(s) ignorada(s)`:''}.`);
+}
+
+
   const c=DB.contas().find(x=>x.id===id);
   if(!c) return;
   const labelAcao=c.tipo==='receber'?'Recebido':'Pago';

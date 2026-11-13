@@ -1551,7 +1551,7 @@ function salvarPerda(itemId){
   toast(`✓ Perda registrada: ${qty} ${item.unidade||'un'} de "${item.descricao||item.nome||''}" — ${fmt(valor)} lançado no DRE.`);
 }
 
-
+function gerarLote(){
   const d=new Date();
   const ym=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;
   const cnt=DB.estoque().filter(i=>i.lote&&i.lote.startsWith(`LOT-${ym}`)).length+1;
@@ -2015,6 +2015,7 @@ function confirmarImportacaoCSV(){
 }
 
 
+function confirmarPagamento(id){
   const c=DB.contas().find(x=>x.id===id);
   if(!c) return;
   const labelAcao=c.tipo==='receber'?'Recebido':'Pago';

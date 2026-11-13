@@ -53,16 +53,45 @@ body{font-family:'Nunito',sans-serif;background:var(--creme);color:var(--texto);
 #topbar{height:var(--top-h);background:var(--verde);display:flex;align-items:center;padding:0 16px;gap:10px;border-bottom:2px solid var(--dourado);flex-shrink:0;z-index:50}
 .tb-brand{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .tb-emblem{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--dourado),#A07828);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--verde);font-family:'Playfair Display',serif}
-#tb-nome{font-family:'Playfair Display',serif;color:#FAF0D8;font-size:14px;font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tb-sep{color:rgba(250,240,216,.2);font-size:18px;flex-shrink:0}
-.nav-tabs{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none}
-.nav-tabs::-webkit-scrollbar{display:none}
-.nav-tab{background:none;border:none;color:rgba(250,240,216,.55);padding:6px 13px;border-radius:6px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;white-space:nowrap;transition:.15s}
-.nav-tab:hover{background:rgba(255,255,255,.08);color:rgba(250,240,216,.85)}
-.nav-tab.active{background:rgba(196,154,60,.2);color:var(--dourado-c)}
+#tb-nome{font-family:'Playfair Display',serif;color:#FAF0D8;font-size:14px;font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tb-right{display:flex;gap:6px;align-items:center;margin-left:auto;flex-shrink:0}
+#sidebar-toggle{display:none;background:none;border:none;color:rgba(250,240,216,.7);font-size:18px;cursor:pointer;padding:6px 8px;border-radius:6px;line-height:1}
+#sidebar-toggle:hover{background:rgba(255,255,255,.1)}
+/* SIDEBAR + BODY */
+#app-body{display:flex;flex:1;overflow:hidden}
+#sidebar{
+  width:210px;flex-shrink:0;
+  background:var(--verde);
+  border-right:1px solid rgba(196,154,60,.2);
+  display:flex;flex-direction:column;
+  overflow-y:auto;scrollbar-width:none;
+  transition:width .22s ease,opacity .22s ease;
+  z-index:20;
+}
+#sidebar::-webkit-scrollbar{display:none}
+#sidebar .sidebar-header{padding:14px 12px 6px;font-family:'Playfair Display',serif;font-size:11px;font-weight:600;color:rgba(196,154,60,.5);letter-spacing:.8px;text-transform:uppercase;white-space:nowrap;overflow:hidden}
+.nav-tabs{display:flex;flex-direction:column;gap:2px;padding:4px 8px 16px;flex:1}
+.nav-tab{
+  background:none;border:none;
+  color:rgba(250,240,216,.6);
+  padding:9px 13px;border-radius:8px;
+  cursor:pointer;font-family:'Nunito',sans-serif;font-size:12.5px;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  transition:.15s;text-align:left;width:100%;
+  border-left:3px solid transparent;
+}
+.nav-tab:hover{background:rgba(255,255,255,.08);color:rgba(250,240,216,.9)}
+.nav-tab.active{background:rgba(196,154,60,.18);color:var(--dourado-c);border-left-color:var(--dourado)}
 #content{flex:1;overflow-y:auto;background:var(--creme)}
 .module{display:none;padding:28px;max-width:1200px;margin:0 auto}
+/* Sidebar overlay on mobile */
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:19}
+@media(max-width:768px){
+  #sidebar-toggle{display:block}
+  #sidebar{position:fixed;top:var(--top-h);left:0;bottom:0;width:220px;transform:translateX(-100%);transition:transform .25s ease}
+  #sidebar.open{transform:translateX(0)}
+  #sidebar-overlay.open{display:block}
+}
 .module.active{display:block}
 
 /* BUTTONS */
@@ -413,14 +442,14 @@ textarea{resize:vertical;min-height:64px}
 </div>
 
 <!-- ══════════════ APP VIEW ══════════════ -->
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
 <div id="view-app" style="display:none">
   <header id="topbar">
+    <button id="sidebar-toggle" onclick="toggleSidebar()" title="Menu">☰</button>
     <div class="tb-brand">
       <div class="tb-emblem">IAê</div>
       <span id="tb-nome">Sistema</span>
     </div>
-    <span class="tb-sep">|</span>
-    <div class="nav-tabs" id="nav-tabs"></div>
     <div class="tb-right">
       <span id="tb-user" class="tb-user-info"></span>
       <button id="btn-backup" class="btn-ghost" onclick="exportBackup()" title="Salvar backup no computador">↓ Backup</button><button class="btn-ghost" style="color:rgba(250,240,216,.45);font-size:12px;padding:4px 7px" onclick="abrirConfigBackup()" title="Configurar backup automático">⚙</button>
@@ -428,7 +457,12 @@ textarea{resize:vertical;min-height:64px}
       <button class="btn-ghost" style="color:rgba(250,240,216,.45)" onclick="goHome()">← Voltar</button>
     </div>
   </header>
-  <div id="content">
+  <div id="app-body">
+    <nav id="sidebar">
+      <div class="sidebar-header">Módulos</div>
+      <div class="nav-tabs" id="nav-tabs"></div>
+    </nav>
+    <div id="content">
 
     <!-- DASHBOARD -->
     <section id="mod-dashboard" class="module active">
@@ -601,6 +635,7 @@ textarea{resize:vertical;min-height:64px}
     </section>
 
   </div><!-- /content -->
+  </div><!-- /app-body -->
 </div><!-- /view-app -->
 
 <!-- MODAL -->
@@ -849,6 +884,16 @@ function renderNavTabs(){
   ).join('');
 }
 
+function toggleSidebar(){
+  const s=document.getElementById('sidebar');
+  const o=document.getElementById('sidebar-overlay');
+  s.classList.toggle('open');
+  o.classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('sidebar-overlay')?.classList.remove('open');
+}
 function goMod(id){
   document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
   const m=document.getElementById('mod-'+id);
@@ -857,6 +902,7 @@ function goMod(id){
   const tab=document.getElementById('navtab-'+id);
   if(tab) tab.classList.add('active');
   modAtivo=id;
+  closeSidebar();
   const R={dashboard:renderDashboard,crm:renderCRM,estoque:renderEstoque,contas:renderContas,dre:renderDRE,fluxo:renderFluxo,orcamento:renderOrcamento,kpis:renderKPIs,projeto:renderProjeto,pe:renderPE,cc:renderCC};
   if(R[id]) R[id]();
 }

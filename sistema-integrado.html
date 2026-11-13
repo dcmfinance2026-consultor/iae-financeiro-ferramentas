@@ -464,7 +464,10 @@ textarea{resize:vertical;min-height:64px}
     <section id="mod-estoque" class="module">
       <div class="page-hd">
         <div><h2>Estoque</h2><p>Itens com cálculo automático de preço de venda a partir do custo + impostos + margem</p></div>
-        <button class="btn btn-primary btn-sm" onclick="abrirEstoqueForm()">+ Item</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" id="btn-abc" onclick="toggleABC()">📊 Curva ABC</button>
+          <button class="btn btn-primary btn-sm" onclick="abrirEstoqueForm()">+ Item</button>
+        </div>
       </div>
       <div class="filters">
         <input id="est-busca" placeholder="Buscar item, lote ou fornecedor..." oninput="renderEstoque()" style="width:220px">
@@ -476,6 +479,7 @@ textarea{resize:vertical;min-height:64px}
         <table><thead><tr><th>Lote</th><th>Descrição</th><th>Categoria</th><th>Fornecedor</th><th>Qtd</th><th>Custo Unit.</th><th>Preço Venda</th><th>Margem</th><th>Status</th><th></th></tr></thead>
         <tbody id="est-tbody"></tbody></table>
       </div>
+      <div id="est-abc" style="display:none;margin-top:16px"></div>
     </section>
 
     <!-- CONTAS -->
@@ -692,6 +696,8 @@ const DB = {
   // Estoque
   estoque(){ return this.get('estoque',[]); },
   saveEstoque(v){ this.set('estoque',v); },
+  perdasEstoque(){ return this.get('perdas_estoque',[]); },
+  savePerdasEstoque(v){ this.set('perdas_estoque',v); },
 
   // Contas
   contas(){ return this.get('contas',[]); },
@@ -1236,10 +1242,15 @@ function renderEstoque(){
       <td style="white-space:nowrap;display:flex;gap:4px">
         <button class="btn btn-outline btn-xs" onclick="abrirEstoqueForm('${i.id}')">✏</button>
         ${feats.includes('contas')?`<button class="btn btn-xs" style="background:rgba(196,154,60,.1);color:var(--marrom);border:1px solid rgba(196,154,60,.3)" onclick="estoqueParaConta('${i.id}')" title="Criar conta a pagar para este item">💳</button>`:''}
+        <button class="btn btn-xs" style="background:rgba(230,120,0,.08);color:var(--warn);border:1px solid var(--warn)" onclick="abrirPerdaForm('${i.id}')" title="Registrar perda ou quebra">📉</button>
         <button class="btn btn-xs" style="background:none;color:var(--danger);border:1px solid var(--danger)" onclick="deletarEstoque('${i.id}')">🗑</button>
       </td>
     </tr>`;
   }).join(''):`<tr><td colspan="10" style="text-align:center;color:var(--texto-s);padding:30px">Nenhum item. <button class="btn btn-primary btn-xs" onclick="abrirEstoqueForm()">+ Adicionar</button></td></tr>`;
+
+  // Curva ABC
+  const abcEl=document.getElementById('est-abc');
+  if(abcEl){ if(_estViewABC){abcEl.style.display='';renderABC();}else abcEl.style.display='none'; }
 }
 
 function abrirEstoqueForm(id=null){
@@ -1381,7 +1392,166 @@ function deletarEstoque(id){
   DB.saveEstoque(DB.estoque().filter(i=>i.id!==id)); renderEstoque();
 }
 
-function gerarLote(){
+// ── Curva ABC ──────────────────────────────────
+let _estViewABC=false;
+function toggleABC(){
+  _estViewABC=!_estViewABC;
+  const btn=document.getElementById('btn-abc');
+  if(btn){ btn.classList.toggle('btn-primary',_estViewABC); btn.classList.toggle('btn-outline',!_estViewABC); }
+  renderEstoque();
+}
+
+function renderABC(){
+  const items=DB.estoque().filter(i=>(+i.quantidade||0)>0);
+  const pv=i=>calcPV(i.custoUnit,i.frete,i.outros,i.impostos,i.margem);
+  const val=i=>(+i.quantidade||0)*pv(i);
+  const sorted=[...items].sort((a,b)=>val(b)-val(a));
+  const total=sorted.reduce((s,i)=>s+val(i),0);
+  if(!sorted.length){
+    document.getElementById('est-abc').innerHTML=`<div class="alert alert-info">Nenhum item com estoque para exibir a Curva ABC.</div>`;
+    return;
+  }
+  let cum=0;
+  const clsOf=(pct)=>pct<=80?'A':pct<=95?'B':'C';
+  const clsColor={'A':'var(--ok)','B':'var(--warn)','C':'var(--danger)'};
+  let cA=0,cB=0,cC=0,vA=0,vB=0,vC=0;
+  const rows=sorted.map((i,idx)=>{
+    const v=val(i);
+    const pIndiv=total>0?v/total*100:0;
+    cum+=pIndiv;
+    const cls=clsOf(cum);
+    if(cls==='A'){cA++;vA+=v;}else if(cls==='B'){cB++;vB+=v;}else{cC++;vC+=v;}
+    return `<tr>
+      <td style="color:var(--texto-s)">${idx+1}</td>
+      <td><strong>${esc(i.descricao||i.nome||'—')}</strong>${i.categoria?`<br><small style="color:var(--texto-s)">${esc(i.categoria)}</small>`:''}
+      </td>
+      <td>${i.quantidade} ${esc(i.unidade||'un')}</td>
+      <td>${fmt(v)}</td>
+      <td>${pIndiv.toFixed(1)}%</td>
+      <td>${Math.min(cum,100).toFixed(1)}%</td>
+      <td><span class="badge" style="background:${clsColor[cls]}20;color:${clsColor[cls]};font-weight:700;font-size:13px">${cls}</span></td>
+    </tr>`;
+  });
+  document.getElementById('est-abc').innerHTML=`
+    <h3 style="margin:0 0 12px;font-size:14px;font-weight:700">📊 Curva ABC — Análise por Valor em Estoque</h3>
+    <div class="stat-grid" style="margin-bottom:16px">
+      <div class="stat-card" style="border-left-color:var(--ok)">
+        <div class="stat-label">Classe A — Foco Máximo</div>
+        <div class="stat-val" style="color:var(--ok)">${cA} ${cA===1?'item':'itens'}</div>
+        <div class="stat-sub">${fmt(vA)} · 80% do valor</div>
+      </div>
+      <div class="stat-card" style="border-left-color:var(--warn)">
+        <div class="stat-label">Classe B — Atenção</div>
+        <div class="stat-val" style="color:var(--warn)">${cB} ${cB===1?'item':'itens'}</div>
+        <div class="stat-sub">${fmt(vB)} · 80–95% do valor</div>
+      </div>
+      <div class="stat-card" style="border-left-color:var(--danger)">
+        <div class="stat-label">Classe C — Revisão</div>
+        <div class="stat-val" style="color:var(--danger)">${cC} ${cC===1?'item':'itens'}</div>
+        <div class="stat-sub">${fmt(vC)} · cauda do estoque</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Valor Total (PV)</div>
+        <div class="stat-val">${fmt(total)}</div>
+        <div class="stat-sub">${sorted.length} itens com estoque</div>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Produto</th><th>Qtd</th><th>Valor Total</th><th>% Indiv.</th><th>% Acum.</th><th>Classe</th></tr></thead>
+        <tbody>${rows.join('')}</tbody>
+      </table>
+    </div>
+    <div class="alert alert-info" style="margin-top:10px;font-size:12px">
+      💡 <strong>Classe A:</strong> priorize reposição e controle rigoroso. <strong>Classe B:</strong> monitore regularmente. <strong>Classe C:</strong> avalie se vale manter em estoque.
+    </div>
+  `;
+}
+
+// ── Perdas e Quebras ───────────────────────────
+function abrirPerdaForm(itemId){
+  const item=DB.estoque().find(i=>i.id===itemId);
+  if(!item) return;
+  openModal('📉 Registrar Perda / Quebra',`
+    <div class="fg"><label>Produto</label>
+      <input value="${esc(item.descricao||item.nome||'')}" disabled style="opacity:.7;background:var(--fundo)">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="fg"><label>Quantidade perdida *</label>
+        <input type="number" id="pf-qty" min="0.01" step="0.01" max="${item.quantidade}" placeholder="0"
+          oninput="calcPerdaValor('${itemId}')">
+      </div>
+      <div class="fg"><label>Data *</label>
+        <input type="date" id="pf-data" value="${hoje()}">
+      </div>
+    </div>
+    <div class="fg"><label>Valor da perda (R$) *</label>
+      <input id="pf-valor" type="number" placeholder="Calculado automaticamente" step="0.01"
+        oninput="this._manual=true">
+    </div>
+    <div class="fg"><label>Motivo</label>
+      <input id="pf-motivo" placeholder="Ex: produto vencido, dano no transporte, furto...">
+    </div>
+    <div style="font-size:12px;color:var(--texto-s);margin-top:4px">
+      Estoque atual: <strong>${item.quantidade} ${item.unidade||'un'}</strong> · Custo unit.: <strong>${fmt(item.custoUnit)}</strong>
+    </div>
+  `,`
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="salvarPerda('${itemId}')">Registrar Perda</button>
+  `);
+}
+
+function calcPerdaValor(itemId){
+  const item=DB.estoque().find(i=>i.id===itemId);
+  if(!item) return;
+  const qty=+document.getElementById('pf-qty')?.value||0;
+  const valEl=document.getElementById('pf-valor');
+  if(valEl&&!valEl._manual) valEl.value=(qty*(+item.custoUnit||0)).toFixed(2);
+}
+
+function salvarPerda(itemId){
+  const item=DB.estoque().find(i=>i.id===itemId);
+  if(!item) return;
+  const qty=+v('pf-qty');
+  const valor=+v('pf-valor');
+  const data=v('pf-data');
+  const motivo=v('pf-motivo').trim();
+  if(!qty||qty<=0){alert('Informe a quantidade perdida.');return;}
+  if(qty>item.quantidade){alert(`Quantidade maior que o estoque atual (${item.quantidade}).`);return;}
+  if(!valor||valor<=0){alert('Informe o valor da perda.');return;}
+  if(!data){alert('Informe a data.');return;}
+
+  // 1. Reduz estoque
+  const estList=DB.estoque();
+  const idx=estList.findIndex(i=>i.id===itemId);
+  estList[idx]={...estList[idx],quantidade:item.quantidade-qty};
+  DB.saveEstoque(estList);
+
+  // 2. Log da perda
+  const perdas=DB.perdasEstoque();
+  perdas.push({id:uid(),itemId,itemNome:item.descricao||item.nome||'',quantidade:qty,valor,data,motivo,criado:hoje()});
+  DB.savePerdasEstoque(perdas);
+
+  // 3. Conta a pagar paga → DRE como CMV
+  const conta={
+    id:uid(),tipo:'pagar',tipoCusto:'cmv',
+    descricao:`Perda/Quebra — ${item.descricao||item.nome||''}`,
+    valor,vencimento:data,contatoId:'',contato:'',
+    categoria:'Perdas / Quebras',orcLinha:'CMV / Custo de Mercadorias',
+    projetoId:'',centroCusto:'',obs:motivo||'Perda registrada no estoque',
+    status:'pago',dataPagamento:data,criado:hoje(),
+  };
+  const contas=DB.contas();
+  contas.push(conta);
+  DB.saveContas(contas);
+  DB.syncContaToDRE(conta);
+
+  closeModal();
+  renderEstoque();
+  toast(`✓ Perda registrada: ${qty} ${item.unidade||'un'} de "${item.descricao||item.nome||''}" — ${fmt(valor)} lançado no DRE.`);
+}
+
+
   const d=new Date();
   const ym=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;
   const cnt=DB.estoque().filter(i=>i.lote&&i.lote.startsWith(`LOT-${ym}`)).length+1;
@@ -2784,6 +2954,10 @@ function renderKPIs(){
   const pmp=pendPag.length?pendPag.reduce((a,c)=>a+Math.max(0,diffDias(c.vencimento)),0)/pendPag.length:0;
   const est=DB.estoque();
   const valEst=est.reduce((a,i)=>{const pv=calcPV(i.custoUnit,i.frete,i.outros,i.impostos,i.margem);return a+pv*(+i.quantidade||0);},0);
+  const valEstCusto=est.reduce((a,i)=>a+(+i.custoUnit||0)*(+i.quantidade||0),0);
+  const giro=valEstCusto>0?k.cmv/valEstCusto:0;
+  const diasEstoque=giro>0?30/giro:0;
+  const ncg=valEstCusto+k.cr-k.cp;
   const proj=DB.projetos();
   const feats=sistemaAtual?.ferramentas||[];
 
@@ -2812,6 +2986,7 @@ function renderKPIs(){
       ${kCard('A Receber',fmt(k.cr),'','Em aberto (pendente/vencido)','var(--info)')}
       ${kCard('A Pagar',fmt(k.cp),'','Em aberto (pendente/vencido)','var(--warn)')}
       ${kCard('Capital de Giro Líq.',fmt(k.cr-k.cp),'','A Receber − A Pagar',k.cr>=k.cp?'var(--ok)':'var(--danger)')}
+      ${kCard('NCG',fmt(ncg),'','Estoque (custo) + A/R − A/P',ncg<0?'var(--danger)':ncg>k.rec*0.3&&k.rec>0?'var(--warn)':'var(--ok)',ncg<0?'⚠ NCG negativo — atenção':ncg>k.rec*0.3&&k.rec>0?`⚠ ${pct(ncg/k.rec*100)} da receita`:'✓ Equilibrado')}
       ${kCard('PMR',Math.round(pmr)+' dias','','Prazo médio de recebimento',pmr<=30?'var(--ok)':pmr<=60?'var(--warn)':'var(--danger)',pmr<=30?'✓ Bom':pmr<=60?'Atenção':'⚠ Longo')}
       ${kCard('PMP',Math.round(pmp)+' dias','','Prazo médio de pagamento',pmp>=30?'var(--ok)':'var(--warn)',pmp>=30?'✓ Bom':'Atenção')}
     </div>
@@ -2819,6 +2994,8 @@ function renderKPIs(){
       ${kCard('Valor em Estoque',fmt(valEst),'','Preço venda × quantidade','var(--info)')}
       ${kCard('Total de Itens',est.length+'','itens cadastrados','SKUs no sistema','var(--verde)')}
       ${kCard('Abaixo do Mínimo',est.filter(i=>i.qtdMin>0&&+i.quantidade<+i.qtdMin).length+'','itens','Necessitam reposição',est.filter(i=>i.qtdMin>0&&+i.quantidade<+i.qtdMin).length?'var(--danger)':'var(--ok)')}
+      ${kCard('Giro de Estoque',giro>0?giro.toFixed(2)+'×':'—','','CMV ÷ Estoque (custo)',giro>=1?'var(--ok)':giro>0?'var(--warn)':'var(--texto-s)',giro>=1?'✓ Giro saudável':giro>0?'⚠ Estoque parado':'— Sem CMV no período')}
+      ${kCard('Dias de Estoque',diasEstoque>0?Math.round(diasEstoque)+' dias':'—','','Cobertura atual do inventário',diasEstoque<=30?'var(--ok)':diasEstoque<=60?'var(--warn)':'var(--danger)',diasEstoque<=30?'✓ Cobertura ótima':diasEstoque<=60?'Atenção':'⚠ Excesso de estoque')}
     </div>`:''}
     ${feats.includes('projeto')&&proj.length?`${sec('PROJETOS')}<div class="stat-grid">
       ${kCard('Projetos Ativos',proj.filter(p=>p.status==='ativo').length+'','','De '+proj.length+' total','var(--info)')}

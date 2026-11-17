@@ -452,7 +452,7 @@ textarea{resize:vertical;min-height:64px}
     </div>
     <div class="tb-right">
       <span id="tb-user" class="tb-user-info"></span>
-      <button id="btn-backup" class="btn-ghost" onclick="exportBackup()" title="Salvar backup no computador">↓ Backup</button><button class="btn-ghost" style="color:rgba(250,240,216,.45);font-size:12px;padding:4px 7px" onclick="abrirConfigBackup()" title="Configurar backup automático">⚙</button>
+      <button id="btn-backup" class="btn-ghost" onclick="exportBackup()" title="Salvar backup no computador">↓ Backup</button><button class="btn-ghost" style="color:rgba(250,240,216,.45);font-size:12px;padding:4px 7px" onclick="abrirImportBackup()" title="Restaurar backup de arquivo .json">↑ Restaurar</button><button class="btn-ghost" style="color:rgba(250,240,216,.45);font-size:12px;padding:4px 7px" onclick="abrirConfigBackup()" title="Configurar backup automático">⚙</button>
       <button class="btn-ghost" style="color:rgba(250,240,216,.45)" onclick="authLogout()">Sair</button>
       <button class="btn-ghost" style="color:rgba(250,240,216,.45)" onclick="goHome()">← Voltar</button>
     </div>
@@ -3672,6 +3672,76 @@ function salvarConfigBackup(){
   closeModal();
   verificarAutoBackup();
   toast('✓ Configuração de backup salva.');
+}
+
+function abrirImportBackup(){
+  openModal('↑ Restaurar Backup',`
+    <div class="alert alert-warn" style="margin-bottom:16px">⚠ <strong>Atenção:</strong> restaurar um backup <strong>substitui todos os dados atuais</strong> deste sistema pelo conteúdo do arquivo. Esta ação não pode ser desfeita. Faça um backup do estado atual antes de prosseguir.</div>
+    <div class="fg" style="margin-bottom:16px">
+      <label>Selecione o arquivo de backup <code>.json</code></label>
+      <input type="file" id="bkp-file" accept=".json" style="margin-top:8px;width:100%;padding:8px;border:1px solid rgba(196,154,60,.3);border-radius:8px;background:var(--creme);font-family:inherit;font-size:13px" onchange="previewBackup()">
+    </div>
+    <div id="bkp-preview" style="display:none;padding:14px;background:rgba(27,59,40,.05);border-radius:8px;border:1px solid rgba(27,59,40,.15);font-size:13px;line-height:1.7"></div>
+  `,`<button class="btn btn-primary" id="bkp-btn-restore" onclick="confirmarRestore()" disabled>Restaurar dados</button>
+     <button class="btn btn-outline" onclick="exportBackup();toast('✓ Backup atual salvo. Agora pode restaurar com segurança.')">↓ Salvar backup atual primeiro</button>
+     <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>`);
+}
+
+let _backupPendente=null;
+
+function previewBackup(){
+  const file=document.getElementById('bkp-file')?.files?.[0];
+  const prev=document.getElementById('bkp-preview');
+  const btn=document.getElementById('bkp-btn-restore');
+  _backupPendente=null;
+  if(btn) btn.disabled=true;
+  if(!file||!prev) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const bkp=JSON.parse(e.target.result);
+      if(!bkp.v||!bkp.dados||!bkp.sistema){ prev.innerHTML='<span style="color:var(--danger)">❌ Arquivo inválido — não é um backup do fin360graus.</span>'; prev.style.display=''; return; }
+      const nChaves=Object.keys(bkp.dados).length;
+      const exportado=bkp.exportado?fmtData(bkp.exportado.split('T')[0])+' às '+bkp.exportado.split('T')[1]?.slice(0,5):'data desconhecida';
+      prev.innerHTML=`
+        <div><strong>Sistema:</strong> ${esc(bkp.sistema?.nome||'—')}</div>
+        <div><strong>Segmento:</strong> ${esc(bkp.sistema?.segmento||'—')}</div>
+        <div><strong>Exportado em:</strong> ${exportado}</div>
+        <div><strong>Registros:</strong> ${nChaves} chave(s) de dados</div>
+        <div style="margin-top:8px;padding:8px;background:rgba(192,57,43,.07);border-radius:6px;font-size:12px;color:var(--danger)">Os dados atuais deste sistema serão substituídos por este backup.</div>`;
+      prev.style.display='';
+      _backupPendente=bkp;
+      if(btn) btn.disabled=false;
+    }catch{
+      prev.innerHTML='<span style="color:var(--danger)">❌ Arquivo corrompido ou formato inválido.</span>';
+      prev.style.display='';
+    }
+  };
+  reader.readAsText(file);
+}
+
+function confirmarRestore(){
+  if(!_backupPendente) return;
+  const bkp=_backupPendente;
+  if(!confirm(`Confirmar restauração do backup de "${bkp.sistema?.nome||'sistema'}"?\n\nTodos os dados atuais serão substituídos.`)) return;
+  try{
+    // Remove dados atuais do sistema
+    const prefix=`iae_sys_${DB.sid}_`;
+    Object.keys(localStorage).filter(k=>k.startsWith(prefix)).forEach(k=>localStorage.removeItem(k));
+    // Restaura chaves do backup
+    Object.entries(bkp.dados).forEach(([k,v])=>{
+      // Remapeia as chaves para o ID do sistema atual (caso o backup venha de outro sistema)
+      const origPrefix=Object.keys(bkp.dados)[0]?.match(/^iae_sys_([^_]+)_/)?.[1];
+      const novaChave=origPrefix&&origPrefix!==DB.sid?k.replace(`iae_sys_${origPrefix}_`,prefix):k;
+      localStorage.setItem(novaChave,JSON.stringify(v));
+    });
+    closeModal();
+    _backupPendente=null;
+    toast('✅ Backup restaurado com sucesso. Recarregando...','ok',2000);
+    setTimeout(()=>location.reload(),2000);
+  }catch(err){
+    toast('Erro ao restaurar backup: '+err.message,'warn',5000);
+  }
 }
 
 // ══════════════════════════════════════════════

@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle Financeiro — Circuito Olímpico</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0A1628;--navy2:#132238;--navy3:#1E3050;--navy4:#263858;
+  --cyan:#00C9B1;--orange:#FF8C00;--yellow:#FFD700;
+  --red:#FF4455;--green:#00D26A;--blue:#4A9EFF;--purple:#9B59FF;
+  --white:#fff;--gray:#6B8299;--light:#C8D8E8;
+}
+html,body{height:100%;overflow-x:hidden}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--navy);color:var(--white);min-height:100vh}
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
+input,select,textarea{background:var(--navy2);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;color:var(--white);padding:10px 14px;font-size:.95rem;font-family:inherit;width:100%;outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--cyan)}
+input::placeholder,textarea::placeholder{color:var(--gray)}
+label{font-size:.8rem;color:var(--light);margin-bottom:5px;display:block;font-weight:600;letter-spacing:.3px}
+.btn{padding:10px 22px;border-radius:50px;border:none;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn-cyan{background:var(--cyan);color:var(--navy)}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-green{background:var(--green);color:var(--navy)}
+.btn-red{background:rgba(255,68,85,.15);color:var(--red);border:1.5px solid rgba(255,68,85,.3)}
+.btn-ghost{background:rgba(255,255,255,.06);color:var(--light);border:1.5px solid rgba(255,255,255,.1)}
+.btn-ghost:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
+.btn-sm{padding:6px 14px;font-size:.8rem}
+.btn-lg{padding:13px 32px;font-size:1rem}
+.btn-xl{padding:16px 40px;font-size:1.1rem}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.card{background:var(--navy3);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:18px}
+.badge{padding:3px 10px;border-radius:12px;font-size:.7rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:inline-block}
+
+/* ══ SETUP ══════════════════════════════════════ */
+#sc-setup{background:radial-gradient(ellipse at 50% -10%,#1A3050 0%,var(--navy) 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;min-height:100vh}
+.setup-wrap{width:100%;max-width:520px;display:flex;flex-direction:column;gap:20px}
+.setup-logo{text-align:center;margin-bottom:4px}
+.setup-title{font-size:1.8rem;font-weight:900;line-height:1.1;background:linear-gradient(135deg,#fff 30%,var(--cyan) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.setup-sub{font-size:.85rem;color:var(--gray);margin-top:4px}
+.setup-block{background:var(--navy3);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.setup-block h3{font-size:.95rem;font-weight:800;color:var(--cyan);display:flex;align-items:center;gap:7px}
+.insurance-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ins-opt{background:var(--navy2);border:2px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;text-align:center}
+.ins-opt:hover{border-color:rgba(255,255,255,.25)}
+.ins-opt.sel-yes{border-color:var(--green);background:rgba(0,210,106,.08)}
+.ins-opt.sel-no{border-color:var(--gray);background:rgba(107,130,153,.08)}
+.ins-opt .ins-icon{font-size:2rem;margin-bottom:6px}
+.ins-opt .ins-label{font-size:.9rem;font-weight:700}
+.ins-opt .ins-desc{font-size:.72rem;color:var(--gray);margin-top:4px;line-height:1.4}
+.round-sel{display:flex;gap:8px;flex-wrap:wrap}
+.rsel-btn{flex:1;min-width:50px;padding:9px 6px;border-radius:10px;background:var(--navy2);border:2px solid rgba(255,255,255,.1);color:var(--light);font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;text-align:center}
+.rsel-btn.sel{background:rgba(0,201,177,.15);border-color:var(--cyan);color:var(--cyan)}
+
+/* ══ APP HEADER ═════════════════════════════════ */
+#sc-app{display:flex;flex-direction:column;min-height:100vh}
+#app-header{background:var(--navy2);border-bottom:1px solid rgba(255,255,255,.07);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.ah-name{font-size:1rem;font-weight:800;flex:1}
+.ah-round{background:rgba(0,201,177,.12);border:1px solid rgba(0,201,177,.25);color:var(--cyan);border-radius:8px;padding:4px 10px;font-size:.78rem;font-weight:700}
+.ah-ins{background:rgba(0,210,106,.12);border:1px solid rgba(0,210,106,.3);color:var(--green);border-radius:8px;padding:4px 10px;font-size:.78rem;font-weight:700}
+.ah-ins.off{background:rgba(107,130,153,.08);border-color:rgba(107,130,153,.2);color:var(--gray)}
+.ah-bal-wrap{text-align:right}
+.ah-bal-lbl{font-size:.65rem;color:var(--gray);text-transform:uppercase;letter-spacing:.5px}
+.ah-bal{font-size:1.2rem;font-weight:900;line-height:1}
+
+/* ══ APP BODY ═══════════════════════════════════ */
+#app-body{flex:1;padding:14px;display:grid;grid-template-columns:1fr 340px;gap:14px;max-width:1100px;margin:0 auto;width:100%}
+@media(max-width:820px){#app-body{grid-template-columns:1fr}}
+
+/* ══ LEFT PANEL ═════════════════════════════════ */
+.left-panel{display:flex;flex-direction:column;gap:14px}
+
+/* Summary cards */
+.summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:600px){.summary-row{grid-template-columns:1fr 1fr}}
+.sum-card{background:var(--navy3);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 14px}
+.sum-label{font-size:.68rem;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.sum-val{font-size:1.3rem;font-weight:900;line-height:1.1}
+.sum-sub{font-size:.68rem;color:var(--gray);margin-top:3px}
+
+/* Transaction form */
+.tx-form{background:var(--navy3);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.tx-form h3{font-size:.9rem;font-weight:800;display:flex;align-items:center;gap:7px;color:var(--light)}
+.type-tabs{display:flex;gap:8px}
+.type-tab{flex:1;padding:9px;border-radius:10px;border:2px solid rgba(255,255,255,.1);background:var(--navy2);color:var(--gray);font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;text-align:center}
+.type-tab.inc.sel{border-color:var(--green);background:rgba(0,210,106,.1);color:var(--green)}
+.type-tab.exp.sel{border-color:var(--red);background:rgba(255,68,85,.1);color:var(--red)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ins-check{background:rgba(0,210,106,.08);border:1.5px solid rgba(0,210,106,.25);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.ins-check input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
+.ins-check label{font-size:.82rem;color:var(--green);cursor:pointer;margin:0;font-weight:600}
+
+/* Transaction history */
+.tx-history{background:var(--navy3);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden}
+.tx-hist-hd{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06)}
+.tx-hist-hd h3{font-size:.9rem;font-weight:800;color:var(--light);display:flex;align-items:center;gap:7px}
+.tx-hist-filter{display:flex;gap:6px}
+.flt-btn{padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--gray);font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s}
+.flt-btn.sel{background:rgba(0,201,177,.12);border-color:var(--cyan);color:var(--cyan)}
+#tx-list{max-height:300px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
+.tx-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s}
+.tx-row:hover{background:rgba(255,255,255,.03)}
+.tx-row:last-child{border-bottom:none}
+.tx-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.tx-icon.inc{background:rgba(0,210,106,.12)}
+.tx-icon.exp{background:rgba(255,68,85,.1)}
+.tx-info{flex:1;min-width:0}
+.tx-desc{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-meta{font-size:.68rem;color:var(--gray);margin-top:2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.tx-amount{font-size:.95rem;font-weight:800;text-align:right;flex-shrink:0}
+.tx-amount.inc{color:var(--green)}
+.tx-amount.exp{color:var(--red)}
+.tx-del{background:none;border:none;color:var(--gray);cursor:pointer;padding:4px 6px;border-radius:6px;font-size:.8rem;transition:color .15s;flex-shrink:0}
+.tx-del:hover{color:var(--red)}
+.tx-empty{text-align:center;padding:28px;color:var(--gray);font-size:.85rem}
+
+/* ══ RIGHT PANEL (AI) ═══════════════════════════ */
+.right-panel{display:flex;flex-direction:column;gap:14px}
+.ai-panel{background:var(--navy3);border:1px solid rgba(155,89,255,.2);border-radius:14px;overflow:hidden}
+.ai-panel-hd{background:linear-gradient(135deg,rgba(155,89,255,.15),rgba(74,158,255,.08));padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(155,89,255,.15)}
+.ai-panel-hd .ai-icon{font-size:1.3rem}
+.ai-panel-hd h3{font-size:.88rem;font-weight:800;color:#C8AAFF}
+.ai-panel-hd .ai-badge{background:rgba(155,89,255,.2);color:#C8AAFF;border-radius:8px;padding:2px 7px;font-size:.65rem;font-weight:700;margin-left:auto}
+#ai-tips{padding:12px;display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(155,89,255,.2) transparent}
+.ai-tip{border-radius:10px;padding:11px 13px;display:flex;gap:9px;align-items:flex-start;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.ai-tip.tip-warn{background:rgba(255,68,85,.07);border:1px solid rgba(255,68,85,.2)}
+.ai-tip.tip-ok{background:rgba(0,210,106,.07);border:1px solid rgba(0,210,106,.2)}
+.ai-tip.tip-info{background:rgba(74,158,255,.07);border:1px solid rgba(74,158,255,.2)}
+.ai-tip.tip-alert{background:rgba(255,140,0,.07);border:1px solid rgba(255,140,0,.25)}
+.ai-tip.tip-ins{background:rgba(0,210,106,.05);border:1px solid rgba(0,210,106,.18)}
+.ai-tip.tip-purple{background:rgba(155,89,255,.07);border:1px solid rgba(155,89,255,.2)}
+.ai-tip-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.ai-tip-body{flex:1;min-width:0}
+.ai-tip-title{font-size:.77rem;font-weight:700;margin-bottom:3px}
+.ai-tip-warn .ai-tip-title{color:var(--red)}
+.ai-tip-ok .ai-tip-title{color:var(--green)}
+.ai-tip-info .ai-tip-title{color:var(--blue)}
+.tip-warn .ai-tip-title{color:var(--red)}
+.tip-ok .ai-tip-title{color:var(--green)}
+.tip-info .ai-tip-title{color:var(--blue)}
+.tip-alert .ai-tip-title{color:var(--orange)}
+.tip-ins .ai-tip-title{color:var(--green)}
+.tip-purple .ai-tip-title{color:#C8AAFF}
+.ai-tip-text{font-size:.78rem;color:var(--light);line-height:1.5}
+
+/* Mini chart */
+.mini-chart-wrap{background:var(--navy3);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px}
+.mini-chart-wrap h3{font-size:.85rem;font-weight:800;color:var(--light);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.bar-chart{display:flex;flex-direction:column;gap:9px}
+.bc-row{display:flex;align-items:center;gap:9px}
+.bc-label{font-size:.72rem;color:var(--gray);width:68px;text-align:right;flex-shrink:0}
+.bc-track{flex:1;height:16px;background:rgba(255,255,255,.06);border-radius:8px;overflow:hidden;position:relative}
+.bc-fill{height:100%;border-radius:8px;transition:width .6s cubic-bezier(.4,0,.2,1);min-width:0;position:relative}
+.bc-fill::after{content:attr(data-val);position:absolute;right:6px;top:0;bottom:0;display:flex;align-items:center;font-size:.65rem;font-weight:700;color:rgba(0,0,0,.7);white-space:nowrap}
+.bc-fill.inc-fill{background:linear-gradient(90deg,var(--green),#00A854)}
+.bc-fill.exp-fill{background:linear-gradient(90deg,var(--red),#CC0011)}
+.bc-fill.bal-fill{background:linear-gradient(90deg,var(--cyan),#008070)}
+.bc-fill.bal-neg{background:linear-gradient(90deg,var(--red),#CC0011)}
+
+/* Round progress */
+.round-prog{background:var(--navy3);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px}
+.round-prog h3{font-size:.85rem;font-weight:800;color:var(--light);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.rp-months{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.rpm{background:var(--navy2);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;padding:9px 6px;text-align:center;cursor:pointer;transition:all .2s}
+.rpm.active{border-color:var(--cyan);background:rgba(0,201,177,.1)}
+.rpm.done{border-color:rgba(0,210,106,.3);background:rgba(0,210,106,.05)}
+.rpm-name{font-size:.7rem;font-weight:700;color:var(--gray);margin-bottom:4px}
+.rpm.active .rpm-name{color:var(--cyan)}
+.rpm.done .rpm-name{color:var(--green)}
+.rpm-bal{font-size:.78rem;font-weight:800}
+
+/* ══ CALCULATOR ═════════════════════════════════ */
+#calc-fab{position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),#008080);border:none;color:var(--navy);font-size:1.3rem;cursor:pointer;box-shadow:0 4px 20px rgba(0,201,177,.4);display:flex;align-items:center;justify-content:center;z-index:200;transition:all .2s}
+#calc-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(0,201,177,.5)}
+#calc-modal{position:fixed;bottom:88px;right:24px;width:260px;background:var(--navy2);border:1px solid rgba(0,201,177,.25);border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.5);z-index:201;display:none;overflow:hidden}
+#calc-modal.open{display:block;animation:slideUp .2s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.calc-display{background:var(--navy);padding:14px 16px;text-align:right;border-bottom:1px solid rgba(255,255,255,.06)}
+#calc-expr{font-size:.7rem;color:var(--gray);min-height:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#calc-result{font-size:1.6rem;font-weight:700;color:var(--white);margin-top:2px;min-height:36px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.04)}
+.ck{padding:0;height:52px;border:none;font-size:.9rem;font-weight:700;cursor:pointer;transition:background .15s;font-family:inherit}
+.ck:hover{filter:brightness(1.2)}
+.ck:active{filter:brightness(.85)}
+.ck-num{background:var(--navy3);color:var(--white)}
+.ck-op{background:rgba(0,201,177,.12);color:var(--cyan)}
+.ck-eq{background:var(--cyan);color:var(--navy);grid-column:span 2}
+.ck-clear{background:rgba(255,68,85,.12);color:var(--red)}
+.ck-bs{background:rgba(255,140,0,.1);color:var(--orange)}
+.ck-zero{grid-column:span 2}
+.calc-use-btn{width:100%;padding:9px;background:rgba(0,201,177,.08);border:none;color:var(--cyan);font-size:.78rem;font-weight:700;cursor:pointer;border-top:1px solid rgba(0,201,177,.12);transition:background .15s;font-family:inherit}
+.calc-use-btn:hover{background:rgba(0,201,177,.15)}
+
+/* ══ TOAST ══════════════════════════════════════ */
+#toast-wrap{position:fixed;top:70px;right:16px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--navy3);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;font-size:.82rem;font-weight:600;animation:toastIn .3s ease;max-width:280px;line-height:1.4}
+.toast.ok{border-color:rgba(0,210,106,.4);color:var(--green)}
+.toast.warn{border-color:rgba(255,140,0,.4);color:var(--orange)}
+.toast.err{border-color:rgba(255,68,85,.4);color:var(--red)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ══ RESET BUTTON ═══════════════════════════════ */
+#btn-reset{position:fixed;bottom:24px;left:24px;background:rgba(255,68,85,.1);border:1.5px solid rgba(255,68,85,.25);color:var(--red);border-radius:50px;padding:9px 16px;font-size:.75rem;font-weight:700;cursor:pointer;z-index:200;transition:all .2s;font-family:inherit}
+#btn-reset:hover{background:rgba(255,68,85,.2)}
+
+/* ══ UTILS ══════════════════════════════════════ */
+.sep{height:1px;background:rgba(255,255,255,.06);margin:4px 0}
+.tag-ins{display:inline-flex;align-items:center;gap:3px;background:rgba(0,210,106,.12);border:1px solid rgba(0,210,106,.25);color:var(--green);border-radius:6px;padding:1px 6px;font-size:.62rem;font-weight:700}
+
+/* ══ CREDIT MODAL ═══════════════════════════════ */
+#credit-overlay{position:fixed;inset:0;background:rgba(10,22,40,.9);z-index:400;overflow-y:auto;padding:24px 16px;display:none}
+#credit-overlay.open{display:block;animation:fadeIn .25s ease}
+.cred-wrap{max-width:760px;margin:0 auto}
+.cred-header{text-align:center;padding:16px 0 20px}
+.cred-header h2{font-size:1.4rem;font-weight:900;color:var(--red);margin-bottom:6px}
+.cred-sub{font-size:.86rem;color:var(--light);line-height:1.6;max-width:520px;margin:0 auto}
+.cred-amount{display:inline-block;background:rgba(255,68,85,.12);border:2px solid rgba(255,68,85,.35);color:var(--red);border-radius:12px;padding:7px 20px;font-size:1.3rem;font-weight:900;margin-top:10px}
+.cred-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px}
+.cred-card{background:var(--navy3);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 13px;cursor:pointer;transition:all .2s;position:relative}
+.cred-card:hover{border-color:rgba(0,201,177,.35);transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
+.cred-card.selected{border-color:var(--cyan);background:rgba(0,201,177,.07)}
+.cred-card.best{border-color:var(--green)}
+.cred-best-tag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--green);color:var(--navy);font-size:.62rem;font-weight:900;padding:2px 10px;border-radius:8px;white-space:nowrap;letter-spacing:.4px}
+.cred-card-hd{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.cred-card-icon{font-size:1.5rem}
+.cred-card-name{font-size:.86rem;font-weight:800;line-height:1.2}
+.cred-card-desc{font-size:.71rem;color:var(--gray);line-height:1.4;margin-bottom:10px;min-height:36px}
+.cred-rates{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.cred-rate-row{display:flex;justify-content:space-between;align-items:center;font-size:.74rem}
+.cred-rate-label{color:var(--gray)}
+.cred-rate-val{font-weight:700}
+.cred-sep{height:1px;background:rgba(255,255,255,.06);margin:6px 0}
+.cred-cet{background:rgba(255,255,255,.04);border-radius:8px;padding:8px 10px;text-align:center}
+.cred-cet-label{font-size:.62rem;color:var(--gray);text-transform:uppercase;letter-spacing:.5px}
+.cred-cet-val{font-size:1.1rem;font-weight:900;color:var(--orange)}
+.cred-card.best .cred-cet-val{color:var(--green)}
+.cred-custo{font-size:.74rem;color:var(--light);text-align:center;margin-top:5px}
+.cred-sel-btn{width:100%;margin-top:9px;padding:7px;border-radius:8px;border:1.5px solid rgba(255,255,255,.12);background:transparent;color:var(--light);font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit}
+.cred-sel-btn:hover{background:rgba(0,201,177,.12);border-color:var(--cyan);color:var(--cyan)}
+.cred-card.selected .cred-sel-btn{background:rgba(0,201,177,.15);border-color:var(--cyan);color:var(--cyan)}
+.ai-credit-box{background:rgba(155,89,255,.07);border:1px solid rgba(155,89,255,.2);border-radius:14px;padding:16px;margin-bottom:16px}
+.ai-credit-box h3{font-size:.88rem;font-weight:800;color:#C8AAFF;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.ai-credit-rec{font-size:.82rem;color:var(--light);line-height:1.6}
+.ai-credit-math{background:rgba(0,0,0,.25);border-radius:8px;padding:11px 14px;margin-top:10px;font-size:.74rem;font-family:'Courier New',monospace;color:#9FC9E8;line-height:1.9;border-left:3px solid rgba(0,201,177,.3)}
+.ir-note{font-size:.7rem;color:var(--gray);font-style:italic;margin-top:8px;padding:7px 10px;background:rgba(255,255,255,.03);border-radius:6px;line-height:1.5}
+.cred-actions{display:flex;gap:10px;justify-content:center;padding:8px 0 4px;flex-wrap:wrap}
+.credit-active-badge{background:rgba(255,68,85,.12);border:1px solid rgba(255,68,85,.3);color:var(--red);border-radius:8px;padding:4px 10px;font-size:.78rem;font-weight:700;cursor:pointer;border-style:solid}
+.credit-active-badge:hover{background:rgba(255,68,85,.22)}
+
+/* ══ FACILITADOR ════════════════════════════════ */
+#fac-overlay{position:fixed;inset:0;background:var(--navy);z-index:500;overflow-y:auto;display:none;flex-direction:column}
+#fac-overlay.open{display:flex}
+.fac-top{background:var(--navy2);border-bottom:1px solid rgba(255,255,255,.07);padding:11px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;flex-wrap:wrap}
+.fac-title{font-size:.95rem;font-weight:900;color:var(--cyan);flex-shrink:0;display:flex;align-items:center;gap:7px}
+.fac-tabs-row{display:flex;gap:6px;flex:1}
+.fac-tab{padding:7px 16px;border-radius:50px;border:1.5px solid rgba(255,255,255,.1);background:transparent;color:var(--gray);font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit}
+.fac-tab.sel{background:rgba(0,201,177,.12);border-color:var(--cyan);color:var(--cyan)}
+.fac-tab.aud{background:rgba(255,215,0,.06);border-color:rgba(255,215,0,.25);color:var(--yellow)}
+.fac-tab.aud.sel{background:rgba(255,215,0,.14)}
+.fac-wrap{flex:1;padding:16px;max-width:1100px;margin:0 auto;width:100%}
+.fac-section-title{font-size:.78rem;color:var(--gray);font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:.6px}
+/* Setup chars grid */
+.fac-chars-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.fac-char-card{background:var(--navy3);border:2px solid rgba(255,255,255,.07);border-radius:14px;padding:14px;display:flex;gap:12px;align-items:flex-start;transition:border-color .2s}
+.fac-char-card:hover{border-color:rgba(0,201,177,.2)}
+.fcc-num{width:32px;height:32px;border-radius:50%;background:rgba(0,201,177,.12);color:var(--cyan);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;flex-shrink:0;margin-top:3px}
+.fcc-body{flex:1;display:flex;flex-direction:column;gap:9px}
+.fcc-nome{background:var(--navy2);border:1.5px solid rgba(255,255,255,.1);border-radius:8px;color:var(--white);padding:7px 10px;font-size:.88rem;font-weight:700;width:100%;font-family:inherit;outline:none;transition:border-color .2s}
+.fcc-nome:focus{border-color:var(--cyan)}
+.fcc-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fcc-row label{font-size:.7rem;color:var(--gray);margin-bottom:4px;display:block;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.fcc-ins-toggle{display:flex;gap:4px}
+.fcc-ins-toggle button{flex:1;padding:7px 4px;border-radius:7px;border:1.5px solid rgba(255,255,255,.1);background:transparent;color:var(--gray);font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;font-family:inherit}
+.fcc-ins-toggle button.sel-yes{background:rgba(0,210,106,.12);border-color:var(--green);color:var(--green)}
+.fcc-ins-toggle button.sel-no{background:rgba(107,130,153,.08);border-color:var(--gray);color:var(--gray)}
+.fcc-mini{font-size:.74rem;display:flex;gap:12px;padding:6px 8px;background:rgba(255,255,255,.03);border-radius:7px}
+/* Lancamentos */
+.fac-char-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none}
+.fac-char-tab{background:var(--navy3);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;padding:7px 10px;cursor:pointer;transition:all .2s;min-width:80px;text-align:center;flex-shrink:0}
+.fac-char-tab.sel{border-color:var(--cyan);background:rgba(0,201,177,.08)}
+.fct-num{display:block;font-size:.62rem;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.fct-name{display:block;font-size:.78rem;font-weight:700;color:var(--light);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px}
+.fac-char-tab.sel .fct-name{color:var(--cyan)}
+.fac-lan-cols{display:grid;grid-template-columns:360px 1fr;gap:14px}
+@media(max-width:820px){.fac-lan-cols{grid-template-columns:1fr}}
+.fac-char-info{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--navy3);border-radius:10px;margin-bottom:10px}
+.fci-name{font-size:1rem;font-weight:800}
+.fci-meta{font-size:.74rem;color:var(--gray);margin-top:2px}
+.fci-bal{font-size:1.2rem;font-weight:900}
+/* Audit */
+.fac-audit-wrap{display:flex;flex-direction:column;gap:16px}
+.audit-podium{background:linear-gradient(135deg,rgba(255,215,0,.07),rgba(0,201,177,.04));border:1px solid rgba(255,215,0,.2);border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:7px}
+.audit-winner{font-size:.92rem;font-weight:700;color:var(--yellow)}
+.audit-loser{font-size:.82rem;color:var(--orange)}
+.audit-chart-wrap{background:var(--navy3);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px}
+.audit-chart-wrap h3,.audit-table-wrap h3{font-size:.88rem;font-weight:800;color:var(--light);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.audit-bars{display:flex;flex-direction:column;gap:9px}
+.audit-bar-row{display:flex;align-items:center;gap:10px}
+.audit-bar-name{font-size:.78rem;font-weight:700;width:120px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.audit-bar-track{flex:1;height:28px;background:rgba(255,255,255,.05);border-radius:8px;overflow:hidden}
+.audit-bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan),#008070);border-radius:8px;display:flex;align-items:center;padding-left:9px;font-size:.71rem;font-weight:700;color:var(--navy);transition:width .6s ease;min-width:50px;white-space:nowrap}
+.audit-bar-fill.neg{background:linear-gradient(90deg,var(--red),#CC0011);color:#fff}
+.audit-table-wrap{background:var(--navy3);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px}
+.audit-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.audit-table th{padding:9px 10px;text-align:left;color:var(--gray);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,.07);white-space:nowrap}
+.audit-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.04)}
+.audit-table tr:last-child td{border-bottom:none}
+.audit-table tr.audit-first{background:rgba(255,215,0,.04)}
+.audit-table tr.audit-last{background:rgba(255,68,85,.04)}
+.audit-rank{background:rgba(255,255,255,.08);border-radius:6px;padding:2px 8px;font-weight:800}
+.audit-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}
+.btn-fac{background:rgba(0,201,177,.08);border:1.5px solid rgba(0,201,177,.2);color:var(--cyan);border-radius:8px;padding:5px 12px;font-size:.76rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-fac:hover{background:rgba(0,201,177,.18)}
+
+/* ══ CRÉDITO DO FACILITADOR ═════════════════════ */
+.fac-cred-section{margin-top:12px;background:rgba(255,68,85,.05);border:1.5px solid rgba(255,68,85,.2);border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:10px}
+.fac-cred-section.active{background:rgba(255,140,0,.05);border-color:rgba(255,140,0,.25)}
+.fac-cred-section h4{font-size:.8rem;font-weight:800;display:flex;align-items:center;gap:7px;margin-bottom:0}
+.fac-cred-section h4.neg{color:var(--red)}
+.fac-cred-section h4.act{color:var(--orange)}
+.fac-cred-opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:7px}
+.fac-cred-opt{background:var(--navy2);border:2px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 9px;cursor:pointer;transition:all .2s;text-align:left;font-family:inherit;width:100%}
+.fac-cred-opt:hover{border-color:rgba(0,201,177,.3)}
+.fac-cred-opt.sel{border-color:var(--cyan);background:rgba(0,201,177,.08)}
+.fac-cred-opt.best{border-color:rgba(0,210,106,.4)}
+.fac-cred-opt.best.sel{border-color:var(--green);background:rgba(0,210,106,.08)}
+.fco-head{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.fco-icon{font-size:1rem}
+.fco-name{font-size:.72rem;font-weight:800;color:var(--light);line-height:1.2}
+.fco-rates{font-size:.68rem;color:var(--gray);line-height:1.6}
+.fco-cet{font-size:.78rem;font-weight:800;color:var(--orange);margin-top:4px}
+.fac-cred-opt.best .fco-cet{color:var(--green)}
+.fco-custo{font-size:.65rem;color:var(--light)}
+.fac-cred-ai{background:rgba(155,89,255,.07);border:1px solid rgba(155,89,255,.18);border-radius:8px;padding:9px 11px;font-size:.75rem;line-height:1.5;color:var(--light)}
+.fac-cred-ai strong{color:#C8AAFF}
+.fac-cred-math{font-family:'Courier New',monospace;font-size:.68rem;color:#9FC9E8;background:rgba(0,0,0,.2);padding:7px 9px;border-radius:6px;margin-top:6px;line-height:1.8}
+.fac-cred-active{background:rgba(255,140,0,.06);border:1.5px solid rgba(255,140,0,.2);border-radius:10px;padding:10px 12px}
+.fca-row{display:flex;justify-content:space-between;align-items:center;font-size:.77rem;margin-bottom:4px}
+.fca-label{color:var(--gray)}
+.fca-val{font-weight:700}
+.fac-cred-hist{margin-top:8px}
+.fac-cred-hist h5{font-size:.72rem;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.fch-row{display:flex;gap:8px;align-items:center;padding:6px 0;border-top:1px solid rgba(255,255,255,.04);font-size:.72rem;flex-wrap:wrap}
+.fch-rod{background:rgba(0,201,177,.12);color:var(--cyan);border-radius:5px;padding:1px 7px;font-weight:700;flex-shrink:0}
+.fch-vals{color:var(--light);flex:1}
+.fch-total{color:var(--red);font-weight:700;flex-shrink:0}
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     SETUP SCREEN
+══════════════════════════════════════════════ -->
+<div id="sc-setup" class="screen active">
+  <div class="setup-wrap">
+    <div class="setup-logo">
+      <div style="font-size:2.8rem;margin-bottom:6px">🏆</div>
+      <div class="setup-title">Controle Financeiro</div>
+      <div class="setup-sub">Circuito Olímpico — Registre suas receitas e despesas</div>
+    </div>
+
+    <!-- Jogador -->
+    <div class="setup-block">
+      <h3>👤 Identificação do Participante</h3>
+      <div>
+        <label>Seu nome</label>
+        <input id="inp-name" type="text" placeholder="Ex: Maria Silva" maxlength="30">
+      </div>
+      <div>
+        <label>Mês inicial (rodada atual)</label>
+        <div class="round-sel" id="round-sel">
+          <div class="rsel-btn sel" data-r="1" onclick="selRound(1)">Jan<br><small>Rod. 1</small></div>
+          <div class="rsel-btn" data-r="2" onclick="selRound(2)">Fev<br><small>Rod. 2</small></div>
+          <div class="rsel-btn" data-r="3" onclick="selRound(3)">Mar<br><small>Rod. 3</small></div>
+          <div class="rsel-btn" data-r="4" onclick="selRound(4)">Abr<br><small>Rod. 4</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Capital inicial -->
+    <div class="setup-block">
+      <h3>💰 Capital Inicial</h3>
+      <div>
+        <label>Valor informado pelo facilitador (R$)</label>
+        <input id="inp-capital" type="number" placeholder="Ex: 5000" min="0" step="any">
+      </div>
+      <div style="font-size:.78rem;color:var(--gray);line-height:1.5">
+        Este valor será seu saldo de partida. Todas as receitas e despesas serão registradas a partir deste capital.
+      </div>
+    </div>
+
+    <!-- Seguro -->
+    <div class="setup-block">
+      <h3>🛡️ Contratação de Seguro</h3>
+      <div style="font-size:.8rem;color:var(--light);line-height:1.5;padding:8px;background:rgba(0,201,177,.05);border-radius:8px;border-left:3px solid var(--cyan)">
+        Com o seguro ativo, você poderá marcar despesas como "cobertas pelo seguro" e se beneficiar de isenções ou descontos informados pelo facilitador.
+      </div>
+      <div class="insurance-opts">
+        <div class="ins-opt sel-yes" id="ins-yes" onclick="selIns(true)">
+          <div class="ins-icon">🛡️</div>
+          <div class="ins-label" style="color:var(--green)">Sim, contratar</div>
+          <div class="ins-desc">Proteção ativa. Despesas elegíveis podem ser reduzidas ou isentas.</div>
+        </div>
+        <div class="ins-opt" id="ins-no" onclick="selIns(false)">
+          <div class="ins-icon">⛔</div>
+          <div class="ins-label" style="color:var(--gray)">Não contratar</div>
+          <div class="ins-desc">Paga todas as despesas integralmente. Maior risco.</div>
+        </div>
+      </div>
+      <div id="ins-warning" style="font-size:.75rem;color:var(--orange);display:none;padding:6px 10px;background:rgba(255,140,0,.07);border-radius:8px;border-left:2px solid var(--orange)">
+        ⚠️ Sem seguro: todas as despesas eventuais serão pagas pelo valor integral. Avalie bem!
+      </div>
+    </div>
+
+    <button class="btn btn-cyan btn-lg" style="width:100%;justify-content:center;font-size:1rem" onclick="startApp()">▶ Iniciar Controle Financeiro</button>
+    <div style="text-align:center;margin-top:6px">
+      <button class="btn-fac" onclick="abrirFacilitador()" style="font-size:.75rem">🎮 Área do Facilitador</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     APP SCREEN
+══════════════════════════════════════════════ -->
+<div id="sc-app" class="screen">
+
+  <!-- Header fixo -->
+  <div id="app-header">
+    <div>
+      <div class="ah-name" id="ah-name">—</div>
+    </div>
+    <div class="ah-round" id="ah-round">Rod. 1 — Janeiro</div>
+    <div class="ah-ins" id="ah-ins">🛡️ Segurado</div>
+    <div style="flex:1"></div>
+    <button class="btn-fac" onclick="abrirFacilitador()" title="Painel do Facilitador">🎮 Facilitador</button>
+    <div class="ah-bal-wrap">
+      <div class="ah-bal-lbl">Saldo atual</div>
+      <div class="ah-bal" id="ah-bal">R$ 0</div>
+    </div>
+  </div>
+
+  <!-- Body em 2 colunas -->
+  <div id="app-body">
+
+    <!-- ── COLUNA ESQUERDA ─────────────────── -->
+    <div class="left-panel">
+
+      <!-- Cards de resumo -->
+      <div class="summary-row">
+        <div class="sum-card">
+          <div class="sum-label">Capital inicial</div>
+          <div class="sum-val" id="sum-capital" style="color:var(--cyan)">R$ 0</div>
+          <div class="sum-sub">Ponto de partida</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-label">Total receitas</div>
+          <div class="sum-val" id="sum-inc" style="color:var(--green)">R$ 0</div>
+          <div class="sum-sub" id="sum-inc-cnt">0 lançamentos</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-label">Total despesas</div>
+          <div class="sum-val" id="sum-exp" style="color:var(--red)">R$ 0</div>
+          <div class="sum-sub" id="sum-exp-cnt">0 lançamentos</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-label">Resultado</div>
+          <div class="sum-val" id="sum-result">R$ 0</div>
+          <div class="sum-sub" id="sum-result-pct">0% do capital</div>
+        </div>
+      </div>
+
+      <!-- Formulário de lançamento -->
+      <div class="tx-form">
+        <h3>➕ Novo Lançamento</h3>
+        <div class="type-tabs">
+          <div class="type-tab inc sel" id="tab-inc" onclick="setType('inc')">📈 Receita</div>
+          <div class="type-tab exp" id="tab-exp" onclick="setType('exp')">📉 Despesa</div>
+        </div>
+        <div>
+          <label>Descrição</label>
+          <input id="inp-desc" type="text" placeholder="Ex: Salário, Aluguel, Venda..." maxlength="50">
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Valor (R$)</label>
+            <input id="inp-val" type="number" placeholder="0,00" min="0" step="any">
+          </div>
+          <div>
+            <label>Categoria</label>
+            <select id="inp-cat">
+              <option value="">— Selecione —</option>
+              <optgroup label="📈 Receitas" id="cat-inc-group">
+                <option value="Salário">💼 Salário</option>
+                <option value="Venda">🛒 Venda de produto</option>
+                <option value="Serviço">🔧 Serviço prestado</option>
+                <option value="Investimento">📊 Rendimento</option>
+                <option value="Bônus">🎯 Bônus / Prêmio</option>
+                <option value="Outros-R">✅ Outros (receita)</option>
+              </optgroup>
+              <optgroup label="📉 Despesas" id="cat-exp-group">
+                <option value="Moradia">🏠 Moradia / Aluguel</option>
+                <option value="Alimentação">🍽️ Alimentação</option>
+                <option value="Transporte">🚗 Transporte</option>
+                <option value="Saúde">💊 Saúde</option>
+                <option value="Educação">📚 Educação</option>
+                <option value="Lazer">🎉 Lazer</option>
+                <option value="Imposto">📋 Imposto / Taxa</option>
+                <option value="Emergência">🚨 Emergência</option>
+                <option value="Outros-D">📌 Outros (despesa)</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <!-- Seguro (só aparece para despesas com seguro ativo) -->
+        <div class="ins-check" id="ins-check-row" style="display:none" onclick="toggleInsCheck()">
+          <input type="checkbox" id="chk-ins" onchange="null">
+          <label for="chk-ins">🛡️ Coberto pelo seguro — aplicar desconto/isenção informado pelo facilitador</label>
+        </div>
+        <div id="ins-desc-row" style="display:none">
+          <label>Valor real após desconto do seguro (R$)</label>
+          <input id="inp-val-ins" type="number" placeholder="Valor com desconto aplicado" min="0" step="any">
+        </div>
+        <button class="btn btn-cyan" style="width:100%;justify-content:center" onclick="addTx()">Registrar Lançamento</button>
+      </div>
+
+      <!-- Histórico -->
+      <div class="tx-history">
+        <div class="tx-hist-hd">
+          <h3>📋 Histórico</h3>
+          <div class="tx-hist-filter">
+            <button class="flt-btn sel" id="flt-all" onclick="setFilter('all',this)">Todos</button>
+            <button class="flt-btn" id="flt-inc" onclick="setFilter('inc',this)">Receitas</button>
+            <button class="flt-btn" id="flt-exp" onclick="setFilter('exp',this)">Despesas</button>
+          </div>
+        </div>
+        <div id="tx-list">
+          <div class="tx-empty">Nenhum lançamento ainda.<br>Adicione sua primeira receita ou despesa acima.</div>
+        </div>
+      </div>
+
+    </div><!-- /left-panel -->
+
+    <!-- ── COLUNA DIREITA (IA) ─────────────── -->
+    <div class="right-panel">
+
+      <!-- Progresso por rodada -->
+      <div class="round-prog">
+        <h3>📅 Meses do Jogo</h3>
+        <div class="rp-months" id="rp-months"></div>
+      </div>
+
+      <!-- AI Tips -->
+      <div class="ai-panel">
+        <div class="ai-panel-hd">
+          <span class="ai-icon">🤖</span>
+          <h3>Assistente Financeiro IA</h3>
+          <span class="ai-badge">Ao VIVO</span>
+        </div>
+        <div id="ai-tips">
+          <div class="tx-empty" style="padding:20px">Aguardando lançamentos para gerar recomendações...</div>
+        </div>
+      </div>
+
+      <!-- Mini chart -->
+      <div class="mini-chart-wrap">
+        <h3>📊 Visão Geral</h3>
+        <div class="bar-chart" id="bar-chart"></div>
+      </div>
+
+    </div><!-- /right-panel -->
+  </div><!-- /app-body -->
+</div><!-- /sc-app -->
+
+<!-- ═══════════════════════════════════════════
+     CALCULADORA FLUTUANTE
+══════════════════════════════════════════════ -->
+<button id="calc-fab" onclick="toggleCalc()" title="Calculadora">🧮</button>
+
+<div id="calc-modal">
+  <div class="calc-display">
+    <div id="calc-expr"></div>
+    <div id="calc-result">0</div>
+  </div>
+  <div class="calc-grid">
+    <button class="ck ck-clear" onclick="calcClear()">C</button>
+    <button class="ck ck-bs" onclick="calcBS()">⌫</button>
+    <button class="ck ck-op" onclick="calcOp('%')">%</button>
+    <button class="ck ck-op" onclick="calcOp('÷')">÷</button>
+
+    <button class="ck ck-num" onclick="calcNum('7')">7</button>
+    <button class="ck ck-num" onclick="calcNum('8')">8</button>
+    <button class="ck ck-num" onclick="calcNum('9')">9</button>
+    <button class="ck ck-op" onclick="calcOp('×')">×</button>
+
+    <button class="ck ck-num" onclick="calcNum('4')">4</button>
+    <button class="ck ck-num" onclick="calcNum('5')">5</button>
+    <button class="ck ck-num" onclick="calcNum('6')">6</button>
+    <button class="ck ck-op" onclick="calcOp('−')">−</button>
+
+    <button class="ck ck-num" onclick="calcNum('1')">1</button>
+    <button class="ck ck-num" onclick="calcNum('2')">2</button>
+    <button class="ck ck-num" onclick="calcNum('3')">3</button>
+    <button class="ck ck-op" onclick="calcOp('+')">+</button>
+
+    <button class="ck ck-num ck-zero" onclick="calcNum('0')">0</button>
+    <button class="ck ck-num" onclick="calcNum('.')">.</button>
+    <button class="ck ck-eq" onclick="calcEq()">=</button>
+  </div>
+  <button class="calc-use-btn" onclick="useCalcResult()">↑ Usar resultado no formulário</button>
+</div>
+
+<!-- Botão resetar -->
+<button id="btn-reset" onclick="resetGame()">↩ Novo jogo</button>
+
+<!-- Modal de Crédito -->
+<div id="credit-overlay">
+  <div class="cred-wrap" id="cred-inner"></div>
+</div>
+
+<!-- Painel do Facilitador -->
+<div id="fac-overlay">
+  <div class="fac-top">
+    <div class="fac-title">🎮 Facilitador</div>
+    <div class="fac-tabs-row">
+      <button class="fac-tab sel" id="ftab-setup"       onclick="setFacTab('setup')">👥 Personagens</button>
+      <button class="fac-tab"     id="ftab-lancamentos" onclick="setFacTab('lancamentos')">➕ Lançamentos</button>
+      <button class="fac-tab aud" id="ftab-auditoria"   onclick="setFacTab('auditoria')">📊 Auditoria Final</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="fecharFacilitador()">✕ Fechar</button>
+  </div>
+  <div class="fac-wrap" id="fac-body"></div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-wrap"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════════════
+let G = {
+  name: '',
+  capital: 0,
+  insurance: true,
+  round: 1,
+  txType: 'inc',
+  filter: 'all',
+  transactions: [],
+  roundSnapshots: { 1: null, 2: null, 3: null, 4: null },
+  creditOption: null,
+  creditActive: false,
+  creditModalShown: false,
+};
+
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril'];
+const MONTH_SHORT = ['Jan','Fev','Mar','Abr'];
+
+// 5 modalidades de crédito com taxas reais do mercado brasileiro
+const CREDIT_OPTIONS = [
+  {
+    id: 1, icon: '💳', name: 'Cartão de Crédito Rotativo',
+    desc: 'Juros sobre o saldo não pago no cartão. A modalidade mais cara do mercado.',
+    taxaMensal: 0.120,   // 12,0% a.m.
+    iofFixo: 0.0038,     // 0,38% flat
+    iofDiario: 0.000082, // 0,0082% ao dia (PF)
+    irAliquota: 0.225,   // 22,5% (prazo ≤ 180 dias)
+  },
+  {
+    id: 2, icon: '🏦', name: 'Cheque Especial',
+    desc: 'Crédito automático na conta corrente. Zero burocracia, mas custo muito alto.',
+    taxaMensal: 0.080,
+    iofFixo: 0.0038,
+    iofDiario: 0.000082,
+    irAliquota: 0.225,
+  },
+  {
+    id: 3, icon: '🤝', name: 'Fintech / Cooperativa',
+    desc: 'Plataformas digitais e cooperativas de crédito. Taxa competitiva e processo ágil.',
+    taxaMensal: 0.032,
+    iofFixo: 0.0038,
+    iofDiario: 0.000082,
+    irAliquota: 0.200,   // 20% (181–360 dias)
+  },
+  {
+    id: 4, icon: '📋', name: 'Empréstimo Pessoal',
+    desc: 'Crédito parcelado contratado no banco. Exige análise de crédito e comprovação de renda.',
+    taxaMensal: 0.045,
+    iofFixo: 0.0038,
+    iofDiario: 0.000082,
+    irAliquota: 0.175,   // 17,5% (361–720 dias)
+  },
+  {
+    id: 5, icon: '📌', name: 'Crédito Consignado',
+    desc: 'Desconto direto no salário ou aposentadoria. Menor risco para o credor = menor taxa.',
+    taxaMensal: 0.018,
+    iofFixo: 0.0038,
+    iofDiario: 0.000082,
+    irAliquota: 0.150,   // 15% (> 720 dias)
+  },
+];
+
+// ══════════════════════════════════════════════
+// FACILITADOR — ESTADO
+// ══════════════════════════════════════════════
+let F = {
+  tab: 'setup',
+  sel: 0,
+  txType: 'inc',
+  chars: Array.from({length:6}, (_,i) => ({
+    id: i+1,
+    nome: `Personagem ${i+1}`,
+    capital: 0,
+    seguro: false,
+    txs: [],
+    credit: { optId: null, active: false, history: [] },
+  })),
+};
+
+// ══════════════════════════════════════════════
+// FACILITADOR — FUNÇÕES
+// ══════════════════════════════════════════════
+function abrirFacilitador() {
+  const pwd = prompt('Senha do facilitador:');
+  if (pwd === null) return;
+  if (pwd !== 'iaefinanceiro2026') { toast('Senha incorreta.', 'warn', 3000); return; }
+  document.getElementById('fac-overlay').classList.add('open');
+  renderFac();
+}
+
+function fecharFacilitador() {
+  document.getElementById('fac-overlay').classList.remove('open');
+}
+
+function setFacTab(t) {
+  F.tab = t;
+  document.querySelectorAll('.fac-tab').forEach(b => b.classList.remove('sel'));
+  document.getElementById(`ftab-${t}`).classList.add('sel');
+  renderFac();
+}
+
+function renderFac() {
+  if (F.tab === 'setup')       renderFacSetup();
+  else if (F.tab === 'lancamentos') renderFacLancamentos();
+  else                         renderFacAuditoria();
+}
+
+function facCalcChar(c) {
+  const inc = c.txs.filter(t=>t.type==='inc').reduce((s,t)=>s+t.val, 0);
+  const exp = c.txs.filter(t=>t.type==='exp').reduce((s,t)=>s+t.val, 0);
+  return { inc, exp, bal: c.capital + inc - exp };
+}
+
+// ── Tab 1: Configurar personagens ──────────────
+function renderFacSetup() {
+  const html = F.chars.map((c,i) => {
+    const s = facCalcChar(c);
+    const hasTx = c.txs.length > 0;
+    return `<div class="fac-char-card">
+      <div class="fcc-num">${i+1}</div>
+      <div class="fcc-body">
+        <input class="fcc-nome" type="text" value="${esc(c.nome)}" placeholder="Nome do personagem"
+          onblur="F.chars[${i}].nome=this.value.trim()||'Personagem ${i+1}'">
+        <div class="fcc-row">
+          <div>
+            <label>Capital inicial (R$)</label>
+            <input type="number" style="padding:7px 10px;font-size:.85rem" value="${c.capital||''}"
+              placeholder="0,00" min="0" step="any"
+              onblur="F.chars[${i}].capital=parseFloat(this.value)||0">
+          </div>
+          <div>
+            <label>Seguro</label>
+            <div class="fcc-ins-toggle">
+              <button class="${c.seguro?'sel-yes':''}" onclick="F.chars[${i}].seguro=true;renderFacSetup()">🛡️ Sim</button>
+              <button class="${!c.seguro?'sel-no':''}" onclick="F.chars[${i}].seguro=false;renderFacSetup()">⛔ Não</button>
+            </div>
+          </div>
+        </div>
+        <div class="fcc-mini">
+          ${hasTx
+            ? `<span style="color:var(--green)">+${fmtR(s.inc)}</span>
+               <span style="color:var(--red)">-${fmtR(s.exp)}</span>
+               <span style="color:${s.bal>=c.capital?'var(--green)':'var(--red)'}">= ${fmtR(s.bal)}</span>
+               <span style="color:var(--gray)">${c.txs.length} lançtos.</span>`
+            : `<span style="color:var(--gray)">Sem lançamentos ainda</span>`}
+        </div>
+        <button class="btn btn-sm btn-ghost" onclick="F.sel=${i};setFacTab('lancamentos')">
+          ➕ Lançar para este personagem
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('fac-body').innerHTML = `
+    <div style="margin-bottom:14px">
+      <div class="fac-section-title">Configure os 6 personagens do jogo</div>
+      <div style="font-size:.8rem;color:var(--gray);margin-bottom:12px;line-height:1.5">
+        Defina o nome, capital inicial e status de seguro de cada participante.
+        Em seguida, use a aba <strong style="color:var(--cyan)">Lançamentos</strong> para registrar as receitas e despesas de cada um ao longo das rodadas.
+      </div>
+    </div>
+    <div class="fac-chars-grid">${html}</div>`;
+}
+
+// ── Tab 2: Lançamentos por personagem ──────────
+function renderFacLancamentos() {
+  const c = F.chars[F.sel];
+  const s = facCalcChar(c);
+
+  const charTabs = F.chars.map((ch,i) => {
+    const si = facCalcChar(ch);
+    return `<div class="fac-char-tab${F.sel===i?' sel':''}" onclick="F.sel=${i};renderFacLancamentos()">
+      <span class="fct-num">P${i+1}</span>
+      <span class="fct-name">${esc(ch.nome)}</span>
+      ${ch.txs.length ? `<span style="font-size:.62rem;color:${si.bal>=ch.capital?'var(--green)':'var(--red)'}">${fmtR(si.bal)}</span>` : ''}
+      ${ch.credit.active ? `<span style="font-size:.62rem;color:var(--orange)">💸</span>` : ''}
+    </div>`;
+  }).join('');
+
+  const CAT_INC = ['Salário','Venda','Serviço','Investimento','Bônus','Outros-R'];
+  const CAT_EXP = ['Moradia','Alimentação','Transporte','Saúde','Educação','Lazer','Imposto','Emergência','Outros-D'];
+  const CAT_ICONS = {Salário:'💼',Venda:'🛒',Serviço:'🔧',Investimento:'📊',Bônus:'🎯','Outros-R':'✅',
+    Moradia:'🏠',Alimentação:'🍽️',Transporte:'🚗',Saúde:'💊',Educação:'📚',Lazer:'🎉',Imposto:'📋',Emergência:'🚨','Outros-D':'📌'};
+  const cats = F.txType === 'inc' ? CAT_INC : CAT_EXP;
+  const catOpts = cats.map(k => `<option value="${k}">${CAT_ICONS[k]} ${k}</option>`).join('');
+
+  const txRows = c.txs.length
+    ? [...c.txs].reverse().map(tx => `
+      <div class="tx-row">
+        <div class="tx-icon ${tx.type}">${CAT_ICONS[tx.cat]||(tx.type==='inc'?'📈':'📉')}</div>
+        <div class="tx-info">
+          <div class="tx-desc">${esc(tx.desc)}</div>
+          <div class="tx-meta"><span>${tx.cat}</span><span>Rod.${tx.round}</span></div>
+        </div>
+        <div class="tx-amount ${tx.type}">${tx.type==='inc'?'+':'-'}${fmtR(tx.val)}</div>
+        <button class="tx-del" onclick="facDelTx(${F.sel},${tx.id})">🗑</button>
+      </div>`).join('')
+    : '<div class="tx-empty">Nenhum lançamento para este personagem.</div>';
+
+  document.getElementById('fac-body').innerHTML = `
+    <div class="fac-char-tabs">${charTabs}</div>
+    <div class="fac-lan-cols">
+      <div>
+        <div class="fac-char-info">
+          <div>
+            <div class="fci-name">${esc(c.nome)}</div>
+            <div class="fci-meta">Capital: ${fmtR(c.capital)} · ${c.seguro?'🛡️ Segurado':'⛔ Sem seguro'}</div>
+          </div>
+          <div class="fci-bal" style="color:${s.bal>=c.capital?'var(--green)':'var(--red)'}">${fmtR(s.bal)}</div>
+        </div>
+        <div class="tx-form" style="border-radius:12px">
+          <h3>➕ Lançamento — ${esc(c.nome)}</h3>
+          <div class="type-tabs">
+            <div class="type-tab inc${F.txType==='inc'?' sel':''}" onclick="F.txType='inc';renderFacLancamentos()">📈 Receita</div>
+            <div class="type-tab exp${F.txType==='exp'?' sel':''}" onclick="F.txType='exp';renderFacLancamentos()">📉 Despesa</div>
+          </div>
+          <div>
+            <label>Descrição</label>
+            <input id="fac-desc" type="text" placeholder="Ex: Salário, Aluguel..." maxlength="50">
+          </div>
+          <div class="form-row">
+            <div>
+              <label>Valor (R$)</label>
+              <input id="fac-val" type="number" placeholder="0,00" min="0" step="any">
+            </div>
+            <div>
+              <label>Rodada</label>
+              <select id="fac-round">
+                <option value="1">Jan (Rod. 1)</option>
+                <option value="2">Fev (Rod. 2)</option>
+                <option value="3">Mar (Rod. 3)</option>
+                <option value="4">Abr (Rod. 4)</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label>Categoria</label>
+            <select id="fac-cat">
+              <option value="">— Selecione —</option>
+              ${catOpts}
+            </select>
+          </div>
+          ${c.seguro && F.txType==='exp' ? `
+          <div class="ins-check" onclick="this.querySelector('input').click()">
+            <input type="checkbox" id="fac-chk-ins">
+            <label for="fac-chk-ins" style="cursor:pointer">🛡️ Coberto pelo seguro</label>
+          </div>` : ''}
+          <button class="btn btn-cyan" style="width:100%;justify-content:center" onclick="addFacTx()">Registrar lançamento</button>
+        </div>
+        ${facCreditHtml(F.sel)}
+      </div>
+      <div class="tx-history" style="border-radius:12px;overflow:hidden">
+        <div class="tx-hist-hd">
+          <h3>📋 ${esc(c.nome)}</h3>
+          <div style="font-size:.72rem;color:var(--gray)">${c.txs.length} lançamento${c.txs.length!==1?'s':''}</div>
+        </div>
+        <div style="max-height:480px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent">
+          ${txRows}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Tab 3: Auditoria Final ─────────────────────
+function renderFacAuditoria() {
+  const data = F.chars.map((c,i) => ({ ...c, ...facCalcChar(c), idx: i }));
+  const configured = data.filter(c => c.capital > 0);
+
+  if (configured.length === 0) {
+    document.getElementById('fac-body').innerHTML = `
+      <div style="text-align:center;padding:48px;color:var(--gray)">
+        <div style="font-size:2.5rem;margin-bottom:12px">📊</div>
+        <div style="font-size:.9rem">Configure o capital dos personagens na aba <strong style="color:var(--cyan)">Personagens</strong> para gerar a auditoria.</div>
+      </div>`;
+    return;
+  }
+
+  const ranked = [...configured].sort((a,b) => b.bal - a.bal);
+  const winner = ranked[0];
+  const loser  = ranked[ranked.length-1];
+  const maxBal = Math.max(...configured.map(c => Math.abs(c.bal)), 1);
+  const medals  = ['🥇','🥈','🥉'];
+
+  const tableRows = ranked.map((c,rank) => {
+    const pct = c.capital > 0 ? ((c.bal - c.capital) / c.capital * 100) : 0;
+    const isFirst = rank === 0;
+    const isLast  = rank === ranked.length - 1 && c.bal < c.capital;
+    return `<tr class="${isFirst?'audit-first':isLast?'audit-last':''}">
+      <td><span class="audit-rank">${medals[rank]||rank+1+'º'}</span></td>
+      <td><strong>${esc(c.nome)}</strong></td>
+      <td style="color:var(--cyan)">${fmtR(c.capital)}</td>
+      <td style="color:var(--green)">+${fmtR(c.inc)}</td>
+      <td style="color:var(--red)">-${fmtR(c.exp)}</td>
+      <td style="color:${c.bal>=c.capital?'var(--green)':'var(--red)'}"><strong>${fmtR(c.bal)}</strong></td>
+      <td style="color:${pct>=0?'var(--green)':'var(--red)'}"><strong>${pct>=0?'+':''}${pct.toFixed(1)}%</strong></td>
+      <td>${c.seguro?'🛡️ Sim':'⛔ Não'}</td>
+      <td>${c.credit.active ? `<span style="color:var(--orange)">💸 Ativo</span>` : c.credit.history.length ? `<span style="color:var(--green)">✅ Quitado</span>` : '—'}</td>
+      <td style="color:var(--gray)">${c.txs.length}</td>
+    </tr>`;
+  }).join('');
+
+  const chartBars = ranked.map((c,i) => {
+    const pct = Math.min(Math.abs(c.bal) / maxBal * 100, 100);
+    return `<div class="audit-bar-row">
+      <div class="audit-bar-name">${medals[i]||''} ${esc(c.nome)}</div>
+      <div class="audit-bar-track">
+        <div class="audit-bar-fill${c.bal<0?' neg':''}" style="width:${Math.max(pct,4).toFixed(1)}%">
+          ${fmtR(c.bal)}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Resumo por rodada
+  const roundSummary = [1,2,3,4].map(r => {
+    const totals = configured.map(c => {
+      const inc = c.txs.filter(t=>t.round===r&&t.type==='inc').reduce((s,t)=>s+t.val,0);
+      const exp = c.txs.filter(t=>t.round===r&&t.type==='exp').reduce((s,t)=>s+t.val,0);
+      return { inc, exp };
+    });
+    const totalInc = totals.reduce((s,t)=>s+t.inc,0);
+    const totalExp = totals.reduce((s,t)=>s+t.exp,0);
+    return `<td style="text-align:center">
+      <div style="font-size:.7rem;color:var(--green)">+${fmtR(totalInc)}</div>
+      <div style="font-size:.7rem;color:var(--red)">-${fmtR(totalExp)}</div>
+    </td>`;
+  }).join('');
+
+  const pctWinner = winner.capital > 0 ? ((winner.bal-winner.capital)/winner.capital*100).toFixed(1) : '0';
+
+  document.getElementById('fac-body').innerHTML = `
+    <div class="fac-audit-wrap">
+      <div class="audit-podium">
+        <div class="audit-winner">🏆 Vencedor: <strong>${esc(winner.nome)}</strong>
+          — Saldo final ${fmtR(winner.bal)} (${pctWinner >= 0 ? '+' : ''}${pctWinner}% sobre o capital)</div>
+        ${loser.bal < loser.capital
+          ? `<div class="audit-loser">⚠️ Pior resultado: ${esc(loser.nome)} — ${fmtR(loser.bal)}
+              (${((loser.bal-loser.capital)/loser.capital*100).toFixed(1)}%)</div>` : ''}
+      </div>
+
+      <div class="audit-chart-wrap">
+        <h3>📊 Comparativo de Saldos Finais</h3>
+        <div class="audit-bars">${chartBars}</div>
+      </div>
+
+      <div class="audit-table-wrap">
+        <h3>📋 Tabela de Auditoria Completa</h3>
+        <div style="overflow-x:auto">
+          <table class="audit-table">
+            <thead>
+              <tr>
+                <th>#</th><th>Personagem</th><th>Capital</th>
+                <th>Receitas</th><th>Despesas</th><th>Saldo Final</th>
+                <th>Resultado</th><th>Seguro</th><th>Crédito</th><th>Lançtos.</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+      </div>
+
+      ${(() => {
+        const creditRows = configured.flatMap(c => {
+          const opt = c.credit.optId ? CREDIT_OPTIONS.find(o => o.id === c.credit.optId) : null;
+          if (!opt && !c.credit.history.length) return [];
+          if (c.credit.history.length) {
+            return c.credit.history.map(h => `<tr>
+              <td><strong>${esc(c.nome)}</strong></td>
+              <td>${opt ? opt.icon+' '+opt.name : '—'}</td>
+              <td style="color:var(--orange)">${opt ? (opt.taxaMensal*100).toFixed(1)+'% a.m.' : '—'}</td>
+              <td>Rod. ${h.rodada}</td>
+              <td style="color:var(--red)">${fmtR(h.divida)}</td>
+              <td style="color:var(--orange)">${fmtR(h.juros)}</td>
+              <td>${fmtR(h.iof)}</td>
+              <td style="color:var(--red);font-weight:700">${fmtR(h.total)}</td>
+              <td>${c.credit.active ? '<span style="color:var(--orange)">💸 Ativo</span>' : '<span style="color:var(--green)">✅ Quitado</span>'}</td>
+            </tr>`);
+          }
+          return [`<tr>
+            <td><strong>${esc(c.nome)}</strong></td>
+            <td>${opt.icon} ${opt.name}</td>
+            <td style="color:var(--orange)">${(opt.taxaMensal*100).toFixed(1)}% a.m.</td>
+            <td colspan="5" style="color:var(--gray)">Empréstimo ativo — sem cobranças ainda</td>
+            <td><span style="color:var(--orange)">💸 Ativo</span></td>
+          </tr>`];
+        });
+        if (!creditRows.length) return '';
+        return `<div class="audit-table-wrap">
+          <h3>💸 Histórico de Empréstimos</h3>
+          <div style="overflow-x:auto">
+            <table class="audit-table">
+              <thead><tr>
+                <th>Personagem</th><th>Modalidade</th><th>Taxa</th><th>Rodada</th>
+                <th>Dívida</th><th>Juros</th><th>IOF</th><th>Total Cobrado</th><th>Situação</th>
+              </tr></thead>
+              <tbody>${creditRows.join('')}</tbody>
+            </table>
+          </div>
+        </div>`;
+      })()}
+
+      <div class="audit-table-wrap">
+        <h3>📅 Totais por Rodada (todos os personagens)</h3>
+        <div style="overflow-x:auto">
+          <table class="audit-table">
+            <thead><tr><th>—</th><th>Janeiro</th><th>Fevereiro</th><th>Março</th><th>Abril</th></tr></thead>
+            <tbody><tr><td style="color:var(--gray);font-weight:700">Total do grupo</td>${roundSummary}</tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="audit-actions">
+        <button class="btn btn-ghost btn-sm" onclick="exportAudit()">⬇️ Exportar CSV</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ Imprimir</button>
+      </div>
+    </div>`;
+}
+
+// ── Crédito do Facilitador ─────────────────────
+function facCreditHtml(charIdx) {
+  const c = F.chars[charIdx];
+  const s = facCalcChar(c);
+
+  if (c.credit.active) {
+    const opt  = CREDIT_OPTIONS.find(o => o.id === c.credit.optId);
+    const debt = Math.abs(s.bal);
+    const det  = calcCETDetails(opt, debt > 0 ? debt : 0.01);
+    const histRows = c.credit.history.map(h => `
+      <div class="fch-row">
+        <span class="fch-rod">Rod.${h.rodada}</span>
+        <span class="fch-vals">Dívida ${fmtR(h.divida)} · Juros ${fmtR(h.juros)} · IOF ${fmtR(h.iof)}</span>
+        <span class="fch-total">-${fmtR(h.total)}</span>
+      </div>`).join('');
+    return `<div class="fac-cred-section active">
+      <h4 class="act">💸 Empréstimo Ativo — ${opt.icon} ${opt.name}</h4>
+      <div class="fac-cred-active">
+        <div class="fca-row"><span class="fca-label">Taxa mensal</span><span class="fca-val" style="color:var(--orange)">${(opt.taxaMensal*100).toFixed(1)}% a.m.</span></div>
+        <div class="fca-row"><span class="fca-label">CET (juros+IOF)</span><span class="fca-val">${(det.cetMensal*100).toFixed(2)}% a.m.</span></div>
+        <div class="fca-row"><span class="fca-label">Dívida atual</span><span class="fca-val" style="color:var(--red)">${fmtR(debt)}</span></div>
+        <div class="fca-row"><span class="fca-label">Custo estimado/mês</span><span class="fca-val" style="color:var(--red)">${fmtR(det.custoTotal)}</span></div>
+        <div class="fca-row"><span class="fca-label">IR (alíquota)</span><span class="fca-val" style="color:var(--blue)">${(opt.irAliquota*100).toFixed(1)}% sobre juros</span></div>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="btn btn-orange btn-sm" onclick="facCobrarJuros(${charIdx})">💸 Cobrar juros desta rodada</button>
+        <button class="btn btn-ghost btn-sm" onclick="facEncerrarCred(${charIdx})">✅ Encerrar empréstimo</button>
+      </div>
+      ${c.credit.history.length ? `<div class="fac-cred-hist">
+        <h5>Cobranças anteriores</h5>${histRows}
+      </div>` : ''}
+    </div>`;
+  }
+
+  if (s.bal < 0) {
+    const debt = Math.abs(s.bal);
+    const opts = CREDIT_OPTIONS.map(o => ({ ...o, calc: calcCETDetails(o, debt) }));
+    const bestId = opts.reduce((b,o) => o.calc.cetMensal < b.calc.cetMensal ? o : b, opts[0]).id;
+    const best   = opts.find(o => o.id === bestId);
+    const worst  = opts.reduce((w,o) => o.calc.cetMensal > w.calc.cetMensal ? o : w, opts[0]);
+    const saving = worst.calc.custoTotal - best.calc.custoTotal;
+    const cards  = opts.map(o => `
+      <button class="fac-cred-opt${o.id===bestId?' best':''}${c.credit.optId===o.id?' sel':''}"
+        onclick="facSelCred(${charIdx},${o.id})">
+        <div class="fco-head"><span class="fco-icon">${o.icon}</span><span class="fco-name">${o.name}</span></div>
+        <div class="fco-rates">Juros: ${(o.taxaMensal*100).toFixed(1)}% a.m.<br>IOF: ${(o.calc.iofTotal*100).toFixed(3)}%<br>IR: ${(o.irAliquota*100).toFixed(1)}%</div>
+        <div class="fco-cet">CET ${(o.calc.cetMensal*100).toFixed(2)}%</div>
+        <div class="fco-custo">${fmtR(o.calc.custoTotal)}/mês</div>
+      </button>`).join('');
+    return `<div class="fac-cred-section">
+      <h4 class="neg">🚨 Saldo Negativo — Modalidade de Crédito</h4>
+      <div style="font-size:.75rem;color:var(--light)">Dívida: <strong style="color:var(--red)">${fmtR(debt)}</strong></div>
+      <div class="fac-cred-opts">${cards}</div>
+      <div class="fac-cred-ai">
+        <strong>🤖 IA recomenda: ${best.icon} ${best.name}</strong> (CET ${(best.calc.cetMensal*100).toFixed(2)}% a.m.)<br>
+        Economia de <strong>${fmtR(saving)}/mês</strong> vs ${worst.name} (${(worst.calc.cetMensal*100).toFixed(2)}%)
+        <div class="fac-cred-math">Dívida:         ${fmtR(debt)}
+Juros ${(best.taxaMensal*100).toFixed(1)}%:      ${fmtR(best.calc.juros)}
+IOF ${(best.calc.iofTotal*100).toFixed(3)}%:   ${fmtR(best.calc.iof)}
+IR alíq. ${(best.irAliquota*100).toFixed(1)}%: ${fmtR(best.calc.encargo_ir)} (encargo inst.)
+──────────────────────────────
+CET: ${(best.calc.cetMensal*100).toFixed(2)}%   Custo/mês: ${fmtR(best.calc.custoTotal)}</div>
+      </div>
+      <button class="btn btn-orange btn-sm" onclick="facConfirmarCred(${charIdx})" ${!c.credit.optId?'disabled':''}>
+        Confirmar modalidade escolhida
+      </button>
+    </div>`;
+  }
+
+  return '';
+}
+
+function facSelCred(charIdx, optId) {
+  F.chars[charIdx].credit.optId = optId;
+  renderFacLancamentos();
+}
+
+function facConfirmarCred(charIdx) {
+  const c = F.chars[charIdx];
+  if (!c.credit.optId) return;
+  c.credit.active = true;
+  const opt = CREDIT_OPTIONS.find(o => o.id === c.credit.optId);
+  toast(`💸 ${opt.name} ativado para ${esc(c.nome)} — ${(opt.taxaMensal*100).toFixed(1)}% a.m.`, 'warn', 4000);
+  renderFacLancamentos();
+}
+
+function facCobrarJuros(charIdx) {
+  const c  = F.chars[charIdx];
+  const s  = facCalcChar(c);
+  if (s.bal >= 0) { facEncerrarCred(charIdx); return; }
+  const opt  = CREDIT_OPTIONS.find(o => o.id === c.credit.optId);
+  const debt = Math.abs(s.bal);
+  const det  = calcCETDetails(opt, debt);
+  const rnd  = parseInt(document.getElementById('fac-round')?.value) || 1;
+  const now  = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  c.txs.push({ id: Date.now(), type:'exp', desc:`Juros + IOF — ${opt.name}`,
+    val: parseFloat(det.custoTotal.toFixed(2)), cat:'Outros-D', round: rnd, ins: false, ts: now });
+  c.credit.history.push({ rodada: rnd, divida: debt, juros: det.juros, iof: det.iof,
+    total: parseFloat(det.custoTotal.toFixed(2)), tsCobranca: now });
+  toast(`💸 Juros ${fmtR(det.custoTotal)} cobrados de ${esc(c.nome)} (${opt.name})`, 'warn', 4000);
+  const sNovo = facCalcChar(c);
+  if (sNovo.bal >= 0) { c.credit.active = false; toast(`✅ ${esc(c.nome)} quitou — crédito encerrado.`, 'ok', 3000); }
+  renderFacLancamentos();
+}
+
+function facEncerrarCred(charIdx) {
+  const c = F.chars[charIdx];
+  c.credit.active = false;
+  c.credit.optId  = null;
+  toast(`✅ Empréstimo de ${esc(c.nome)} encerrado.`, 'ok');
+  renderFacLancamentos();
+}
+
+function addFacTx() {
+  const desc = document.getElementById('fac-desc')?.value.trim();
+  const val  = parseFloat(document.getElementById('fac-val')?.value);
+  const cat  = document.getElementById('fac-cat')?.value;
+  const rnd  = parseInt(document.getElementById('fac-round')?.value) || 1;
+  const ins  = !!(document.getElementById('fac-chk-ins')?.checked);
+  if (!desc) { toast('Informe a descrição.', 'warn'); return; }
+  if (!val || val <= 0) { toast('Informe um valor válido.', 'warn'); return; }
+  if (!cat) { toast('Selecione uma categoria.', 'warn'); return; }
+  c.txs.push({ id: Date.now(), type: F.txType, desc, val, cat, round: rnd, ins,
+    ts: new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) });
+  toast(`${F.txType==='inc'?'📈':'📉'} ${esc(desc)} — ${fmtR(val)} (${esc(c.nome)})`, F.txType==='inc'?'ok':'', 2500);
+  renderFacLancamentos();
+}
+
+function facDelTx(charIdx, id) {
+  if (!confirm('Remover este lançamento?')) return;
+  F.chars[charIdx].txs = F.chars[charIdx].txs.filter(t => t.id !== id);
+  renderFacLancamentos();
+}
+
+function exportAudit() {
+  const rows = [['Posição','Personagem','Capital','Receitas','Despesas','Saldo Final','Resultado %','Seguro','Crédito','Lançamentos']];
+  const data = F.chars.filter(c => c.capital > 0)
+    .map(c => ({ ...c, ...facCalcChar(c) }))
+    .sort((a,b) => b.bal - a.bal);
+  data.forEach((c,i) => {
+    const pct = c.capital > 0 ? ((c.bal-c.capital)/c.capital*100).toFixed(1) : '0';
+    const opt = c.credit.optId ? CREDIT_OPTIONS.find(o=>o.id===c.credit.optId) : null;
+    const credStatus = c.credit.active ? `Ativo - ${opt?.name||''}` : c.credit.history.length ? 'Quitado' : 'Sem crédito';
+    rows.push([i+1, c.nome, c.capital.toFixed(2), c.inc.toFixed(2), c.exp.toFixed(2),
+      c.bal.toFixed(2), pct+'%', c.seguro?'Sim':'Não', credStatus, c.txs.length]);
+  });
+  // Histórico de empréstimos
+  const hasCredHist = data.some(c => c.credit.history.length || c.credit.active);
+  if (hasCredHist) {
+    rows.push([]);
+    rows.push(['--- HISTÓRICO DE EMPRÉSTIMOS ---']);
+    rows.push(['Personagem','Modalidade','Taxa a.m.','Rodada','Dívida','Juros','IOF','Total Cobrado','Situação']);
+    data.forEach(c => {
+      const opt = c.credit.optId ? CREDIT_OPTIONS.find(o=>o.id===c.credit.optId) : null;
+      if (c.credit.history.length) {
+        c.credit.history.forEach(h => {
+          rows.push([c.nome, opt?.name||'—', opt?(opt.taxaMensal*100).toFixed(1)+'%':'—',
+            'Rod.'+h.rodada, h.divida.toFixed(2), h.juros.toFixed(2), h.iof.toFixed(2),
+            h.total.toFixed(2), c.credit.active?'Ativo':'Quitado']);
+        });
+      } else if (c.credit.active && opt) {
+        rows.push([c.nome, opt.name, (opt.taxaMensal*100).toFixed(1)+'%','—','—','—','—','—','Ativo s/ cobrança']);
+      }
+    });
+  }
+  const csv = rows.map(r => r.join(';')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,﻿' + encodeURIComponent(csv);
+  a.download = 'auditoria-circuito-olimpico.csv';
+  a.click();
+  toast('✅ CSV exportado com sucesso.', 'ok');
+}
+let _insSelected = true;
+let _roundSelected = 1;
+
+function selRound(r) {
+  _roundSelected = r;
+  document.querySelectorAll('.rsel-btn').forEach(b => b.classList.remove('sel'));
+  document.querySelector(`.rsel-btn[data-r="${r}"]`).classList.add('sel');
+}
+
+function selIns(val) {
+  _insSelected = val;
+  document.getElementById('ins-yes').className = 'ins-opt' + (val ? ' sel-yes' : '');
+  document.getElementById('ins-no').className  = 'ins-opt' + (!val ? ' sel-no' : '');
+  document.getElementById('ins-warning').style.display = val ? 'none' : 'block';
+}
+
+function startApp() {
+  const name = document.getElementById('inp-name').value.trim();
+  const cap  = parseFloat(document.getElementById('inp-capital').value);
+  if (!name) { toast('Informe seu nome para continuar.', 'warn'); return; }
+  if (!cap || cap <= 0) { toast('Informe o capital inicial informado pelo facilitador.', 'warn'); return; }
+
+  G.name = name;
+  G.capital = cap;
+  G.insurance = _insSelected;
+  G.round = _roundSelected;
+  G.transactions = [];
+  G.roundSnapshots = { 1: null, 2: null, 3: null, 4: null };
+
+  if (G.insurance) {
+    G.transactions.push({
+      id: Date.now(),
+      type: 'exp',
+      desc: 'Contratação de Seguro',
+      val: 550,
+      valOriginal: null,
+      cat: 'Outros-D',
+      insApplied: false,
+      round: G.round,
+      ts: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
+    });
+  }
+
+  showScreen('sc-app');
+  renderHeader();
+  renderSummary();
+  renderRoundProgress();
+  renderHistory();
+  renderChart();
+  renderAI();
+}
+
+// ══════════════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ══════════════════════════════════════════════
+// HEADER
+// ══════════════════════════════════════════════
+function renderHeader() {
+  document.getElementById('ah-name').textContent = G.name;
+  document.getElementById('ah-round').textContent = `Rod. ${G.round} — ${MONTHS[G.round-1]}`;
+  const insEl = document.getElementById('ah-ins');
+  if (G.insurance) {
+    insEl.textContent = '🛡️ Segurado';
+    insEl.className = 'ah-ins';
+  } else {
+    insEl.textContent = '⛔ Sem seguro';
+    insEl.className = 'ah-ins off';
+  }
+  // Badge de crédito ativo
+  let creditEl = document.getElementById('ah-credit');
+  if (G.creditActive && G.creditOption) {
+    if (!creditEl) {
+      creditEl = document.createElement('button');
+      creditEl.id = 'ah-credit';
+      creditEl.className = 'credit-active-badge';
+      creditEl.title = 'Clique para ver detalhes do crédito ativo';
+      creditEl.onclick = abrirModalCredito;
+      document.getElementById('ah-ins').insertAdjacentElement('afterend', creditEl);
+    }
+    creditEl.textContent = `💸 ${G.creditOption.name} (${(G.creditOption.taxaMensal*100).toFixed(1)}% a.m.)`;
+  } else if (creditEl) {
+    creditEl.remove();
+  }
+  updateBalance();
+}
+
+function updateBalance() {
+  const bal = calcBalance();
+  const el = document.getElementById('ah-bal');
+  el.textContent = fmtR(bal);
+  el.style.color = bal >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+// ══════════════════════════════════════════════
+// TRANSAÇÕES
+// ══════════════════════════════════════════════
+function setType(t) {
+  G.txType = t;
+  document.getElementById('tab-inc').className = 'type-tab inc' + (t==='inc' ? ' sel' : '');
+  document.getElementById('tab-exp').className = 'type-tab exp' + (t==='exp' ? ' sel' : '');
+  // Mostrar opção de seguro apenas para despesas com seguro ativo
+  const insRow = document.getElementById('ins-check-row');
+  insRow.style.display = (t === 'exp' && G.insurance) ? 'flex' : 'none';
+  document.getElementById('chk-ins').checked = false;
+  document.getElementById('ins-desc-row').style.display = 'none';
+  // Reorganizar categorias
+  const selCat = document.getElementById('inp-cat');
+  const incGrp = document.getElementById('cat-inc-group');
+  const expGrp = document.getElementById('cat-exp-group');
+  incGrp.style.display = t === 'inc' ? '' : 'none';
+  expGrp.style.display = t === 'exp' ? '' : 'none';
+  selCat.value = '';
+}
+
+function toggleInsCheck() {
+  const chk = document.getElementById('chk-ins');
+  chk.checked = !chk.checked;
+  document.getElementById('ins-desc-row').style.display = chk.checked ? 'block' : 'none';
+  if (chk.checked) document.getElementById('inp-val-ins').focus();
+}
+
+function addTx() {
+  const desc = document.getElementById('inp-desc').value.trim();
+  const val  = parseFloat(document.getElementById('inp-val').value);
+  const cat  = document.getElementById('inp-cat').value;
+  if (!desc) { toast('Informe a descrição do lançamento.', 'warn'); return; }
+  if (!val || val <= 0) { toast('Informe um valor válido (maior que zero).', 'warn'); return; }
+  if (!cat) { toast('Selecione uma categoria.', 'warn'); return; }
+
+  const insApplied = G.insurance && G.txType === 'exp' && document.getElementById('chk-ins').checked;
+  let finalVal = val;
+  let insOrig  = null;
+  if (insApplied) {
+    const valIns = parseFloat(document.getElementById('inp-val-ins').value);
+    if (!isNaN(valIns) && valIns >= 0) {
+      insOrig = val;
+      finalVal = valIns;
+    }
+  }
+
+  const tx = {
+    id: Date.now(),
+    type: G.txType,
+    desc,
+    val: finalVal,
+    valOriginal: insOrig,
+    cat,
+    insApplied,
+    round: G.round,
+    ts: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
+  };
+  G.transactions.unshift(tx);
+
+  // limpar form
+  document.getElementById('inp-desc').value = '';
+  document.getElementById('inp-val').value  = '';
+  document.getElementById('inp-cat').value  = '';
+  document.getElementById('chk-ins').checked = false;
+  document.getElementById('inp-val-ins').value = '';
+  document.getElementById('ins-desc-row').style.display = 'none';
+
+  const saving = insOrig ? ` (economizou ${fmtR(insOrig - finalVal)} 🛡️)` : '';
+  toast(`${tx.type==='inc'?'📈 Receita':'📉 Despesa'} registrada: ${fmtR(finalVal)}${saving}`, tx.type==='inc'?'ok':'');
+
+  renderAll();
+}
+
+function deleteTx(id) {
+  if (!confirm('Remover este lançamento?')) return;
+  G.transactions = G.transactions.filter(t => t.id !== id);
+  renderAll();
+}
+
+function calcBalance() {
+  const sumInc = G.transactions.filter(t=>t.type==='inc').reduce((s,t)=>s+t.val,0);
+  const sumExp = G.transactions.filter(t=>t.type==='exp').reduce((s,t)=>s+t.val,0);
+  return G.capital + sumInc - sumExp;
+}
+
+function calcSums() {
+  const inc = G.transactions.filter(t=>t.type==='inc').reduce((s,t)=>s+t.val,0);
+  const exp = G.transactions.filter(t=>t.type==='exp').reduce((s,t)=>s+t.val,0);
+  return { inc, exp, bal: G.capital + inc - exp };
+}
+
+// ══════════════════════════════════════════════
+// RENDER ALL
+// ══════════════════════════════════════════════
+function renderAll() {
+  updateBalance();
+  renderSummary();
+  renderHistory();
+  renderChart();
+  renderAI();
+  renderRoundProgress();
+  checkNegativeBalance();
+}
+
+// ══════════════════════════════════════════════
+// SUMMARY CARDS
+// ══════════════════════════════════════════════
+function renderSummary() {
+  const { inc, exp, bal } = calcSums();
+  const result = bal - G.capital; // resultado líquido (sem capital)
+  const pct = G.capital > 0 ? ((result / G.capital) * 100) : 0;
+  const incCnt = G.transactions.filter(t=>t.type==='inc').length;
+  const expCnt = G.transactions.filter(t=>t.type==='exp').length;
+
+  document.getElementById('sum-capital').textContent = fmtR(G.capital);
+  document.getElementById('sum-inc').textContent = fmtR(inc);
+  document.getElementById('sum-exp').textContent = fmtR(exp);
+  document.getElementById('sum-inc-cnt').textContent = `${incCnt} lançamento${incCnt!==1?'s':''}`;
+  document.getElementById('sum-exp-cnt').textContent = `${expCnt} lançamento${expCnt!==1?'s':''}`;
+
+  const resEl = document.getElementById('sum-result');
+  resEl.textContent = fmtR(result);
+  resEl.style.color = result >= 0 ? 'var(--green)' : 'var(--red)';
+
+  const pctEl = document.getElementById('sum-result-pct');
+  pctEl.textContent = `${result>=0?'+':''}${pct.toFixed(1)}% do capital`;
+  pctEl.style.color = result >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+// ══════════════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════════════
+function setFilter(f, el) {
+  G.filter = f;
+  document.querySelectorAll('.flt-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('tx-list');
+  let txs = G.transactions;
+  if (G.filter === 'inc') txs = txs.filter(t=>t.type==='inc');
+  if (G.filter === 'exp') txs = txs.filter(t=>t.type==='exp');
+
+  if (!txs.length) {
+    list.innerHTML = `<div class="tx-empty">Nenhum lançamento${G.filter!=='all'?' deste tipo':''} ainda.</div>`;
+    return;
+  }
+
+  list.innerHTML = txs.map(tx => {
+    const icons = {
+      Salário:'💼',Venda:'🛒',Serviço:'🔧',Investimento:'📊',Bônus:'🎯','Outros-R':'✅',
+      Moradia:'🏠',Alimentação:'🍽️',Transporte:'🚗',Saúde:'💊',Educação:'📚',
+      Lazer:'🎉',Imposto:'📋',Emergência:'🚨','Outros-D':'📌',
+    };
+    const icon = icons[tx.cat] || (tx.type==='inc'?'📈':'📉');
+    const insTag = tx.insApplied
+      ? `<span class="tag-ins">🛡️ seguro ${tx.valOriginal?'+'+fmtR(tx.valOriginal-tx.val)+' econ.':''}</span>`
+      : '';
+    const origStr = tx.valOriginal ? `<span style="text-decoration:line-through;color:var(--gray);font-size:.7rem">${fmtR(tx.valOriginal)}</span> ` : '';
+    return `<div class="tx-row">
+      <div class="tx-icon ${tx.type}">${icon}</div>
+      <div class="tx-info">
+        <div class="tx-desc">${esc(tx.desc)}</div>
+        <div class="tx-meta">
+          <span>${tx.cat}</span>
+          <span>Rod.${tx.round}</span>
+          <span>${tx.ts}</span>
+          ${insTag}
+        </div>
+      </div>
+      <div class="tx-amount ${tx.type}">${tx.type==='inc'?'+':'-'}${origStr}${fmtR(tx.val)}</div>
+      <button class="tx-del" onclick="deleteTx(${tx.id})" title="Remover">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// ROUND PROGRESS
+// ══════════════════════════════════════════════
+function renderRoundProgress() {
+  const el = document.getElementById('rp-months');
+  const { bal } = calcSums();
+  el.innerHTML = [1,2,3,4].map(r => {
+    const isCurrent = r === G.round;
+    const isDone    = r < G.round;
+    const snap = G.roundSnapshots[r];
+    const cls = isCurrent ? 'rpm active' : (isDone ? 'rpm done' : 'rpm');
+    const balStr = isCurrent
+      ? `<div class="rpm-bal" style="color:${bal>=G.capital?'var(--green)':'var(--red)'}">${fmtR(bal)}</div>`
+      : (snap ? `<div class="rpm-bal" style="color:${snap>=G.capital?'var(--green)':'var(--red)'}">${fmtR(snap)}</div>` : `<div class="rpm-bal" style="color:var(--gray)">—</div>`);
+    return `<div class="${cls}" onclick="changeRound(${r})">
+      <div class="rpm-name">${MONTH_SHORT[r-1]}</div>
+      ${balStr}
+    </div>`;
+  }).join('');
+}
+
+function changeRound(r) {
+  if (r === G.round) return;
+  // Aplica juros ao virar o mês se crédito ativo
+  if (G.creditActive && G.creditOption) {
+    const balAtual = calcBalance();
+    if (balAtual < 0) {
+      applyMonthlyInterest();
+      renderAll();
+    } else {
+      G.creditActive = false;
+      G.creditOption = null;
+      toast('✅ Saldo positivo — crédito encerrado!', 'ok');
+    }
+  }
+  // Salva snapshot do saldo antes de mudar
+  G.roundSnapshots[G.round] = calcBalance();
+  G.round = r;
+  document.getElementById('ah-round').textContent = `Rod. ${G.round} — ${MONTHS[G.round-1]}`;
+  toast(`Mudou para ${MONTHS[r-1]} (Rodada ${r})`, 'ok');
+  renderRoundProgress();
+}
+
+// ══════════════════════════════════════════════
+// MINI CHART
+// ══════════════════════════════════════════════
+function renderChart() {
+  const { inc, exp, bal } = calcSums();
+  const max = Math.max(inc, exp, G.capital, 1);
+  const pInc = Math.min((inc / max) * 100, 100);
+  const pExp = Math.min((exp / max) * 100, 100);
+  const pBal = Math.min((Math.abs(bal) / max) * 100, 100);
+  const isNeg = bal < 0;
+
+  document.getElementById('bar-chart').innerHTML = `
+    <div class="bc-row">
+      <div class="bc-label">Capital</div>
+      <div class="bc-track"><div class="bc-fill bal-fill" style="width:${Math.min((G.capital/max)*100,100).toFixed(1)}%;background:rgba(0,201,177,.4)" data-val="${fmtR(G.capital)}"></div></div>
+    </div>
+    <div class="bc-row">
+      <div class="bc-label">Receitas</div>
+      <div class="bc-track"><div class="bc-fill inc-fill" style="width:${pInc.toFixed(1)}%" data-val="${fmtR(inc)}"></div></div>
+    </div>
+    <div class="bc-row">
+      <div class="bc-label">Despesas</div>
+      <div class="bc-track"><div class="bc-fill exp-fill" style="width:${pExp.toFixed(1)}%" data-val="${fmtR(exp)}"></div></div>
+    </div>
+    <div class="bc-row">
+      <div class="bc-label">Saldo</div>
+      <div class="bc-track"><div class="bc-fill ${isNeg?'bal-neg':'bal-fill'}" style="width:${pBal.toFixed(1)}%" data-val="${fmtR(bal)}"></div></div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════
+// AI TIPS ENGINE
+// ══════════════════════════════════════════════
+function renderAI() {
+  const { inc, exp, bal } = calcSums();
+  const result = bal - G.capital;
+  const pctExp  = inc > 0 ? exp / inc : (exp > 0 ? 999 : 0);
+  const pctBal  = G.capital > 0 ? bal / G.capital : 1;
+  const txCount = G.transactions.length;
+  const insCount = G.transactions.filter(t => t.insApplied).length;
+  const insEcon  = G.transactions.filter(t => t.insApplied && t.valOriginal)
+    .reduce((s,t) => s + (t.valOriginal - t.val), 0);
+  const hasEmerg = G.transactions.some(t => t.cat === 'Emergência');
+  const incCount = G.transactions.filter(t=>t.type==='inc').length;
+  const expCount = G.transactions.filter(t=>t.type==='exp').length;
+
+  const tips = [];
+
+  // Sem lançamentos ainda
+  if (txCount === 0) {
+    tips.push({ type:'tip-purple', icon:'🤖', title:'Bem-vindo ao Circuito!',
+      text:`Olá, ${G.name}! Você começou com ${fmtR(G.capital)} de capital. Registre suas receitas e despesas aqui para acompanhar sua saúde financeira em tempo real.` });
+    if (G.insurance) {
+      tips.push({ type:'tip-ins', icon:'🛡️', title:'Seguro ativo — boa escolha!',
+        text:'Com o seguro contratado, você poderá marcar despesas elegíveis como cobertas e reduzir seu custo. Fique atento quando o facilitador informar que uma despesa tem desconto.' });
+    } else {
+      tips.push({ type:'tip-warn', icon:'⚠️', title:'Sem seguro — atenção ao risco!',
+        text:'Sem seguro, todas as despesas serão pagas pelo valor integral. Avalie bem antes de comprometer seu capital com despesas inesperadas.' });
+    }
+    tips.push({ type:'tip-info', icon:'💡', title:'Como usar este painel',
+      text:`Clique em "📈 Receita" ou "📉 Despesa", preencha descrição, valor e categoria, e pressione Registrar. Use a 🧮 calculadora flutuante para cálculos rápidos. Troque de rodada clicando nos meses acima.` });
+    renderAITips(tips); return;
+  }
+
+  // Saldo crítico
+  if (bal <= 0) {
+    tips.push({ type:'tip-warn', icon:'🚨', title:'SALDO NEGATIVO — Atenção urgente!',
+      text:`Seu saldo está em ${fmtR(bal)}. Você ultrapassou seu capital inicial. Reduza despesas imediatamente ou busque novas receitas para recuperar o equilíbrio.` });
+  } else if (pctBal < 0.3) {
+    tips.push({ type:'tip-warn', icon:'⚠️', title:'Saldo muito baixo',
+      text:`Seu saldo (${fmtR(bal)}) está abaixo de 30% do capital inicial. Evite novas despesas não essenciais e foque em receitas para estabilizar.` });
+  } else if (pctBal > 1.5) {
+    tips.push({ type:'tip-ok', icon:'🏆', title:'Excelente! Saldo muito saudável',
+      text:`Seu saldo de ${fmtR(bal)} representa ${((pctBal-1)*100).toFixed(0)}% de ganho sobre o capital. Você está indo muito bem!` });
+  } else if (result > 0) {
+    tips.push({ type:'tip-ok', icon:'✅', title:'Resultado positivo',
+      text:`Você está ${fmtR(result)} acima do capital inicial (${((result/G.capital)*100).toFixed(1)}% de crescimento). Continue assim!` });
+  }
+
+  // Relação receita x despesa
+  if (incCount > 0 && expCount > 0) {
+    if (pctExp > 0.9) {
+      tips.push({ type:'tip-warn', icon:'📉', title:'Despesas quase iguais às receitas',
+        text:`Você está gastando ${(pctExp*100).toFixed(0)}% do que ganha. Sobra muito pouco. Revise despesas de lazer e extras antes de comprometer o caixa.` });
+    } else if (pctExp > 0.7) {
+      tips.push({ type:'tip-alert', icon:'📊', title:'Despesas elevadas',
+        text:`${(pctExp*100).toFixed(0)}% das receitas estão comprometidas com despesas. O ideal é manter abaixo de 70% para ter uma reserva de segurança.` });
+    } else if (pctExp < 0.4) {
+      tips.push({ type:'tip-ok', icon:'💰', title:'Ótimo controle de gastos',
+        text:`Suas despesas representam apenas ${(pctExp*100).toFixed(0)}% das receitas. Excelente disciplina financeira — você está preservando bem o capital!` });
+    }
+  }
+
+  // Sem receitas
+  if (expCount > 0 && incCount === 0) {
+    tips.push({ type:'tip-alert', icon:'📋', title:'Só despesas registradas',
+      text:'Você registrou despesas mas nenhuma receita ainda. Lembre-se de registrar suas entradas para ter uma visão completa do fluxo financeiro.' });
+  }
+
+  // Emergência
+  if (hasEmerg) {
+    tips.push({ type:'tip-warn', icon:'🚨', title:'Despesa de emergência registrada',
+      text:'Emergências afetam o planejamento financeiro. Avalie se o seguro (se contratado) cobre parte deste custo. Priorize reconstruir a reserva nas próximas rodadas.' });
+  }
+
+  // Seguro — benefícios usados
+  if (G.insurance && insCount > 0) {
+    tips.push({ type:'tip-ins', icon:'🛡️', title:`Seguro economizou ${fmtR(insEcon)}`,
+      text:`Você usou o seguro ${insCount} vez(es) e economizou ${fmtR(insEcon)}. Esta economia direta contribui para manter seu saldo saudável!` });
+  }
+
+  if (G.insurance && insCount === 0 && expCount >= 2) {
+    tips.push({ type:'tip-ins', icon:'🛡️', title:'Seguro ativo — lembre de usar!',
+      text:'Você tem seguro contratado mas ainda não o utilizou. Quando o facilitador indicar que uma despesa tem cobertura, marque a opção "Coberto pelo seguro" no formulário.' });
+  }
+
+  // Dica por rodada
+  const roundTips = [
+    { title:'Rodada 1 — Estabeleça a base', text:'No primeiro mês, foque em registrar todas as receitas fixas (salário, serviços) e as despesas essenciais (moradia, alimentação). Evite gastos de lazer por enquanto.' },
+    { title:'Rodada 2 — Avalie o padrão', text:'Com um mês de dados, compare suas despesas com as receitas. Se as despesas passam de 60% das receitas, identifique o que pode ser reduzido já nesta rodada.' },
+    { title:'Rodada 3 — Hora de otimizar', text:'No terceiro mês, foque em reduzir despesas não essenciais. Negociar preços, substituir categorias caras e antecipar receitas são estratégias vencedoras.' },
+    { title:'Rodada 4 — Sprint final!', text:'Último mês! Priorize fechar com saldo positivo. Despesas de emergência nesta fase são muito perigosas — use o seguro se disponível e foque nas receitas.' },
+  ];
+  tips.push({ type:'tip-info', icon:'📅', ...roundTips[G.round-1] });
+
+  // Conceito financeiro baseado no perfil atual
+  const finTips = [
+    { title:'Dica: Regra 50-30-20', text:'Tente destinar 50% do saldo para necessidades, 30% para desejos e 20% para reserva/investimento. É um guia simples para manter o equilíbrio.' },
+    { title:'Dica: Fluxo de caixa positivo', text:'Ter mais entradas do que saídas é a base da saúde financeira. Mesmo pequenas economias mensais acumulam um grande patrimônio ao longo do tempo.' },
+    { title:'Dica: Reserva de emergência', text:'Uma reserva equivalente a 3-6 meses de despesas protege contra imprevistos. No jogo, manter pelo menos 20% do capital em caixa é uma boa proteção.' },
+    { title:'Dica: Custo de oportunidade', text:'Cada real gasto em despesas é um real que não está gerando rendimento. Questione sempre: "Esta despesa é necessária agora ou pode esperar?"' },
+  ];
+  tips.push({ type:'tip-purple', icon:'💡', ...finTips[G.round % finTips.length] });
+
+  // Dica sobre crédito ativo
+  if (G.creditActive && G.creditOption) {
+    const bal  = calcBalance();
+    const debt = Math.abs(bal);
+    const det  = calcCETDetails(G.creditOption, debt);
+    tips.push({ type:'tip-warn', icon:'💸', title:`Crédito ativo — ${G.creditOption.name}`,
+      text:`Você está devendo ${fmtR(debt)}. A cada rodada que virar, serão cobrados <strong>${fmtR(det.custoTotal)}</strong> de juros + IOF (CET ${(det.cetMensal*100).toFixed(2)}% a.m.). Priorize receitas para quitar a dívida o quanto antes.` });
+  }
+
+  renderAITips(tips);
+}
+
+function renderAITips(tips) {
+  document.getElementById('ai-tips').innerHTML = tips.map(t => `
+    <div class="ai-tip ${t.type}">
+      <div class="ai-tip-icon">${t.icon}</div>
+      <div class="ai-tip-body">
+        <div class="ai-tip-title">${t.title}</div>
+        <div class="ai-tip-text">${t.text}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// CALCULADORA
+// ══════════════════════════════════════════════
+let _calcExpr = '';
+let _calcVal  = '0';
+let _calcNew  = true;
+
+function toggleCalc() {
+  const m = document.getElementById('calc-modal');
+  m.classList.toggle('open');
+}
+
+function calcNum(n) {
+  if (_calcNew) { _calcVal = n === '.' ? '0.' : n; _calcNew = false; }
+  else if (n === '.' && _calcVal.includes('.')) return;
+  else if (_calcVal === '0' && n !== '.') _calcVal = n;
+  else _calcVal += n;
+  document.getElementById('calc-result').textContent = _calcVal;
+}
+
+function calcOp(op) {
+  _calcExpr = (_calcExpr || '0') + ' ' + _calcVal + ' ' + op;
+  document.getElementById('calc-expr').textContent = _calcExpr;
+  _calcNew = true;
+}
+
+function calcEq() {
+  if (!_calcExpr) return;
+  const full = (_calcExpr + ' ' + _calcVal)
+    .replace(/÷/g, '/').replace(/×/g, '*').replace(/−/g, '-').replace(/%/g, '/100');
+  try {
+    // Safe eval with only numbers and operators
+    if (!/^[\d\s\+\-\*\/\.\(\)]+$/.test(full)) return;
+    const res = Function('"use strict";return (' + full + ')')();
+    _calcVal = isFinite(res) ? parseFloat(res.toFixed(10)).toString() : 'Erro';
+    document.getElementById('calc-result').textContent = _calcVal;
+    document.getElementById('calc-expr').textContent = full.replace(/\//g,'÷').replace(/\*/g,'×') + ' =';
+    _calcExpr = '';
+    _calcNew = true;
+  } catch { document.getElementById('calc-result').textContent = 'Erro'; }
+}
+
+function calcClear() {
+  _calcExpr = ''; _calcVal = '0'; _calcNew = true;
+  document.getElementById('calc-result').textContent = '0';
+  document.getElementById('calc-expr').textContent = '';
+}
+
+function calcBS() {
+  if (_calcNew) return;
+  _calcVal = _calcVal.length > 1 ? _calcVal.slice(0,-1) : '0';
+  document.getElementById('calc-result').textContent = _calcVal;
+}
+
+function useCalcResult() {
+  const val = parseFloat(_calcVal);
+  if (isNaN(val) || val <= 0) { toast('Resultado inválido para usar no formulário.','warn'); return; }
+  document.getElementById('inp-val').value = val;
+  document.getElementById('calc-modal').classList.remove('open');
+  document.getElementById('inp-val').focus();
+  toast(`Valor ${fmtR(val)} inserido no formulário ✓`, 'ok');
+}
+
+// ══════════════════════════════════════════════
+// RESET
+// ══════════════════════════════════════════════
+function resetGame() {
+  const pwd = prompt('Digite a senha do facilitador para reiniciar o jogo:');
+  if (pwd === null) return;
+  if (pwd !== 'iaefinanceiro2026') { toast('Senha incorreta. Apenas o facilitador pode reiniciar o jogo.', 'warn', 4000); return; }
+  G.transactions = [];
+  G.creditOption = null;
+  G.creditActive = false;
+  G.creditModalShown = false;
+  document.getElementById('inp-name').value    = '';
+  document.getElementById('inp-capital').value = '';
+  selIns(true);
+  selRound(1);
+  showScreen('sc-setup');
+}
+
+// ══════════════════════════════════════════════
+// CRÉDITO — SALDO NEGATIVO
+// ══════════════════════════════════════════════
+function calcCETDetails(opt, valor) {
+  const iofTotal = opt.iofFixo + opt.iofDiario * 30;
+  const iof      = valor * iofTotal;
+  const juros    = valor * opt.taxaMensal;
+  // IR: alíquota que incide sobre os juros cobrados pela instituição (encargo tributário embutido)
+  const encargo_ir = juros * opt.irAliquota;
+  const custoTotal = juros + iof;
+  const cetMensal  = custoTotal / valor;
+  return { iof, iofTotal, juros, encargo_ir, custoTotal, cetMensal };
+}
+
+function checkNegativeBalance() {
+  const bal = calcBalance();
+  if (bal < 0) {
+    if (!G.creditActive && !G.creditModalShown) {
+      G.creditModalShown = true;
+      setTimeout(() => abrirModalCredito(), 250);
+    }
+  } else {
+    G.creditModalShown = false;
+    if (G.creditActive) {
+      G.creditActive = false;
+      G.creditOption = null;
+      toast('✅ Saldo voltou ao positivo! Crédito encerrado.', 'ok', 4000);
+      renderHeader();
+    }
+  }
+}
+
+function abrirModalCredito() {
+  const bal  = calcBalance();
+  const debt = Math.abs(bal);
+
+  // Calcula CET para cada opção
+  const opts = CREDIT_OPTIONS.map(o => ({ ...o, calc: calcCETDetails(o, debt) }));
+  // Encontra a melhor (menor CET)
+  const bestId = opts.reduce((best, o) => o.calc.cetMensal < best.calc.cetMensal ? o : best, opts[0]).id;
+  const best   = opts.find(o => o.id === bestId);
+  const worst  = opts.reduce((w, o)  => o.calc.cetMensal > w.calc.cetMensal  ? o : w,  opts[0]);
+  const saving = worst.calc.custoTotal - best.calc.custoTotal;
+
+  // ── Cards das 5 opções ──────────────────────
+  const cardsHtml = opts.map(o => {
+    const isBest = o.id === bestId;
+    const isSel  = G.creditOption?.id === o.id;
+    return `<div class="cred-card${isBest?' best':''}${isSel?' selected':''}" id="ccard-${o.id}" onclick="selecionarCredito(${o.id})">
+      ${isBest ? '<div class="cred-best-tag">✅ MELHOR OPÇÃO</div>' : ''}
+      <div class="cred-card-hd">
+        <div class="cred-card-icon">${o.icon}</div>
+        <div class="cred-card-name">${o.name}</div>
+      </div>
+      <div class="cred-card-desc">${o.desc}</div>
+      <div class="cred-rates">
+        <div class="cred-rate-row">
+          <span class="cred-rate-label">Juros</span>
+          <span class="cred-rate-val" style="color:var(--orange)">${(o.taxaMensal*100).toFixed(1)}% a.m.</span>
+        </div>
+        <div class="cred-rate-row">
+          <span class="cred-rate-label">IOF (30 dias)</span>
+          <span class="cred-rate-val">${(o.calc.iofTotal*100).toFixed(3)}%</span>
+        </div>
+        <div class="cred-rate-row">
+          <span class="cred-rate-label">IR (alíquota)</span>
+          <span class="cred-rate-val" style="color:var(--blue)">${(o.irAliquota*100).toFixed(1)}%</span>
+        </div>
+      </div>
+      <div class="cred-sep"></div>
+      <div class="cred-cet">
+        <div class="cred-cet-label">CET mensal</div>
+        <div class="cred-cet-val">${(o.calc.cetMensal*100).toFixed(2)}%</div>
+      </div>
+      <div class="cred-custo">Custo/mês sobre ${fmtR(debt)}: <strong>${fmtR(o.calc.custoTotal)}</strong></div>
+      <button class="cred-sel-btn">${isSel ? '✓ Selecionado' : 'Selecionar esta modalidade'}</button>
+    </div>`;
+  }).join('');
+
+  // ── Bloco IA ────────────────────────────────
+  const aiHtml = `
+    <div class="ai-credit-rec">
+      🏆 <strong>Melhor escolha: ${best.icon} ${best.name}</strong><br>
+      Entre as 5 modalidades, o <strong>${best.name}</strong> apresenta o menor
+      Custo Efetivo Total: <strong>${(best.calc.cetMensal*100).toFixed(2)}% a.m.</strong>
+      sobre a dívida de ${fmtR(debt)}.
+      Em comparação com a opção mais cara (${worst.name}, CET ${(worst.calc.cetMensal*100).toFixed(2)}% a.m.),
+      a economia é de <strong>${fmtR(saving)} por mês</strong>.
+    </div>
+    <div class="ai-credit-math">
+Cálculo do CET — ${best.name}
+══════════════════════════════════════
+Dívida (D):               ${fmtR(debt)}
+
+Juros  = D × ${(best.taxaMensal*100).toFixed(1)}% a.m.  = ${fmtR(best.calc.juros)}
+IOF    = D × ${(best.calc.iofTotal*100).toFixed(3)}%      = ${fmtR(best.calc.iof)}
+         (0,38% fixo + 0,0082%/dia × 30)
+─────────────────────────────────────
+Custo total/mês:          ${fmtR(best.calc.custoTotal)}
+CET mensal:               ${(best.calc.cetMensal*100).toFixed(2)}%
+
+IR (alíquota ${(best.irAliquota*100).toFixed(1)}%):
+  Encargo sobre juros:    ${fmtR(best.calc.encargo_ir)}
+  (pago pela instituição, refletido no spread)
+    </div>
+    <div class="ir-note">
+      ℹ️ <strong>O que é o IOF?</strong> Imposto sobre Operações Financeiras cobrado ao tomador do crédito (você).
+      <strong>E o IR?</strong> O Imposto de Renda incide sobre os juros recebidos pela instituição — ela repassa esse custo via spread na taxa cobrada.
+      Por isso, operações de prazo menor têm IR mais alto (22,5%) e encarecem mais.
+    </div>`;
+
+  document.getElementById('cred-inner').innerHTML = `
+    <div class="cred-header">
+      <h2>🚨 Saldo Negativo — Modalidades de Crédito</h2>
+      <div class="cred-sub">Seu saldo ficou negativo. Analise as modalidades abaixo e escolha uma para cobrir a diferença.<br>Ao virar o mês, os juros serão cobrados automaticamente até o saldo voltar ao positivo.</div>
+      <div class="cred-amount">${fmtR(bal)}</div>
+    </div>
+    <div class="cred-grid">${cardsHtml}</div>
+    <div class="ai-credit-box">
+      <h3>🤖 Análise da IA — Qual é a melhor opção e por quê?</h3>
+      ${aiHtml}
+    </div>
+    <div class="cred-actions">
+      <button class="btn btn-cyan btn-lg" onclick="confirmarCredito()" id="btn-confirm-credit" ${!G.creditOption?'disabled':''}>Confirmar modalidade</button>
+      <button class="btn btn-ghost" onclick="fecharModalCredito()">Analisar depois</button>
+    </div>`;
+
+  document.getElementById('credit-overlay').classList.add('open');
+}
+
+function selecionarCredito(id) {
+  G.creditOption = CREDIT_OPTIONS.find(o => o.id === id);
+  document.querySelectorAll('.cred-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.cred-sel-btn').forEach(b => b.textContent = 'Selecionar esta modalidade');
+  const card = document.getElementById(`ccard-${id}`);
+  card.classList.add('selected');
+  card.querySelector('.cred-sel-btn').textContent = '✓ Selecionado';
+  const btn = document.getElementById('btn-confirm-credit');
+  if (btn) btn.disabled = false;
+}
+
+function confirmarCredito() {
+  if (!G.creditOption) return;
+  G.creditActive = true;
+  fecharModalCredito();
+  toast(`📋 ${G.creditOption.name} ativado — ${(G.creditOption.taxaMensal*100).toFixed(1)}% a.m. + IOF. Juros cobrados ao virar o mês.`, 'warn', 5000);
+  renderHeader();
+}
+
+function fecharModalCredito() {
+  document.getElementById('credit-overlay').classList.remove('open');
+}
+
+function applyMonthlyInterest() {
+  if (!G.creditOption) return;
+  const bal  = calcBalance();
+  if (bal >= 0) return;
+  const debt = Math.abs(bal);
+  const det  = calcCETDetails(G.creditOption, debt);
+  G.transactions.push({
+    id: Date.now(),
+    type: 'exp',
+    desc: `Juros + IOF — ${G.creditOption.name}`,
+    val: parseFloat(det.custoTotal.toFixed(2)),
+    valOriginal: null,
+    cat: 'Outros-D',
+    insApplied: false,
+    round: G.round,
+    ts: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
+  });
+  toast(`💸 Juros de ${fmtR(det.custoTotal)} cobrados (${G.creditOption.name} — CET ${(det.cetMensal*100).toFixed(2)}% a.m.)`, 'warn', 5000);
+}
+
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+function toast(msg, type='', dur=3000) {
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' '+type : '');
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, dur);
+}
+
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
+function fmtR(v) {
+  return 'R$ ' + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Inicializa opções de categoria
+document.getElementById('cat-exp-group').style.display = 'none';
+
+// Fecha calculadora ao clicar fora
+document.addEventListener('click', e => {
+  const fab = document.getElementById('calc-fab');
+  const modal = document.getElementById('calc-modal');
+  if (modal.classList.contains('open') && !modal.contains(e.target) && e.target !== fab) {
+    modal.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bolsa Universitária: Desafio de 6 Meses</title>
+<style>
+:root{
+  --bg:#EEF2F7;--card:#FFF;--primary:#1565C0;--pdark:#0D47A1;--plight:#E3F2FD;
+  --green:#1B5E20;--gmid:#2E7D32;--glight:#E8F5E9;
+  --red:#B71C1C;--rmid:#C62828;--rlight:#FFEBEE;
+  --warn:#E65100;--wmid:#F57F17;--wlight:#FFF8E1;
+  --purple:#4A148C;--pvl:#F3E5F5;--teal:#004D40;--tlight:#E0F2F1;
+  --txt:#0D1B2A;--txm:#37474F;--txl:#78909C;
+  --brd:#CFD8DC;--shd:0 2px 12px rgba(0,0,0,.09);--shd2:0 4px 24px rgba(0,0,0,.13);
+  --r:14px;--rs:9px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;font-size:15px}
+body{background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased}
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ═══ WELCOME ═══ */
+#sc-welcome{
+  background:linear-gradient(145deg,#0D47A1 0%,#1565C0 45%,#1976D2 70%,#0288D1 100%);
+  align-items:center;justify-content:center;padding:40px 20px;text-align:center;gap:0
+}
+.wlc-badge{
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  color:#fff;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:5px 14px;border-radius:999px;margin-bottom:20px;display:inline-block
+}
+.wlc-emoji{font-size:4rem;margin-bottom:12px;display:block}
+.wlc-title{font-size:clamp(1.8rem,5vw,3rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:8px}
+.wlc-sub{font-size:clamp(1rem,3vw,1.3rem);color:rgba(255,255,255,.85);margin-bottom:28px}
+.wlc-desc{
+  max-width:480px;color:rgba(255,255,255,.8);font-size:.93rem;line-height:1.6;margin-bottom:32px
+}
+.wlc-feats{
+  display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:36px;max-width:520px
+}
+.wlc-feat{
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.9);font-size:.82rem;padding:7px 14px;border-radius:999px
+}
+.wlc-disc{
+  font-size:.75rem;color:rgba(255,255,255,.55);max-width:420px;line-height:1.5;margin-top:24px
+}
+
+/* ═══ BUTTONS ═══ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-family:inherit;font-weight:600;cursor:pointer;border:none;
+  transition:all .18s;text-decoration:none;white-space:nowrap
+}
+.btn-primary{
+  background:var(--primary);color:#fff;padding:14px 32px;
+  border-radius:999px;font-size:1rem;box-shadow:0 4px 16px rgba(21,101,192,.35)
+}
+.btn-primary:hover{background:var(--pdark);transform:translateY(-1px);box-shadow:0 6px 20px rgba(21,101,192,.45)}
+.btn-success{background:var(--gmid);color:#fff;padding:13px 28px;border-radius:999px;font-size:.95rem}
+.btn-success:hover{background:var(--green);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--primary);border:2px solid var(--primary);padding:11px 24px;border-radius:999px;font-size:.9rem}
+.btn-outline:hover{background:var(--plight)}
+.btn-warn{background:var(--wmid);color:#fff;padding:11px 22px;border-radius:var(--rs);font-size:.88rem}
+.btn-ghost{background:transparent;color:var(--txm);padding:9px 16px;border-radius:var(--rs);font-size:.85rem}
+.btn-ghost:hover{background:rgba(0,0,0,.06)}
+.btn-sm{padding:7px 16px!important;font-size:.82rem!important}
+.btn-full{width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+
+/* ═══ SETUP ═══ */
+#sc-setup{background:var(--bg);padding:28px 16px;align-items:center}
+.setup-card{
+  background:var(--card);border-radius:var(--r);box-shadow:var(--shd);
+  padding:32px 28px;width:100%;max-width:580px
+}
+.setup-logo{text-align:center;margin-bottom:28px}
+.setup-logo-emoji{font-size:2.4rem;display:block;margin-bottom:6px}
+.setup-logo h2{font-size:1.4rem;font-weight:800;color:var(--primary)}
+.setup-logo p{font-size:.85rem;color:var(--txl);margin-top:4px}
+.form-group{margin-bottom:20px}
+.form-label{
+  display:block;font-size:.8rem;font-weight:600;color:var(--txm);
+  letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px
+}
+.form-input{
+  width:100%;padding:11px 14px;border:1.5px solid var(--brd);border-radius:var(--rs);
+  font-family:inherit;font-size:.95rem;color:var(--txt);background:var(--card);
+  transition:border-color .15s
+}
+.form-input:focus{outline:none;border-color:var(--primary)}
+.form-hint{font-size:.77rem;color:var(--txl);margin-top:5px}
+.profiles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+.profile-card{
+  border:2px solid var(--brd);border-radius:var(--rs);padding:14px 10px;
+  cursor:pointer;text-align:center;transition:all .18s;user-select:none
+}
+.profile-card:hover{border-color:var(--primary);background:var(--plight)}
+.profile-card.sel{border-color:var(--primary);background:var(--plight);box-shadow:0 0 0 3px rgba(21,101,192,.15)}
+.pc-emoji{font-size:1.8rem;display:block;margin-bottom:6px}
+.pc-name{font-weight:700;font-size:.88rem;color:var(--txt)}
+.pc-risco{font-size:.75rem;color:var(--txl);margin-top:3px}
+.pc-risco-bar{
+  display:flex;gap:2px;justify-content:center;margin-top:6px
+}
+.risco-dot{width:8px;height:8px;border-radius:50%;background:var(--brd)}
+.risco-dot.on{background:var(--primary)}
+.profile-card.sel .risco-dot.on{background:var(--gmid)}
+.setup-perfil-desc{
+  margin-top:12px;padding:12px 14px;background:var(--plight);
+  border-radius:var(--rs);font-size:.83rem;color:var(--txm);display:none
+}
+.setup-perfil-desc.show{display:block}
+
+/* ═══ GAME SCREEN ═══ */
+#sc-game{background:var(--bg);flex-direction:column;min-height:100vh}
+.game-header{
+  background:linear-gradient(135deg,#0D47A1,#1565C0);
+  padding:14px 16px;position:sticky;top:0;z-index:10;
+  box-shadow:0 2px 8px rgba(0,0,0,.15)
+}
+.gh-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.gh-name{color:rgba(255,255,255,.8);font-size:.82rem}
+.gh-months{display:flex;gap:5px;align-items:center}
+.month-dot{
+  width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.2);
+  border:2px solid rgba(255,255,255,.35);color:rgba(255,255,255,.7);
+  font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center
+}
+.month-dot.done{background:rgba(255,255,255,.85);border-color:#fff;color:#1565C0}
+.month-dot.current{background:#fff;border-color:#fff;color:#0D47A1;box-shadow:0 0 0 3px rgba(255,255,255,.3)}
+.gh-row2{display:flex;align-items:flex-end;justify-content:space-between}
+.gh-pat-label{color:rgba(255,255,255,.65);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em}
+.gh-pat-value{color:#fff;font-size:1.6rem;font-weight:800;line-height:1.1}
+.gh-ret-wrap{text-align:right}
+.gh-ret-mes{font-size:.8rem;color:rgba(255,255,255,.7);margin-bottom:1px}
+.gh-ret-val{font-size:1.1rem;font-weight:700;color:#fff}
+.gh-ret-val.pos{color:#A5D6A7}
+.gh-ret-val.neg{color:#EF9A9A}
+
+/* ═══ TABS ═══ */
+.game-tabs{
+  display:flex;border-bottom:1px solid var(--brd);background:var(--card);
+  padding:0 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  position:sticky;top:72px;z-index:9
+}
+.tab-btn{
+  flex-shrink:0;padding:12px 16px;font-family:inherit;font-size:.85rem;font-weight:600;
+  color:var(--txl);background:none;border:none;cursor:pointer;
+  border-bottom:3px solid transparent;margin-bottom:-1px;transition:all .15s
+}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab-panel{display:none;padding:16px;flex-direction:column;gap:14px}
+.tab-panel.active{display:flex}
+
+/* ═══ CARDS ═══ */
+.cards-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat-card{
+  background:var(--card);border-radius:var(--rs);padding:12px 14px;
+  box-shadow:var(--shd)
+}
+.sc-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--txl);font-weight:600;margin-bottom:4px}
+.sc-val{font-size:1.3rem;font-weight:800;color:var(--txt)}
+.sc-val.pos{color:var(--gmid)}
+.sc-val.neg{color:var(--rmid)}
+.sc-sub{font-size:.75rem;color:var(--txl);margin-top:3px}
+.sc-sub.pos{color:var(--gmid)}
+.sc-sub.neg{color:var(--rmid)}
+
+/* ═══ CHART CONTAINERS ═══ */
+.chart-wrap{
+  background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shd)
+}
+.chart-title{font-size:.85rem;font-weight:700;color:var(--txm);margin-bottom:12px}
+.chart-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:.77rem;color:var(--txm)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.chart-svg{width:100%;overflow:visible}
+
+/* ═══ PORTFOLIO TABLE ═══ */
+.portfolio-wrap{background:var(--card);border-radius:var(--r);box-shadow:var(--shd);overflow:hidden}
+.portfolio-title{padding:14px 16px;font-size:.88rem;font-weight:700;color:var(--txm);border-bottom:1px solid var(--brd)}
+.asset-row{
+  display:grid;grid-template-columns:auto 1fr auto auto;
+  align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--brd)
+}
+.asset-row:last-child{border-bottom:none}
+.ar-icon{font-size:1.3rem;line-height:1}
+.ar-name{font-size:.85rem;font-weight:600;color:var(--txt)}
+.ar-tipo{font-size:.72rem;color:var(--txl)}
+.ar-pct{
+  font-size:.82rem;font-weight:700;color:var(--primary);
+  background:var(--plight);padding:3px 8px;border-radius:999px
+}
+.ar-ret{font-size:.82rem;font-weight:700;text-align:right}
+.ar-ret.pos{color:var(--gmid)}
+.ar-ret.neg{color:var(--rmid)}
+.ar-val{font-size:.78rem;color:var(--txl);text-align:right}
+
+/* ═══ HISTORY LOG ═══ */
+.hist-item{
+  background:var(--card);border-radius:var(--rs);padding:14px;box-shadow:var(--shd)
+}
+.hi-mes{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--txl);margin-bottom:5px}
+.hi-titulo{font-size:.9rem;font-weight:700;color:var(--txt);margin-bottom:4px}
+.hi-decisao{font-size:.8rem;color:var(--gmid);font-style:italic}
+.hi-impacto{font-size:.77rem;color:var(--txl);margin-top:4px}
+
+/* ═══ ADVANCE BUTTON ═══ */
+.advance-wrap{
+  position:sticky;bottom:0;background:linear-gradient(to top,var(--bg) 70%,transparent);
+  padding:16px;margin:0 -16px;margin-top:4px
+}
+
+/* ═══ EVENT OVERLAY ═══ */
+#overlay-event{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(13,27,42,.75);backdrop-filter:blur(4px);
+  display:none;align-items:flex-start;justify-content:center;
+  overflow-y:auto;padding:16px
+}
+#overlay-event.show{display:flex}
+.event-card{
+  background:var(--card);border-radius:var(--r);box-shadow:var(--shd2);
+  width:100%;max-width:540px;margin:auto;overflow:hidden
+}
+.ev-header{
+  background:linear-gradient(135deg,#B71C1C,#C62828);
+  padding:20px;text-align:center;position:relative
+}
+.ev-header.azul{background:linear-gradient(135deg,#0D47A1,#1565C0)}
+.ev-header.verde{background:linear-gradient(135deg,#1B5E20,#2E7D32)}
+.ev-header.laranja{background:linear-gradient(135deg,#E65100,#F57F17)}
+.ev-mes{font-size:.75rem;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.ev-emoji{font-size:2.6rem;display:block;margin-bottom:8px}
+.ev-titulo{font-size:1.15rem;font-weight:800;color:#fff;margin-bottom:4px}
+.ev-sub{font-size:.85rem;color:rgba(255,255,255,.8)}
+.ev-body{padding:20px}
+.ev-section{margin-bottom:16px}
+.ev-section-label{
+  font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;
+  font-weight:700;color:var(--txl);margin-bottom:7px
+}
+.ev-noticia{
+  font-size:.88rem;line-height:1.6;color:var(--txm);
+  background:#F8F9FA;border-left:3px solid var(--brd);padding:10px 12px;border-radius:0 var(--rs) var(--rs) 0
+}
+.ev-explicacao{font-size:.85rem;line-height:1.6;color:var(--txm)}
+.ev-efeitos{display:flex;flex-direction:column;gap:5px}
+.ev-ef-row{display:flex;align-items:center;gap:8px;font-size:.8rem}
+.ev-ef-ativo{flex:1;color:var(--txm)}
+.ev-ef-sinal{
+  font-weight:700;padding:2px 8px;border-radius:999px;font-size:.75rem
+}
+.ev-ef-sinal.pos{color:var(--gmid);background:var(--glight)}
+.ev-ef-sinal.neg{color:var(--rmid);background:var(--rlight)}
+.ev-ef-sinal.neu{color:var(--txl);background:#F5F5F5}
+.ev-opts{display:flex;flex-direction:column;gap:8px}
+.ev-opt{
+  border:2px solid var(--brd);border-radius:var(--rs);padding:12px 14px;
+  cursor:pointer;transition:all .18s;text-align:left;background:var(--card);
+  font-family:inherit;width:100%
+}
+.ev-opt:hover{border-color:var(--primary);background:var(--plight)}
+.ev-opt.sel{border-color:var(--primary);background:var(--plight);box-shadow:0 0 0 3px rgba(21,101,192,.12)}
+.ev-opt-title{font-size:.88rem;font-weight:700;color:var(--txt);margin-bottom:3px}
+.ev-opt-desc{font-size:.78rem;color:var(--txl)}
+.ev-ai{
+  background:linear-gradient(135deg,var(--pvl),var(--plight));
+  border:1px solid rgba(74,20,140,.15);border-radius:var(--rs);padding:12px 14px;margin-top:4px
+}
+.ev-ai-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--purple);font-weight:700;margin-bottom:5px}
+.ev-ai-text{font-size:.82rem;color:var(--txm);line-height:1.5}
+.ev-footer{padding:16px 20px;border-top:1px solid var(--brd);display:flex;gap:10px;flex-wrap:wrap}
+
+/* ═══ REBALANCE OVERLAY ═══ */
+#overlay-rebalance{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(13,27,42,.75);backdrop-filter:blur(4px);
+  display:none;align-items:flex-end;justify-content:center;padding:0
+}
+#overlay-rebalance.show{display:flex}
+.reb-card{
+  background:var(--card);border-radius:var(--r) var(--r) 0 0;box-shadow:var(--shd2);
+  width:100%;max-width:580px;max-height:85vh;overflow-y:auto
+}
+.reb-header{
+  padding:16px 20px;border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:var(--card);z-index:1
+}
+.reb-title{font-size:1rem;font-weight:700;color:var(--txt)}
+.reb-body{padding:16px 20px}
+.reb-info{
+  font-size:.82rem;color:var(--txm);background:var(--wlight);
+  border:1px solid rgba(239,108,0,.2);border-radius:var(--rs);
+  padding:10px 12px;margin-bottom:14px;line-height:1.5
+}
+.reb-row{
+  display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--brd)
+}
+.reb-row:last-of-type{border-bottom:none}
+.reb-icon{font-size:1.3rem;width:28px;text-align:center}
+.reb-name{flex:1}
+.reb-ativo-name{font-size:.85rem;font-weight:600;color:var(--txt)}
+.reb-ativo-val{font-size:.75rem;color:var(--txl)}
+.reb-controls{display:flex;align-items:center;gap:6px}
+.reb-btn{
+  width:28px;height:28px;border-radius:50%;border:none;cursor:pointer;
+  font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center;
+  transition:all .15s
+}
+.reb-btn-m{background:var(--rlight);color:var(--rmid)}
+.reb-btn-m:hover{background:var(--rmid);color:#fff}
+.reb-btn-p{background:var(--glight);color:var(--gmid)}
+.reb-btn-p:hover{background:var(--gmid);color:#fff}
+.reb-pct{
+  width:56px;text-align:center;font-weight:700;font-size:.88rem;
+  border:1.5px solid var(--brd);border-radius:var(--rs);padding:4px 2px;
+  color:var(--txt)
+}
+.reb-total{
+  margin-top:12px;text-align:right;font-size:.85rem;font-weight:700;padding-top:10px;border-top:2px solid var(--brd)
+}
+.reb-total.ok{color:var(--gmid)}
+.reb-total.err{color:var(--rmid)}
+.reb-footer{padding:14px 20px;border-top:1px solid var(--brd);display:flex;gap:10px}
+
+/* ═══ FINAL REPORT ═══ */
+#sc-report{background:var(--bg);flex-direction:column;align-items:center;padding-bottom:40px}
+.report-hero{
+  width:100%;background:linear-gradient(145deg,#0D47A1,#1565C0,#1976D2);
+  padding:36px 20px 48px;text-align:center
+}
+.rh-trophy{font-size:3rem;display:block;margin-bottom:12px}
+.rh-title{font-size:1.6rem;font-weight:800;color:#fff;margin-bottom:6px}
+.rh-nome{font-size:1.1rem;color:rgba(255,255,255,.85);margin-bottom:16px}
+.rh-pat{font-size:.85rem;color:rgba(255,255,255,.65);margin-bottom:4px;text-transform:uppercase;letter-spacing:.1em}
+.rh-pat-val{font-size:2.4rem;font-weight:800;color:#fff}
+.rh-ret{font-size:1rem;color:rgba(255,255,255,.8);margin-top:4px}
+.report-body{width:100%;max-width:620px;padding:0 16px;margin-top:-24px;display:flex;flex-direction:column;gap:14px}
+.score-card{
+  background:var(--card);border-radius:var(--r);box-shadow:var(--shd);overflow:hidden
+}
+.score-title{padding:14px 16px;font-size:.9rem;font-weight:700;color:var(--txm);border-bottom:1px solid var(--brd)}
+.score-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.score-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.score-label{font-size:.85rem;color:var(--txm);flex:1}
+.score-bar-wrap{flex:2;height:8px;background:#EEF2F7;border-radius:999px;overflow:hidden}
+.score-bar{height:100%;border-radius:999px;background:var(--primary);transition:width .6s ease}
+.score-val{font-size:.85rem;font-weight:700;color:var(--txt);min-width:36px;text-align:right}
+.score-total{
+  margin-top:8px;padding-top:12px;border-top:2px solid var(--brd);
+  display:flex;justify-content:space-between;align-items:center
+}
+.score-total-label{font-size:.88rem;font-weight:700;color:var(--txm)}
+.score-total-val{font-size:1.4rem;font-weight:800;color:var(--primary)}
+.lessons-list{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.lesson-item{
+  background:var(--plight);border-radius:var(--rs);padding:11px 14px;
+  font-size:.83rem;line-height:1.5;color:var(--txm)
+}
+.lesson-item b{color:var(--primary)}
+.ranking-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.ranking-table th{
+  background:#F5F5F5;padding:8px 12px;text-align:left;
+  font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--txl);font-weight:700
+}
+.ranking-table td{padding:9px 12px;border-bottom:1px solid var(--brd);color:var(--txm)}
+.ranking-table tr.me td{background:var(--plight);color:var(--primary);font-weight:700}
+.rank-medal{font-size:1.1rem}
+
+/* ═══ TOAST ═══ */
+#toast-wrap{position:fixed;bottom:16px;right:16px;z-index:999;display:flex;flex-direction:column;gap:6px;max-width:300px}
+.toast{
+  background:#1C1C2E;color:#fff;padding:10px 14px;border-radius:var(--rs);
+  font-size:.82rem;line-height:1.4;box-shadow:var(--shd2);
+  animation:toastIn .3s ease
+}
+.toast.ok{background:var(--gmid)}
+.toast.warn{background:var(--wmid)}
+.toast.err{background:var(--rmid)}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ═══ DISC ═══ */
+.disc{font-size:.72rem;color:var(--txl);text-align:center;padding:8px 16px;line-height:1.4}
+
+/* ═══ MISC ═══ */
+.section-title{font-size:.88rem;font-weight:700;color:var(--txm);margin-bottom:4px}
+.empty-state{text-align:center;padding:28px 16px;color:var(--txl);font-size:.85rem}
+.badge{
+  display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;
+  padding:3px 8px;border-radius:999px
+}
+.badge-blue{background:var(--plight);color:var(--primary)}
+.badge-green{background:var(--glight);color:var(--gmid)}
+.badge-red{background:var(--rlight);color:var(--rmid)}
+.badge-warn{background:var(--wlight);color:var(--warn)}
+.tooltip-wrap{position:relative;display:inline-block}
+.tooltip-icon{cursor:help;font-size:.8rem;color:var(--txl);margin-left:3px}
+.risco-gauge{display:flex;gap:3px;align-items:center;margin-top:6px}
+.rg-seg{height:6px;border-radius:3px;flex:1;background:var(--brd)}
+.rg-seg.on1{background:var(--gmid)}
+.rg-seg.on2{background:#8BC34A}
+.rg-seg.on3{background:var(--wmid)}
+.rg-seg.on4{background:#FF7043}
+.rg-seg.on5{background:var(--rmid)}
+.info-box{
+  background:var(--plight);border:1px solid rgba(21,101,192,.2);border-radius:var(--rs);
+  padding:11px 14px;font-size:.82rem;color:var(--txm);line-height:1.5
+}
+
+@media(max-width:420px){
+  .profiles-grid{grid-template-columns:1fr}
+  .cards-row{grid-template-columns:1fr}
+  .asset-row{grid-template-columns:auto 1fr auto}
+  .ar-pct{display:none}
+}
+@media(min-width:600px){
+  .setup-card{padding:40px 36px}
+  .cards-row{grid-template-columns:repeat(4,1fr)}
+  .tab-panel{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ WELCOME ══════════════════ -->
+<div id="sc-welcome" class="screen active">
+  <span class="wlc-badge">🏫 IAê Financeiro</span>
+  <span class="wlc-emoji">🎓</span>
+  <h1 class="wlc-title">Bolsa Universitária</h1>
+  <p class="wlc-sub">Desafio de 6 Meses</p>
+  <p class="wlc-desc">
+    Você tem uma bolsa virtual de investimentos. Viva 6 meses de mercado real, enfrente eventos macroeconômicos e descubra qual estratégia faz seu dinheiro trabalhar mais.
+  </p>
+  <div class="wlc-feats">
+    <span class="wlc-feat">📊 8 ativos reais</span>
+    <span class="wlc-feat">🌪️ 10 eventos macro</span>
+    <span class="wlc-feat">🏆 Ranking comparativo</span>
+    <span class="wlc-feat">📈 CDI · IPCA · Risco</span>
+  </div>
+  <button class="btn btn-primary" onclick="showScreen('sc-setup')" style="font-size:1.1rem;padding:16px 48px">
+    Começar o Desafio →
+  </button>
+  <p class="wlc-disc">
+    ⚠️ Simulação educacional — nenhum dinheiro real envolvido.<br>
+    Rentabilidades passadas não garantem resultados futuros.
+  </p>
+</div>
+
+<!-- ══════════════════ SETUP ══════════════════ -->
+<div id="sc-setup" class="screen">
+  <div style="padding:16px;display:flex;flex-direction:column;align-items:center">
+  <div class="setup-card">
+    <div class="setup-logo">
+      <span class="setup-logo-emoji">🎯</span>
+      <h2>Configure seu Desafio</h2>
+      <p>Seus dados de investidor por 6 meses</p>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Seu nome</label>
+      <input id="inp-nome" class="form-input" placeholder="Ex.: João Silva" maxlength="40">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Capital inicial (R$)
+        <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--txl)"> — resultado do Circuito Olímpico</span>
+      </label>
+      <input id="inp-capital" class="form-input" type="number" min="500" max="99999" step="100" value="5000" placeholder="5000">
+      <p class="form-hint">💡 Use o saldo final do período 4 no Circuito Olímpico, ou qualquer valor entre R$ 500 e R$ 99.999.</p>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Perfil de investidor</label>
+      <div class="profiles-grid" id="profiles-grid">
+        <div class="profile-card" onclick="selPerfil('conservador')">
+          <span class="pc-emoji">🛡️</span>
+          <div class="pc-name">Conservador</div>
+          <div class="pc-risco">Risco baixo</div>
+          <div class="pc-risco-bar">
+            <div class="risco-dot on"></div>
+            <div class="risco-dot"></div>
+            <div class="risco-dot"></div>
+            <div class="risco-dot"></div>
+            <div class="risco-dot"></div>
+          </div>
+        </div>
+        <div class="profile-card" onclick="selPerfil('moderado')">
+          <span class="pc-emoji">⚖️</span>
+          <div class="pc-name">Moderado</div>
+          <div class="pc-risco">Risco médio</div>
+          <div class="pc-risco-bar">
+            <div class="risco-dot on"></div>
+            <div class="risco-dot on"></div>
+            <div class="risco-dot on"></div>
+            <div class="risco-dot"></div>
+            <div class="risco-dot"></div>
+          </div>
+        </div>
+        <div class="profile-card" onclick="selPerfil('arrojado')">
+          <span class="pc-emoji">🚀</span>
+          <div class="pc-name">Arrojado</div>
+          <div class="pc-risco">Risco alto</div>
+          <div class="pc-risco-bar">
+            <div class="risco-dot on"></div>
+            <div class="risco-dot on"></div>
+            <div class="risco-dot on"></div>
+            <div class="risco-dot on"></div>
+            <div class="risco-dot on"></div>
+          </div>
+        </div>
+      </div>
+      <div id="perfil-desc" class="setup-perfil-desc"></div>
+    </div>
+    <button id="btn-iniciar" class="btn btn-primary btn-full" onclick="iniciarJogo()" style="margin-top:8px" disabled>
+      🚀 Iniciar Desafio de 6 Meses
+    </button>
+    <button class="btn btn-ghost btn-full" onclick="showScreen('sc-welcome')" style="margin-top:6px">← Voltar</button>
+  </div>
+  </div>
+</div>
+
+<!-- ══════════════════ GAME ══════════════════ -->
+<div id="sc-game" class="screen">
+  <div class="game-header" id="game-header"></div>
+  <div class="game-tabs" id="game-tabs">
+    <button class="tab-btn active" onclick="showTab('resumo')">📊 Resumo</button>
+    <button class="tab-btn" onclick="showTab('carteira')">📂 Carteira</button>
+    <button class="tab-btn" onclick="showTab('historico')">📋 Histórico</button>
+  </div>
+  <div class="tab-panel active" id="tab-resumo"></div>
+  <div class="tab-panel" id="tab-carteira"></div>
+  <div class="tab-panel" id="tab-historico"></div>
+</div>
+
+<!-- ══════════════════ REPORT ══════════════════ -->
+<div id="sc-report" class="screen"></div>
+
+<!-- ══════════════════ OVERLAY EVENT ══════════════════ -->
+<div id="overlay-event">
+  <div class="event-card" id="event-card-inner"></div>
+</div>
+
+<!-- ══════════════════ OVERLAY REBALANCE ══════════════════ -->
+<div id="overlay-rebalance">
+  <div class="reb-card">
+    <div class="reb-header">
+      <div class="reb-title">⚖️ Rebalancear Carteira</div>
+      <button class="btn btn-ghost btn-sm" onclick="fecharRebalance()">✕</button>
+    </div>
+    <div class="reb-body">
+      <div class="reb-info">
+        🔄 Redistribua seu capital entre os ativos disponíveis. O total deve ser 100%. LCI/LCA tem carência — resgates antecipados podem ter custo.
+      </div>
+      <div id="reb-rows"></div>
+      <div id="reb-total" class="reb-total ok">Total: 100%</div>
+    </div>
+    <div class="reb-footer">
+      <button class="btn btn-success" id="btn-confirmar-reb" onclick="confirmarRebalance()" style="flex:1">✓ Confirmar Rebalanceamento</button>
+      <button class="btn btn-ghost" onclick="fecharRebalance()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ TOAST ══════════════════ -->
+<div id="toast-wrap"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// CONFIG — Dados financeiros, ativos, perfis, eventos
+// ═══════════════════════════════════════════════════════════════════
+const CFG = {
+  CDI_MENSAL:  0.01108,  // (1.1424)^(1/12)-1 ≈ 1.108% ao mês
+  IPCA_MENSAL: 0.00447,  // (1.055)^(1/12)-1  ≈ 0.447% ao mês
+  MESES: 6,
+  NOMES_MESES: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],
+
+  ATIVOS: {
+    trs: { nome:'Tesouro Selic 2027',   emoji:'🏛️', tipo:'rf', risco:1, cor:'#1565C0',
+           taxa:0.01108, vol:0,     ir:true,  taxa_adm:0,
+           descricao:'Título público federal indexado à Selic. Seguro e com liquidez diária.' },
+    cdb: { nome:'CDB Liquidez Diária',  emoji:'🏦', tipo:'rf', risco:1, cor:'#1976D2',
+           taxa:0.01108, vol:0,     ir:true,  taxa_adm:0,
+           descricao:'Certificado de Depósito Bancário a 100% do CDI. Liquidez diária, garantido pelo FGC.' },
+    lci: { nome:'LCI/LCA',              emoji:'🌾', tipo:'rf', risco:1, cor:'#0288D1',
+           taxa:0.00997, vol:0,     ir:false, taxa_adm:0, carencia:true,
+           descricao:'Letra de crédito isenta de IR para PF. Carência mínima de 90 dias.' },
+    tipa:{ nome:'Tesouro IPCA+ 2029',   emoji:'📊', tipo:'rf', risco:2, cor:'#01579B',
+           taxa:0.01077, vol:0.008, ir:true,  taxa_adm:0,
+           descricao:'Protege da inflação. Oscila pela marcação a mercado (pode perder no curto prazo).' },
+    bova:{ nome:'ETF BOVA11',           emoji:'📈', tipo:'rv', risco:4, cor:'#2E7D32',
+           taxa:0.00553, vol:0.040, ir:true,  taxa_adm:0.0003,
+           descricao:'ETF que replica o Ibovespa. Exposição ampla à bolsa brasileira com custos baixos.' },
+    acoes:{ nome:'Ações (Dividendos)',  emoji:'🏢', tipo:'rv', risco:4, cor:'#388E3C',
+            taxa:0.00800, vol:0.055, ir:true,  taxa_adm:0,
+            descricao:'Carteira de ações de empresas pagadoras de dividendos. Alto potencial, alto risco.' },
+    fiis:{ nome:'FIIs (IFIX)',          emoji:'🏗️', tipo:'rv', risco:3, cor:'#4CAF50',
+           taxa:0.01600, vol:0.030, ir:false, taxa_adm:0.0008,
+           descricao:'Fundos imobiliários. Rendimentos mensais isentos de IR para PF.' },
+    bdrs:{ nome:'BDRs Internacionais',  emoji:'🌍', tipo:'rv', risco:5, cor:'#00897B',
+           taxa:0.00700, vol:0.050, ir:true,  taxa_adm:0,
+           descricao:'Ações de empresas estrangeiras negociadas no Brasil. Exposição ao câmbio.' },
+  },
+
+  PERFIS: {
+    conservador: {
+      nome:'Conservador', emoji:'🛡️', risco_max:2, cor:'#1565C0',
+      descricao:'Prioriza a segurança. Aceita retornos menores em troca de previsibilidade. Ideal para quem não quer perder dinheiro no curto prazo.',
+      ret_esperado:'10–14% a.a.',
+      aloc:[ {id:'trs',pct:40}, {id:'cdb',pct:25}, {id:'lci',pct:20}, {id:'tipa',pct:15} ]
+    },
+    moderado: {
+      nome:'Moderado', emoji:'⚖️', risco_max:3.5, cor:'#1976D2',
+      descricao:'Equilíbrio entre segurança e crescimento. Aceita alguma oscilação para buscar retornos maiores que a renda fixa.',
+      ret_esperado:'12–18% a.a.',
+      aloc:[ {id:'trs',pct:25}, {id:'lci',pct:20}, {id:'tipa',pct:15}, {id:'bova',pct:25}, {id:'acoes',pct:15} ]
+    },
+    arrojado: {
+      nome:'Arrojado', emoji:'🚀', risco_max:5, cor:'#2E7D32',
+      descricao:'Foca no crescimento máximo. Aceita grandes oscilações em busca de retornos muito acima da média. Perfil de longo prazo.',
+      ret_esperado:'15–30% a.a.',
+      aloc:[ {id:'bova',pct:35}, {id:'acoes',pct:30}, {id:'fiis',pct:20}, {id:'bdrs',pct:15} ]
+    },
+  },
+
+  EVENTOS: [
+    { id:'copom_alta', cor:'azul',
+      titulo:'🏛️ COPOM Eleva a Selic',
+      sub:'Banco Central sobe juros em +0,50 p.p.',
+      noticia:'O Comitê de Política Monetária (COPOM) decidiu, por unanimidade, elevar a taxa Selic em 0,50 ponto percentual para combater a inflação persistente. A decisão surpreendeu parte do mercado financeiro.',
+      explicacao:'Alta nos juros beneficia quem investe em renda fixa indexada ao CDI/Selic. Encarece o crédito, pressionando empresas e ações. Títulos prefixados perdem valor pela marcação a mercado.',
+      efeitos:{ trs:+0.004, cdb:+0.004, lci:+0.003, tipa:-0.012, bova:-0.025, acoes:-0.030, fiis:-0.020, bdrs:-0.005 },
+      opcoes:[
+        { texto:'🛡️ Aumentar renda fixa CDI', desc:'Migrar para CDB e Tesouro Selic', bonus:{ trs:+0.003, cdb:+0.003, bova:-0.015, acoes:-0.015 }, q:0.9 },
+        { texto:'⚖️ Manter carteira atual',   desc:'Aguardar o impacto nos próximos meses', bonus:{}, q:0.5 },
+        { texto:'🎯 Comprar mais ações agora', desc:'Usar a queda como oportunidade de entrada', bonus:{ acoes:+0.015, bova:+0.015, cdb:-0.015, trs:-0.015 }, q:0.3 },
+      ]},
+    { id:'ipca_surpresa', cor:'laranja',
+      titulo:'📊 IPCA Surpreende para Cima',
+      sub:'Inflação acumula 6,2% em 12 meses',
+      noticia:'O IBGE divulgou o IPCA de setembro com alta de 0,83%, acima da expectativa de 0,65%. Em 12 meses, a inflação acumula 6,2%, superando o teto da meta de 4,5%. COPOM deve reagir.',
+      explicacao:'Alta inesperada da inflação beneficia o Tesouro IPCA+, que é corrigido pelo IPCA. Pressiona o COPOM a subir juros. BDRs ganham se o dólar subir como hedge inflacionário.',
+      efeitos:{ trs:+0.001, cdb:+0.001, lci:+0.001, tipa:+0.009, bova:-0.015, acoes:-0.018, fiis:-0.010, bdrs:+0.005 },
+      opcoes:[
+        { texto:'📊 Aumentar Tesouro IPCA+', desc:'Proteger carteira contra inflação maior', bonus:{ tipa:+0.012, bova:-0.010 }, q:0.9 },
+        { texto:'🌍 Hedge com BDRs',         desc:'Dólar tende a subir com inflação alta', bonus:{ bdrs:+0.012, lci:-0.010 }, q:0.6 },
+        { texto:'⚖️ Manter posições',         desc:'Aguardar confirmação da tendência', bonus:{}, q:0.5 },
+      ]},
+    { id:'dolar_sobe', cor:'laranja',
+      titulo:'💱 Dólar Dispara 10%',
+      sub:'Real perde valor frente ao Dólar americano',
+      noticia:'Incertezas no cenário externo, com alta dos juros nos EUA e queda das commodities, provocaram forte desvalorização do Real. O Dólar chegou a R$ 5,90, nível mais alto em 18 meses.',
+      explicacao:'Alta do dólar beneficia BDRs (ativos em dólar) e exportadoras na bolsa. Prejudica importadores e gera pressão inflacionária. BOVA11 cai em geral com dólar alto.',
+      efeitos:{ trs:0, cdb:0, lci:0, tipa:+0.004, bova:-0.018, acoes:-0.012, fiis:-0.015, bdrs:+0.075 },
+      opcoes:[
+        { texto:'🌍 Aumentar BDRs agora',    desc:'Aproveitar o cenário favorável ao câmbio', bonus:{ bdrs:+0.020, bova:-0.018 }, q:0.75 },
+        { texto:'🛡️ Correr para renda fixa', desc:'Reduzir risco em cenário volátil', bonus:{ cdb:+0.010, trs:+0.010, bdrs:-0.025, bova:-0.018 }, q:0.6 },
+        { texto:'⚖️ Manter carteira',         desc:'Dólar pode cair tão rápido quanto subiu', bonus:{}, q:0.55 },
+      ]},
+    { id:'recessao_global', cor:'',
+      titulo:'🌍 Recessão Global no Horizonte',
+      sub:'EUA e Europa sinalizam contração econômica',
+      noticia:'Os EUA registraram dois trimestres consecutivos de contração do PIB, e a zona do euro também desacelera. O FMI revisou para baixo as projeções mundiais, gerando forte aversão ao risco global.',
+      explicacao:'Em recessão global, investidores fogem do risco. Ações e commodities caem. Tesouro Selic vira porto seguro. Brasil sofre com queda das exportações e saída de capital estrangeiro.',
+      efeitos:{ trs:+0.003, cdb:+0.003, lci:+0.001, tipa:-0.012, bova:-0.055, acoes:-0.065, fiis:-0.028, bdrs:-0.038 },
+      opcoes:[
+        { texto:'🛡️ Reduzir risco: Tesouro Selic', desc:'Vender renda variável e proteger capital', bonus:{ trs:+0.015, cdb:+0.015, bova:-0.035, acoes:-0.035 }, q:1.0 },
+        { texto:'⚖️ Manter e aguardar recuperação', desc:'Recessões são temporárias — segurar posições', bonus:{}, q:0.4 },
+        { texto:'📈 Comprar ações (buy the dip)',   desc:'Preços baixos = oportunidade de longo prazo', bonus:{ acoes:+0.015, bova:+0.015, trs:-0.028 }, q:0.25 },
+      ]},
+    { id:'copom_queda', cor:'verde',
+      titulo:'📉 COPOM Corta a Selic',
+      sub:'Banco Central inicia ciclo de redução dos juros',
+      noticia:'Com a inflação em queda e a economia desacelerando, o COPOM cortou a Selic em 0,50 ponto percentual. É o início de um ciclo de afrouxamento que deve durar vários meses.',
+      explicacao:'Queda nos juros beneficia ações (empresas se financiam mais barato) e FIIs. Tesouro IPCA+ ganha em valor pela marcação a mercado positiva. Renda fixa CDI rende menos a partir de agora.',
+      efeitos:{ trs:-0.004, cdb:-0.004, lci:-0.003, tipa:+0.015, bova:+0.030, acoes:+0.035, fiis:+0.025, bdrs:+0.010 },
+      opcoes:[
+        { texto:'📈 Aumentar renda variável', desc:'Aproveitar o início do ciclo de queda de juros', bonus:{ bova:+0.018, acoes:+0.018, trs:-0.015 }, q:1.0 },
+        { texto:'📊 Comprar Tesouro IPCA+',   desc:'Capturar marcação a mercado positiva', bonus:{ tipa:+0.018, cdb:-0.012 }, q:0.85 },
+        { texto:'⚖️ Manter posições',           desc:'Aguardar confirmação da tendência', bonus:{}, q:0.5 },
+      ]},
+    { id:'crise_credito', cor:'',
+      titulo:'⚠️ Crise de Crédito Corporativo',
+      sub:'Grande varejista anuncia insolvência',
+      noticia:'Uma grande rede varejista com R$ 15 bilhões em dívidas anunciou incapacidade de honrar seus compromissos. O evento gerou desconfiança no crédito privado e spread nos CDBs de bancos menores.',
+      explicacao:'Crises de crédito afetam CDBs de bancos menores e ações. Tesouro Direto fica mais atrativo como porto seguro. É hora de revisar se seus CDBs são de instituições sólidas.',
+      efeitos:{ trs:+0.005, cdb:-0.008, lci:-0.004, tipa:+0.003, bova:-0.022, acoes:-0.038, fiis:-0.012, bdrs:-0.008 },
+      opcoes:[
+        { texto:'🏛️ Migrar para Tesouro Direto', desc:'Garantir segurança com títulos do governo', bonus:{ trs:+0.015, tipa:+0.008, cdb:-0.018 }, q:1.0 },
+        { texto:'⚖️ Avaliar e manter',             desc:'Verificar se seus CDBs são de bancos grandes', bonus:{}, q:0.7 },
+        { texto:'🛒 Comprar ações em queda',        desc:'Aproveitar o pânico para comprar empresas sólidas', bonus:{ acoes:+0.012, bova:+0.010, trs:-0.018 }, q:0.35 },
+      ]},
+    { id:'incerteza_fiscal', cor:'',
+      titulo:'🏛️ Incerteza Fiscal e Política',
+      sub:'Governo revisará meta fiscal — mercado reage',
+      noticia:'O governo reconheceu dificuldades para cumprir a meta fiscal. Declarações sobre revisão do teto de gastos geraram turbulência nos mercados, alta do dólar e queda da bolsa.',
+      explicacao:'Incerteza fiscal aumenta o risco-país, derruba a bolsa e desvaloriza o Real. Renda fixa segura (Tesouro) e BDRs (exposição ao dólar) são porto seguro neste cenário.',
+      efeitos:{ trs:+0.003, cdb:+0.001, lci:+0.001, tipa:-0.018, bova:-0.038, acoes:-0.045, fiis:-0.022, bdrs:+0.028 },
+      opcoes:[
+        { texto:'🛡️ Correr para Tesouro Selic',    desc:'Proteger capital em cenário de incerteza', bonus:{ trs:+0.015, bova:-0.022, acoes:-0.022 }, q:0.9 },
+        { texto:'🌍 Hedge com BDRs',               desc:'Dólar sobe com incerteza — BDRs ganham', bonus:{ bdrs:+0.018, bova:-0.020 }, q:0.8 },
+        { texto:'📈 Manter posição em bolsa',       desc:'Crises políticas são passageiras', bonus:{}, q:0.3 },
+      ]},
+    { id:'pib_positivo', cor:'verde',
+      titulo:'📈 PIB Surpreende Positivamente',
+      sub:'Brasil cresce 1,8% no trimestre — acima do esperado',
+      noticia:'O IBGE divulgou crescimento do PIB de 1,8% no trimestre, ante expectativa de 0,9%. Agronegócio e setor de serviços puxaram o resultado. FMI revisou para cima a projeção do Brasil.',
+      explicacao:'Crescimento econômico beneficia as ações e os FIIs. Empresas lucram mais, imóveis se valorizam. Pode gerar leve pressão inflacionária, mas o cenário geral é positivo para a renda variável.',
+      efeitos:{ trs:0, cdb:0, lci:0, tipa:+0.004, bova:+0.040, acoes:+0.050, fiis:+0.030, bdrs:+0.015 },
+      opcoes:[
+        { texto:'📈 Aumentar posição em ações', desc:'Aproveitar o momento econômico positivo', bonus:{ bova:+0.018, acoes:+0.022, trs:-0.018 }, q:1.0 },
+        { texto:'🏗️ Focar em FIIs',             desc:'Economia forte beneficia setor imobiliário', bonus:{ fiis:+0.018, cdb:-0.012 }, q:0.8 },
+        { texto:'⚖️ Manter posições',             desc:'Já estou bem posicionado para o crescimento', bonus:{}, q:0.6 },
+      ]},
+    { id:'queda_global', cor:'',
+      titulo:'📉 Queda Global nas Bolsas',
+      sub:'S&P 500 cai 7% — pânico contamina o mundo',
+      noticia:'O índice S&P 500 registrou queda de 7% em uma semana após dados piores que o esperado no emprego americano. Bolsas no mundo todo seguiram o movimento, incluindo a Bovespa.',
+      explicacao:'Quedas nas bolsas americanas contaminam mercados globais. BOVA11 e ações brasileiras tendem a cair em solidariedade. BDRs podem cair em dólar mas compensar em reais se câmbio mover.',
+      efeitos:{ trs:+0.003, cdb:+0.003, lci:+0.001, tipa:-0.007, bova:-0.048, acoes:-0.055, fiis:-0.018, bdrs:-0.032 },
+      opcoes:[
+        { texto:'🛡️ Reduzir renda variável',       desc:'Proteger capital da volatilidade global', bonus:{ trs:+0.018, cdb:+0.012, bova:-0.028 }, q:1.0 },
+        { texto:'⚖️ Manter e aguardar',             desc:'Correções são normais e passageiras', bonus:{}, q:0.5 },
+        { texto:'🛒 Buy the dip',                   desc:'Preços baixos = oportunidade', bonus:{ bova:+0.022, acoes:+0.022, trs:-0.028 }, q:0.35 },
+      ]},
+    { id:'alta_comodities', cor:'verde',
+      titulo:'🛢️ Commodities Disparam',
+      sub:'Petróleo ultrapassa USD 95 — minério +15%',
+      noticia:'Cortes de produção da OPEP+ e demanda crescente da China impulsionaram o petróleo acima de USD 95. Minério de ferro também subiu 15%, beneficiando as exportações brasileiras e as ações do setor.',
+      explicacao:'Alta das commodities impulsiona exportadoras brasileiras (Petrobras, Vale), fazendo o BOVA11 subir. Pode gerar inflação importada. BDRs de empresas de commodities também sobem.',
+      efeitos:{ trs:0, cdb:0, lci:0, tipa:+0.009, bova:+0.045, acoes:+0.055, fiis:+0.010, bdrs:+0.028 },
+      opcoes:[
+        { texto:'🛢️ Aumentar BOVA11 e ações', desc:'Brasil é grande exportador de commodities', bonus:{ bova:+0.018, acoes:+0.022, cdb:-0.018 }, q:1.0 },
+        { texto:'📊 Proteger com Tesouro IPCA+', desc:'Commodities altas viram inflação futura', bonus:{ tipa:+0.012, lci:-0.008 }, q:0.8 },
+        { texto:'⚖️ Manter posições',             desc:'Já estou exposto ao cenário favorável', bonus:{}, q:0.6 },
+      ]},
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
+let S = {
+  nome:'', capital:5000, perfil:null,
+  mes:0,            // 0 = pré-simulação, 1-6 = meses
+  concluido:false,
+  portfolio:{},     // id → { pct, valor, retorno_mes:[] }
+  patrimonio:0,
+  patrimonio_hist:[],  // [capital, mes1, ..., mes6]
+  cdi_hist:[],
+  ipca_hist:[],
+  ret_mes:0,
+  eventos_jogo:[],     // array de eventos pré-sorteados (comprimento 6, pode ter null)
+  evento_mes_atual:null,
+  decisoes:[],         // { mes, evento_id, opcao_idx, bonus, q }
+  historico:[],        // { mes, retorno, evento_id, decisao_idx }
+  pct_temp:{},         // para rebalanceamento temporário
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════════
+function fmt(n){ return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtK(n){ return n>=1000?'R$ '+(n/1000).toFixed(1)+'k':'R$ '+n.toFixed(0); }
+function fmtP(n,digits=2){ return (n>=0?'+':'')+( n*100).toFixed(digits)+'%'; }
+function fmtPabs(n,digits=2){ return (n*100).toFixed(digits)+'%'; }
+function clr(n){ return n>=0?'pos':'neg'; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function normalRand(mean,std){
+  let u=0,v=0;
+  while(u===0)u=Math.random();
+  while(v===0)v=Math.random();
+  return mean+std*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function showTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`.tab-btn[onclick="showTab('${name}')"]`).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='resumo') renderResumo();
+  if(name==='carteira') renderCarteira();
+  if(name==='historico') renderHistorico();
+}
+
+let _toastT=null;
+function toast(msg,tipo='',dur=3200){
+  const wrap=document.getElementById('toast-wrap');
+  const el=document.createElement('div');
+  el.className='toast'+(tipo?' '+tipo:'');
+  el.textContent=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>el.remove(),dur);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SETUP
+// ═══════════════════════════════════════════════════════════════════
+let _perfil=null;
+function selPerfil(p){
+  _perfil=p;
+  document.querySelectorAll('.profile-card').forEach(c=>c.classList.remove('sel'));
+  const cards=['conservador','moderado','arrojado'];
+  document.querySelectorAll('.profile-card')[cards.indexOf(p)].classList.add('sel');
+  const pd=document.getElementById('perfil-desc');
+  pd.textContent=CFG.PERFIS[p].descricao;
+  pd.classList.add('show');
+  validarSetup();
+}
+
+function validarSetup(){
+  const nome=document.getElementById('inp-nome').value.trim();
+  const cap=parseFloat(document.getElementById('inp-capital').value)||0;
+  const ok=nome.length>1 && cap>=500 && cap<=99999 && _perfil;
+  document.getElementById('btn-iniciar').disabled=!ok;
+}
+document.getElementById('inp-nome').addEventListener('input',validarSetup);
+document.getElementById('inp-capital').addEventListener('input',validarSetup);
+
+// ═══════════════════════════════════════════════════════════════════
+// INICIAR JOGO
+// ═══════════════════════════════════════════════════════════════════
+function iniciarJogo(){
+  S.nome = document.getElementById('inp-nome').value.trim();
+  S.capital = parseFloat(document.getElementById('inp-capital').value)||5000;
+  S.perfil = _perfil;
+  S.mes = 0;
+  S.concluido = false;
+  S.decisoes = [];
+  S.historico = [];
+  S.ret_mes = 0;
+
+  // Inicializar portfolio
+  S.portfolio = {};
+  CFG.PERFIS[_perfil].aloc.forEach(a=>{
+    S.portfolio[a.id]={ pct:a.pct, valor:S.capital*a.pct/100, retorno_mes:[] };
+  });
+  S.patrimonio = S.capital;
+  S.patrimonio_hist = [S.capital];
+  S.cdi_hist = [S.capital];
+  S.ipca_hist = [S.capital];
+
+  // Sortear eventos para os meses (mês 1 sem evento, meses 2-6 com evento)
+  const pool = [...CFG.EVENTOS];
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]; }
+  S.eventos_jogo = [null, pool[0], pool[1], pool[2], pool[3], pool[4]]; // índices 0-5 para meses 1-6
+
+  showScreen('sc-game');
+  avancarParaMes(1);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GAME ENGINE — simulação mensal
+// ═══════════════════════════════════════════════════════════════════
+function getRetorno(id, eventEf, decBonus){
+  const a = CFG.ATIVOS[id];
+  let taxa = a.taxa;
+  if(a.vol>0){
+    const r = normalRand(0, a.vol);
+    taxa += Math.max(-a.vol*2, Math.min(a.vol*2, r));
+  }
+  taxa += (eventEf||0) + (decBonus||0);
+  if(a.taxa_adm) taxa -= a.taxa_adm;
+  // Floor/ceil razoáveis
+  if(a.tipo==='rf') taxa = Math.max(-0.03, Math.min(0.025, taxa));
+  else              taxa = Math.max(-0.20, Math.min(0.22,  taxa));
+  return taxa;
+}
+
+function simularMes(eventEfeitos, decBonus){
+  let novoP = 0;
+  const retornos = {};
+  for(const [id,pos] of Object.entries(S.portfolio)){
+    if(pos.valor<=0) continue;
+    const ef  = eventEfeitos?.[id] || 0;
+    const dec = decBonus?.[id] || 0;
+    const r   = getRetorno(id, ef, dec);
+    pos.valor *= (1+r);
+    pos.retorno_mes.push(r);
+    retornos[id] = r;
+    novoP += pos.valor;
+  }
+  const ret_mes = (novoP - S.patrimonio) / S.patrimonio;
+  S.patrimonio = novoP;
+  S.ret_mes = ret_mes;
+  S.patrimonio_hist.push(novoP);
+  // benchmarks acumulados
+  S.cdi_hist.push(S.cdi_hist[S.cdi_hist.length-1] * (1+CFG.CDI_MENSAL));
+  S.ipca_hist.push(S.ipca_hist[S.ipca_hist.length-1] * (1+CFG.IPCA_MENSAL));
+  return { ret_mes, retornos };
+}
+
+function avancarParaMes(mes){
+  S.mes = mes;
+  renderHeader();
+
+  if(mes>CFG.MESES){
+    finalizarJogo();
+    return;
+  }
+
+  const evento = S.eventos_jogo[mes-1];
+  if(evento){
+    S.evento_mes_atual = evento;
+    mostrarEvento(evento, mes);
+  } else {
+    // Mês 1: sem evento, simular direto
+    const result = simularMes(null, null);
+    S.historico.push({ mes, retorno:result.ret_mes, evento_id:null, decisao_idx:null });
+    renderAll();
+  }
+}
+
+function confirmarDecisao(optIdx){
+  const ev = S.evento_mes_atual;
+  if(!ev) return;
+  const opt = ev.opcoes[optIdx];
+  fecharEvento();
+
+  const result = simularMes(ev.efeitos, opt.bonus);
+  S.decisoes.push({ mes:S.mes, evento_id:ev.id, opcao_idx:optIdx, bonus:opt.bonus, q:opt.q });
+  S.historico.push({ mes:S.mes, retorno:result.ret_mes, evento_id:ev.id, decisao_idx:optIdx });
+  S.evento_mes_atual = null;
+  renderAll();
+}
+
+function avancarMes(){
+  if(S.mes >= CFG.MESES){
+    finalizarJogo();
+  } else {
+    avancarParaMes(S.mes+1);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER — HEADER
+// ═══════════════════════════════════════════════════════════════════
+function renderHeader(){
+  const dots = Array.from({length:6},(_,i)=>{
+    const n = i+1;
+    const cls = n<S.mes?'done': n===S.mes?'current':'';
+    return `<div class="month-dot ${cls}">${n}</div>`;
+  }).join('');
+
+  const retPct = S.ret_mes;
+  const retCls = clr(retPct);
+  const mesNome = S.mes>0 && S.mes<=6 ? CFG.NOMES_MESES[(new Date().getMonth()+S.mes-1)%12] : '—';
+
+  document.getElementById('game-header').innerHTML=`
+    <div class="gh-row1">
+      <div class="gh-name">${esc(S.nome)} · ${CFG.PERFIS[S.perfil].emoji} ${CFG.PERFIS[S.perfil].nome}</div>
+      <div class="gh-months">${dots}</div>
+    </div>
+    <div class="gh-row2">
+      <div>
+        <div class="gh-pat-label">Patrimônio — ${esc(mesNome)}</div>
+        <div class="gh-pat-value">${fmtK(S.patrimonio)}</div>
+      </div>
+      <div class="gh-ret-wrap">
+        <div class="gh-ret-mes">Este mês</div>
+        <div class="gh-ret-val ${retCls}">${fmtP(retPct)}</div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER — RESUMO
+// ═══════════════════════════════════════════════════════════════════
+function renderResumo(){
+  const retAcum = (S.patrimonio - S.capital) / S.capital;
+  const cdiAcum = (S.cdi_hist[S.cdi_hist.length-1] - S.capital) / S.capital;
+  const ipcaAcum= (S.ipca_hist[S.ipca_hist.length-1] - S.capital) / S.capital;
+  const vsCAI   = retAcum - cdiAcum;
+  const risco   = calcRiscoMedio();
+  const nMes    = S.mes;
+
+  const tab = document.getElementById('tab-resumo');
+  tab.innerHTML = `
+    <div class="cards-row">
+      <div class="stat-card">
+        <div class="sc-label">Patrimônio</div>
+        <div class="sc-val">${fmtK(S.patrimonio)}</div>
+        <div class="sc-sub">Inicial: ${fmtK(S.capital)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">Este mês</div>
+        <div class="sc-val ${clr(S.ret_mes)}">${fmtP(S.ret_mes)}</div>
+        <div class="sc-sub ${clr(S.ret_mes)}">${fmt(S.ret_mes*S.patrimonio/(1+S.ret_mes))}</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">Acumulado</div>
+        <div class="sc-val ${clr(retAcum)}">${fmtP(retAcum)}</div>
+        <div class="sc-sub ${clr(retAcum)}">${fmt(S.patrimonio-S.capital)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">vs CDI</div>
+        <div class="sc-val ${clr(vsCAI)}">${fmtP(vsCAI)}</div>
+        <div class="sc-sub">CDI acum: ${fmtPabs(cdiAcum)}</div>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">📈 Evolução do Patrimônio</div>
+      <div id="chart-linha" style="min-height:160px"></div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#1565C0"></div>Sua carteira</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#757575"></div>CDI</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#F57F17"></div>IPCA</div>
+      </div>
+    </div>
+    <div class="stat-card" style="display:flex;align-items:center;gap:14px">
+      <div style="flex:1">
+        <div class="sc-label">Risco médio da carteira</div>
+        <div class="sc-val">${risco.toFixed(1)}/5</div>
+        <div class="sc-sub">${riscoLabel(risco)}</div>
+      </div>
+      <div style="flex:2">
+        <div class="risco-gauge">
+          ${[1,2,3,4,5].map(i=>`<div class="rg-seg${i<=Math.round(risco)?' on'+i:''}"></div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="advance-wrap">
+      ${nMes < CFG.MESES ? `
+        <button class="btn btn-outline btn-full" onclick="abrirRebalance()" style="margin-bottom:8px">⚖️ Rebalancear antes do próximo mês</button>
+        <button class="btn btn-primary btn-full" onclick="avancarMes()">➡️ Avançar para o Mês ${nMes+1}</button>
+      ` : `
+        <button class="btn btn-success btn-full" onclick="finalizarJogo()" style="font-size:1rem;padding:16px">🏆 Ver Resultado Final</button>
+      `}
+    </div>`;
+
+  setTimeout(()=>drawLinhaChart(),50);
+}
+
+function riscoLabel(r){
+  if(r<=1.5) return 'Muito baixo';
+  if(r<=2.5) return 'Baixo';
+  if(r<=3.5) return 'Moderado';
+  if(r<=4.5) return 'Alto';
+  return 'Muito alto';
+}
+
+function calcRiscoMedio(){
+  let totalVal=0, riscoW=0;
+  for(const [id,pos] of Object.entries(S.portfolio)){
+    totalVal += pos.valor;
+    riscoW   += pos.valor * CFG.ATIVOS[id].risco;
+  }
+  return totalVal>0 ? riscoW/totalVal : 0;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER — CARTEIRA
+// ═══════════════════════════════════════════════════════════════════
+function renderCarteira(){
+  const tab = document.getElementById('tab-carteira');
+  const total = S.patrimonio;
+  const rows = Object.entries(S.portfolio).map(([id,pos])=>{
+    const a = CFG.ATIVOS[id];
+    const pctAtual = (pos.valor/total*100);
+    const retMes = pos.retorno_mes.length ? pos.retorno_mes[pos.retorno_mes.length-1] : 0;
+    const retAcum = (pos.valor / (S.capital * pos.pct/100)) - 1;
+    return `<div class="asset-row">
+      <div class="ar-icon">${a.emoji}</div>
+      <div>
+        <div class="ar-name">${esc(a.nome)}</div>
+        <div class="ar-tipo">${a.tipo==='rf'?'Renda Fixa':'Renda Variável'} · Risco ${a.risco}/5</div>
+      </div>
+      <div class="ar-pct">${pctAtual.toFixed(0)}%</div>
+      <div>
+        <div class="ar-ret ${clr(retMes)}">${fmtP(retMes)} mês</div>
+        <div class="ar-val">${fmt(pos.valor)}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  tab.innerHTML = `
+    <div class="chart-wrap">
+      <div class="chart-title">🥧 Alocação Atual</div>
+      <div id="chart-donut" style="display:flex;justify-content:center;min-height:180px"></div>
+      <div class="chart-legend" id="donut-legend"></div>
+    </div>
+    <div class="portfolio-wrap">
+      <div class="portfolio-title">Ativos em Carteira · Total ${fmt(total)}</div>
+      ${rows}
+    </div>`;
+
+  setTimeout(()=>drawDonutChart(),50);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER — HISTÓRICO
+// ═══════════════════════════════════════════════════════════════════
+function renderHistorico(){
+  const tab = document.getElementById('tab-historico');
+  if(!S.historico.length){
+    tab.innerHTML=`<div class="empty-state">📋 O histórico aparecerá conforme os meses avançam.</div>`;
+    return;
+  }
+  const items = S.historico.map(h=>{
+    const ev = h.evento_id ? CFG.EVENTOS.find(e=>e.id===h.evento_id) : null;
+    const dec = ev && h.decisao_idx!==null ? ev.opcoes[h.decisao_idx] : null;
+    const mesNome = CFG.NOMES_MESES[(new Date().getMonth()+h.mes-1)%12];
+    return `<div class="hist-item">
+      <div class="hi-mes">Mês ${h.mes} — ${esc(mesNome)}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span class="badge ${h.retorno>=0?'badge-green':'badge-red'}">${fmtP(h.retorno)}</span>
+        ${ev?`<span class="badge badge-blue">${ev.titulo}</span>`:'<span class="badge" style="background:#F5F5F5;color:#78909C">Sem evento</span>'}
+      </div>
+      ${dec?`<div class="hi-decisao">↳ Decisão: ${esc(dec.texto)}</div>`:''}
+      <div class="hi-impacto">Patrimônio: ${fmt(S.patrimonio_hist[h.mes]||0)}</div>
+    </div>`;
+  }).reverse().join('');
+  tab.innerHTML = items;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER — ALL (após simular mês)
+// ═══════════════════════════════════════════════════════════════════
+function renderAll(){
+  renderHeader();
+  // Re-render active tab
+  const activeTab = document.querySelector('.tab-btn.active');
+  if(activeTab){
+    const name = activeTab.getAttribute('onclick').match(/'(\w+)'/)?.[1];
+    if(name==='carteira') renderCarteira();
+    else if(name==='historico') renderHistorico();
+    else renderResumo();
+  } else {
+    showTab('resumo');
+    renderResumo();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// EVENTO OVERLAY
+// ═══════════════════════════════════════════════════════════════════
+let _evOptSel = null;
+
+function mostrarEvento(ev, mes){
+  _evOptSel = null;
+  const mesNome = CFG.NOMES_MESES[(new Date().getMonth()+mes-1)%12];
+  const opts = ev.opcoes.map((o,i)=>`
+    <button class="ev-opt" id="ev-opt-${i}" onclick="selEvOpt(${i})">
+      <div class="ev-opt-title">${esc(o.texto)}</div>
+      <div class="ev-opt-desc">${esc(o.desc)}</div>
+    </button>`).join('');
+
+  // Build efeitos list (only assets in portfolio)
+  const efs = Object.keys(S.portfolio).map(id=>{
+    const ef = ev.efeitos?.[id] || 0;
+    if(ef===0) return '';
+    const cls = ef>0?'pos':'neg';
+    const sinal = ef>0?`▲ +${(ef*100).toFixed(1)}%`:`▼ ${(ef*100).toFixed(1)}%`;
+    return `<div class="ev-ef-row">
+      <span class="ev-ef-ativo">${CFG.ATIVOS[id].emoji} ${esc(CFG.ATIVOS[id].nome)}</span>
+      <span class="ev-ef-sinal ${cls}">${sinal}</span>
+    </div>`;
+  }).filter(Boolean).join('');
+
+  // AI recommendation
+  const melhorIdx = ev.opcoes.reduce((best,o,i)=>o.q>ev.opcoes[best].q?i:best, 0);
+  const melhor = ev.opcoes[melhorIdx];
+
+  document.getElementById('event-card-inner').innerHTML = `
+    <div class="ev-header ${ev.cor||''}">
+      <div class="ev-mes">📅 Mês ${mes} — ${esc(mesNome)}</div>
+      <span class="ev-emoji">${ev.titulo.split(' ')[0]}</span>
+      <div class="ev-titulo">${esc(ev.titulo.replace(/^\S+\s/,''))}</div>
+      <div class="ev-sub">${esc(ev.sub)}</div>
+    </div>
+    <div class="ev-body">
+      <div class="ev-section">
+        <div class="ev-section-label">O que aconteceu</div>
+        <div class="ev-noticia">${esc(ev.noticia)}</div>
+      </div>
+      ${efs?`<div class="ev-section">
+        <div class="ev-section-label">Impacto estimado nos seus ativos</div>
+        <div class="ev-efeitos">${efs}</div>
+      </div>`:''}
+      <div class="ev-section">
+        <div class="ev-section-label">O que isso significa</div>
+        <div class="ev-explicacao">${esc(ev.explicacao)}</div>
+      </div>
+      <div class="ev-section">
+        <div class="ev-section-label">Qual é a sua decisão?</div>
+        <div class="ev-opts">${opts}</div>
+      </div>
+      <div class="ev-ai">
+        <div class="ev-ai-label">🤖 Análise da IA</div>
+        <div class="ev-ai-text">
+          Recomendação: <b>${esc(melhor.texto)}</b>.<br>
+          ${esc(melhor.desc)} — melhor alinhamento com as condições de mercado deste cenário.
+        </div>
+      </div>
+    </div>
+    <div class="ev-footer">
+      <button class="btn btn-primary" id="btn-confirmar-ev" onclick="confirmEvt()" disabled style="flex:1">✓ Confirmar Decisão</button>
+    </div>`;
+
+  document.getElementById('overlay-event').classList.add('show');
+}
+
+function selEvOpt(idx){
+  _evOptSel = idx;
+  document.querySelectorAll('.ev-opt').forEach((b,i)=>b.classList.toggle('sel',i===idx));
+  document.getElementById('btn-confirmar-ev').disabled = false;
+}
+
+function confirmEvt(){
+  if(_evOptSel===null) return;
+  confirmarDecisao(_evOptSel);
+}
+
+function fecharEvento(){
+  document.getElementById('overlay-event').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// REBALANCE
+// ═══════════════════════════════════════════════════════════════════
+function abrirRebalance(){
+  // Copiar alocações atuais (baseadas em valor atual)
+  const total = S.patrimonio;
+  S.pct_temp = {};
+  for(const [id,pos] of Object.entries(S.portfolio)){
+    S.pct_temp[id] = Math.round(pos.valor/total*100);
+  }
+  renderRebRows();
+  document.getElementById('overlay-rebalance').classList.add('show');
+}
+
+function renderRebRows(){
+  const rows = Object.entries(S.portfolio).map(([id,pos])=>{
+    const a = CFG.ATIVOS[id];
+    const pct = S.pct_temp[id]||0;
+    return `<div class="reb-row">
+      <div class="reb-icon">${a.emoji}</div>
+      <div class="reb-name">
+        <div class="reb-ativo-name">${esc(a.nome)}</div>
+        <div class="reb-ativo-val">${fmt(pos.valor)}${a.carencia?' · ⚠️ Carência':''}</div>
+      </div>
+      <div class="reb-controls">
+        <button class="reb-btn reb-btn-m" onclick="rebAdj('${id}',-1)">−</button>
+        <input class="reb-pct" id="reb-pct-${id}" type="number" min="0" max="100" value="${pct}" oninput="rebInput('${id}',this.value)">
+        <button class="reb-btn reb-btn-p" onclick="rebAdj('${id}',+1)">+</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('reb-rows').innerHTML=rows;
+  atualizarRebTotal();
+}
+
+function rebAdj(id, delta){
+  S.pct_temp[id] = Math.max(0, Math.min(100, (S.pct_temp[id]||0)+delta));
+  document.getElementById('reb-pct-'+id).value = S.pct_temp[id];
+  atualizarRebTotal();
+}
+
+function rebInput(id, raw){
+  const v = parseInt(raw,10);
+  S.pct_temp[id] = isNaN(v) ? 0 : Math.max(0, Math.min(100, v));
+  atualizarRebTotal();
+}
+
+function atualizarRebTotal(){
+  const total = Object.values(S.pct_temp).reduce((s,v)=>s+v,0);
+  const el = document.getElementById('reb-total');
+  const ok = total===100;
+  el.textContent = `Total: ${total}% ${ok?'✓':'— precisa ser 100%'}`;
+  el.className = 'reb-total '+(ok?'ok':'err');
+  document.getElementById('btn-confirmar-reb').disabled = !ok;
+}
+
+function confirmarRebalance(){
+  const total = Object.values(S.pct_temp).reduce((s,v)=>s+v,0);
+  if(total!==100){ toast('Total deve ser 100%','warn'); return; }
+  for(const [id,pos] of Object.entries(S.portfolio)){
+    pos.pct = S.pct_temp[id];
+    pos.valor = S.patrimonio * pos.pct/100;
+  }
+  fecharRebalance();
+  toast('✅ Carteira rebalanceada com sucesso!','ok');
+  renderAll();
+}
+
+function fecharRebalance(){
+  document.getElementById('overlay-rebalance').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CHARTS — Linha
+// ═══════════════════════════════════════════════════════════════════
+function drawLinhaChart(){
+  const el = document.getElementById('chart-linha');
+  if(!el) return;
+  const W = el.clientWidth || 340;
+  const H = 170;
+  const pad = {t:12,r:12,b:30,l:52};
+  const iW = W-pad.l-pad.r;
+  const iH = H-pad.t-pad.b;
+
+  const pts = S.patrimonio_hist;
+  const cdi = S.cdi_hist;
+  const ipa = S.ipca_hist;
+  const n   = pts.length;
+  if(n<2){el.innerHTML='<div class="empty-state" style="padding:30px 0">Avance os meses para ver o gráfico.</div>';return;}
+
+  const all = [...pts,...cdi,...ipa];
+  const minV = Math.min(...all)*0.995;
+  const maxV = Math.max(...all)*1.005;
+  const rng  = maxV-minV||1;
+
+  const xs = i=>(pad.l + i/(n-1)*iW).toFixed(1);
+  const ys = v=>(pad.t + (1-(v-minV)/rng)*iH).toFixed(1);
+
+  // Grid & labels
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="chart-svg">`;
+  const ticks=4;
+  for(let i=0;i<=ticks;i++){
+    const v=minV+(maxV-minV)*i/ticks;
+    const y=ys(v);
+    svg+=`<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="#E8ECEF" stroke-width="1"/>`;
+    svg+=`<text x="${pad.l-4}" y="${parseFloat(y)+4}" text-anchor="end" font-size="10" fill="#90A4AE">${fmtK(v)}</text>`;
+  }
+  // X labels
+  for(let i=0;i<n;i++){
+    svg+=`<text x="${xs(i)}" y="${H-5}" text-anchor="middle" font-size="10" fill="#90A4AE">${i===0?'Início':'M'+i}</text>`;
+  }
+
+  const poly = arr=>{
+    const pp = arr.map((_,i)=>`${xs(i)},${ys(arr[i])}`).join(' ');
+    return `points="${pp}"`;
+  };
+
+  // IPCA fill
+  const ipaPts = ipa.map((_,i)=>`${xs(i)},${ys(ipa[i])}`).join(' ');
+  const cdiPts  = cdi.map((_,i)=>`${xs(i)},${ys(cdi[i])}`).join(' ');
+  const portPts = pts.map((_,i)=>`${xs(i)},${ys(pts[i])}`).join(' ');
+
+  svg+=`<polyline ${poly(ipa)} fill="none" stroke="#F57F17" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  svg+=`<polyline ${poly(cdi)} fill="none" stroke="#90A4AE" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  svg+=`<polyline ${poly(pts)} fill="none" stroke="#1565C0" stroke-width="2.5"/>`;
+
+  // dots
+  pts.forEach((_,i)=>{
+    svg+=`<circle cx="${xs(i)}" cy="${ys(pts[i])}" r="4" fill="#1565C0"/>`;
+  });
+  svg+='</svg>';
+  el.innerHTML=svg;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CHARTS — Donut
+// ═══════════════════════════════════════════════════════════════════
+function drawDonutChart(){
+  const el=document.getElementById('chart-donut');
+  const leg=document.getElementById('donut-legend');
+  if(!el) return;
+
+  const SZ=180,CX=90,CY=90,R=72,RI=42;
+  const total=S.patrimonio;
+  const data=Object.entries(S.portfolio).map(([id,pos])=>({
+    id,pct:pos.valor/total,val:pos.valor,
+    nome:CFG.ATIVOS[id].nome,cor:CFG.ATIVOS[id].cor,emoji:CFG.ATIVOS[id].emoji
+  }));
+
+  let angle=-Math.PI/2;
+  let svg=`<svg viewBox="0 0 ${SZ} ${SZ}" width="${SZ}" height="${SZ}">`;
+  data.forEach(d=>{
+    const slice=d.pct*2*Math.PI;
+    const x1=CX+R*Math.cos(angle),y1=CY+R*Math.sin(angle);
+    const x2=CX+R*Math.cos(angle+slice),y2=CY+R*Math.sin(angle+slice);
+    const xi1=CX+RI*Math.cos(angle),yi1=CY+RI*Math.sin(angle);
+    const xi2=CX+RI*Math.cos(angle+slice),yi2=CY+RI*Math.sin(angle+slice);
+    const lg=slice>Math.PI?1:0;
+    svg+=`<path d="M${xi1} ${yi1}A${RI} ${RI} 0 ${lg} 1 ${xi2} ${yi2}L${x2} ${y2}A${R} ${R} 0 ${lg} 0 ${x1} ${y1}Z" fill="${d.cor}"/>`;
+    angle+=slice;
+  });
+  svg+=`<text x="${CX}" y="${CY-6}" text-anchor="middle" font-size="11" fill="#546E7A" font-weight="600">Carteira</text>`;
+  svg+=`<text x="${CX}" y="${CY+10}" text-anchor="middle" font-size="13" fill="#0D1B2A" font-weight="800">${(total/1000).toFixed(1)}k</text>`;
+  svg+='</svg>';
+  el.innerHTML=svg;
+
+  if(leg) leg.innerHTML=data.map(d=>`
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${d.cor}"></div>
+      ${d.emoji} ${esc(d.nome.split(' ')[0])} <b>${(d.pct*100).toFixed(0)}%</b>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FINALIZAR JOGO
+// ═══════════════════════════════════════════════════════════════════
+function finalizarJogo(){
+  S.concluido = true;
+  const retLiq = calcRetLiquido();
+  const aderencia = calcAderencia();
+  const qualDec = calcQualDecisoes();
+  const score = calcScore(retLiq, aderencia, qualDec);
+
+  salvarRanking(score, retLiq);
+  renderReport(retLiq, aderencia, qualDec, score);
+  showScreen('sc-report');
+}
+
+function calcRetLiquido(){
+  let ganhoTotal = 0;
+  for(const [id,pos] of Object.entries(S.portfolio)){
+    const a = CFG.ATIVOS[id];
+    const custoBase = S.capital * pos.pct/100;
+    const ganho = pos.valor - custoBase;
+    if(ganho<=0) continue;
+    if(a.ir){
+      // 6 meses = 180 dias → 22.5% IR
+      const ir = ganho * 0.225;
+      ganhoTotal += ganho - ir;
+    } else {
+      ganhoTotal += ganho;
+    }
+  }
+  const patrimonioLiq = S.capital + ganhoTotal;
+  return (patrimonioLiq - S.capital) / S.capital;
+}
+
+function calcAderencia(){
+  const perfil = CFG.PERFIS[S.perfil];
+  const riscoMedio = calcRiscoMedio();
+  const riscoEsperado = perfil.risco_max;
+  const diff = Math.abs(riscoMedio - riscoEsperado);
+  // 100% se dentro de 0.5 do esperado, cai linearmente
+  return Math.max(0, 1 - diff/2);
+}
+
+function calcQualDecisoes(){
+  if(!S.decisoes.length) return 0.5;
+  const avg = S.decisoes.reduce((s,d)=>s+d.q,0) / S.decisoes.length;
+  return avg;
+}
+
+function calcScore(retLiq, ader, qual){
+  // Normalizar retorno: 0% = 0 pts, CDI acum = 50 pts, +50% acima do CDI = 100 pts
+  const cdiAcum = (S.cdi_hist[S.cdi_hist.length-1]-S.capital)/S.capital;
+  const retNorm = Math.min(1, Math.max(0, (retLiq - 0) / (cdiAcum*2 || 0.12)));
+  const pts = retNorm*60 + ader*25 + qual*15;
+  return Math.round(Math.min(100, pts*100));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RANKING — localStorage
+// ═══════════════════════════════════════════════════════════════════
+function salvarRanking(score, retLiq){
+  const ranking = JSON.parse(localStorage.getItem('bu_ranking')||'[]');
+  ranking.push({
+    nome:S.nome, perfil:S.perfil,
+    capital:S.capital, patrimonio:S.patrimonio,
+    retorno:retLiq, score,
+    data:new Date().toLocaleDateString('pt-BR')
+  });
+  ranking.sort((a,b)=>b.score-a.score);
+  localStorage.setItem('bu_ranking', JSON.stringify(ranking.slice(0,20)));
+}
+
+function carregarRanking(){
+  return JSON.parse(localStorage.getItem('bu_ranking')||'[]');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER — REPORT FINAL
+// ═══════════════════════════════════════════════════════════════════
+function renderReport(retLiq, ader, qual, score){
+  const retAcum = (S.patrimonio-S.capital)/S.capital;
+  const cdiAcum = (S.cdi_hist[S.cdi_hist.length-1]-S.capital)/S.capital;
+  const ipcaAcum= (S.ipca_hist[S.ipca_hist.length-1]-S.capital)/S.capital;
+  const trophy = score>=80?'🥇':score>=60?'🥈':score>=40?'🥉':'🎓';
+
+  // Lições aprendidas
+  const licoes = gerarLicoes(retAcum, cdiAcum, ader, qual);
+
+  // Ranking
+  const ranking = carregarRanking();
+  const minha_pos = ranking.findIndex(r=>r.nome===S.nome&&r.score===score&&r.data===new Date().toLocaleDateString('pt-BR'));
+
+  const ranking_html = ranking.length ? `
+    <div class="score-card">
+      <div class="score-title">🏆 Ranking Geral</div>
+      <div style="padding:0 16px 16px;overflow-x:auto">
+      <table class="ranking-table">
+        <thead><tr>
+          <th>#</th><th>Nome</th><th>Perfil</th><th>Retorno</th><th>Score</th>
+        </tr></thead>
+        <tbody>
+          ${ranking.slice(0,10).map((r,i)=>`
+            <tr class="${i===minha_pos?'me':''}">
+              <td>${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
+              <td>${esc(r.nome)}</td>
+              <td>${CFG.PERFIS[r.perfil]?.emoji||''} ${esc(r.perfil)}</td>
+              <td class="${r.retorno>=0?'':''}"><span style="color:${r.retorno>=0?'var(--gmid)':'var(--rmid)'}">${(r.retorno*100).toFixed(2)}%</span></td>
+              <td><b>${r.score}</b></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>
+    </div>` : '';
+
+  // Asset table
+  const ativo_rows = Object.entries(S.portfolio).map(([id,pos])=>{
+    const a=CFG.ATIVOS[id];
+    const retAt=(pos.valor/(S.capital*pos.pct/100))-1;
+    return `<div class="asset-row">
+      <div class="ar-icon">${a.emoji}</div>
+      <div><div class="ar-name">${esc(a.nome)}</div><div class="ar-tipo">${a.ir?'IR 22.5%':'Isento'}</div></div>
+      <div class="ar-pct">${(pos.valor/S.patrimonio*100).toFixed(0)}%</div>
+      <div>
+        <div class="ar-ret ${clr(retAt)}">${fmtP(retAt)}</div>
+        <div class="ar-val">${fmt(pos.valor)}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const sc = document.getElementById('sc-report');
+  sc.innerHTML=`
+    <div class="report-hero">
+      <span class="rh-trophy">${trophy}</span>
+      <div class="rh-title">Desafio Concluído!</div>
+      <div class="rh-nome">${esc(S.nome)} · ${CFG.PERFIS[S.perfil].emoji} ${CFG.PERFIS[S.perfil].nome}</div>
+      <div class="rh-pat">Patrimônio Final</div>
+      <div class="rh-pat-val">${fmt(S.patrimonio)}</div>
+      <div class="rh-ret">${retAcum>=0?'+':''}${(retAcum*100).toFixed(2)}% em 6 meses</div>
+    </div>
+    <div class="report-body">
+      <!-- Pontuação -->
+      <div class="score-card">
+        <div class="score-title">📊 Sua Pontuação</div>
+        <div class="score-body">
+          <div class="score-row">
+            <div class="score-label">Retorno líquido (60%)</div>
+            <div class="score-bar-wrap"><div class="score-bar" style="width:${Math.min(100,retLiq/0.15*100)}%"></div></div>
+            <div class="score-val">${(retLiq*100).toFixed(1)}%</div>
+          </div>
+          <div class="score-row">
+            <div class="score-label">Aderência ao perfil (25%)</div>
+            <div class="score-bar-wrap"><div class="score-bar" style="width:${ader*100}%;background:var(--gmid)"></div></div>
+            <div class="score-val">${(ader*100).toFixed(0)}%</div>
+          </div>
+          <div class="score-row">
+            <div class="score-label">Qualidade das decisões (15%)</div>
+            <div class="score-bar-wrap"><div class="score-bar" style="width:${qual*100}%;background:var(--purple)"></div></div>
+            <div class="score-val">${(qual*100).toFixed(0)}%</div>
+          </div>
+          <div class="score-total">
+            <div class="score-total-label">Score Final</div>
+            <div class="score-total-val">${score} pts</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparativos -->
+      <div class="cards-row">
+        <div class="stat-card">
+          <div class="sc-label">vs CDI</div>
+          <div class="sc-val ${clr(retAcum-cdiAcum)}">${fmtP(retAcum-cdiAcum)}</div>
+          <div class="sc-sub">CDI: ${(cdiAcum*100).toFixed(2)}%</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">vs IPCA</div>
+          <div class="sc-val ${clr(retAcum-ipcaAcum)}">${fmtP(retAcum-ipcaAcum)}</div>
+          <div class="sc-sub">IPCA: ${(ipcaAcum*100).toFixed(2)}%</div>
+        </div>
+      </div>
+
+      <!-- Gráfico evolução final -->
+      <div class="chart-wrap">
+        <div class="chart-title">📈 Jornada dos 6 Meses</div>
+        <div id="report-chart-linha" style="min-height:160px"></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#1565C0"></div>Sua carteira</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#757575"></div>CDI</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#F57F17"></div>IPCA</div>
+        </div>
+      </div>
+
+      <!-- Ativos -->
+      <div class="portfolio-wrap">
+        <div class="portfolio-title">Performance por Ativo</div>
+        ${ativo_rows}
+      </div>
+
+      <!-- Lições -->
+      <div class="score-card">
+        <div class="score-title">💡 Lições Aprendidas</div>
+        <div class="lessons-list">${licoes}</div>
+      </div>
+
+      ${ranking_html}
+
+      <button class="btn btn-primary btn-full" onclick="novoJogo()" style="margin-top:4px">🔄 Jogar Novamente</button>
+      <div class="disc">⚠️ Simulação educacional — nenhum dinheiro real. IAê Financeiro © 2025</div>
+    </div>`;
+
+  setTimeout(()=>drawLinhaChartReport(),80);
+}
+
+function gerarLicoes(retAcum, cdiAcum, ader, qual){
+  const lic=[];
+  if(retAcum > cdiAcum){
+    lic.push(`<div class="lesson-item">🏆 <b>Você bateu o CDI!</b> Retorno de ${(retAcum*100).toFixed(2)}% vs CDI de ${(cdiAcum*100).toFixed(2)}%. Isso mostra que risco bem gerenciado pode superar a renda fixa.</div>`);
+  } else {
+    lic.push(`<div class="lesson-item">📉 <b>O CDI foi difícil de bater.</b> Seu retorno foi ${(retAcum*100).toFixed(2)}% vs CDI de ${(cdiAcum*100).toFixed(2)}%. Em 6 meses com eventos adversos, a renda fixa pode ser mais resiliente.</div>`);
+  }
+  if(ader < 0.6){
+    lic.push(`<div class="lesson-item">⚠️ <b>Desvio do perfil declarado.</b> Sua carteira divergiu do perfil ${CFG.PERFIS[S.perfil].nome}. Manter a estratégia original é fundamental para resultados consistentes.</div>`);
+  } else {
+    lic.push(`<div class="lesson-item">✅ <b>Boa disciplina de perfil.</b> Sua carteira manteve coerência com o perfil ${CFG.PERFIS[S.perfil].nome}. Consistência é uma das principais virtudes do investidor.</div>`);
+  }
+  if(qual < 0.5){
+    lic.push(`<div class="lesson-item">🎓 <b>Decisões conservadoras demais.</b> Algumas oportunidades de mercado podem ter sido perdidas. No simulador, eventos negativos são oportunidades de aprender a reagir.</div>`);
+  } else if(qual >= 0.8){
+    lic.push(`<div class="lesson-item">🌟 <b>Excelente qualidade nas decisões!</b> Suas escolhas estiveram bem alinhadas com o cenário macroeconômico. Isso faz diferença no resultado real de longo prazo.</div>`);
+  } else {
+    lic.push(`<div class="lesson-item">⚖️ <b>Decisões razoáveis.</b> Você tomou decisões equilibradas diante dos eventos. Continue estudando cada cenário para aprimorar o timing.</div>`);
+  }
+  lic.push(`<div class="lesson-item">📚 <b>IR e taxas importam.</b> Juros sobre juros × IR regressivo × taxa de administração: mesmo pequenas diferenças no custo acumulam muito em 6 meses. Prefira LCI/LCA e FIIs para retornos líquidos maiores.</div>`);
+  return lic.join('');
+}
+
+function drawLinhaChartReport(){
+  const el=document.getElementById('report-chart-linha');
+  if(!el) return;
+  const W=el.clientWidth||340;
+  const H=170;
+  const pad={t:12,r:12,b:30,l:52};
+  const iW=W-pad.l-pad.r, iH=H-pad.t-pad.b;
+  const pts=S.patrimonio_hist, cdi=S.cdi_hist, ipa=S.ipca_hist;
+  const n=pts.length;
+  if(n<2){el.innerHTML='';return;}
+  const all=[...pts,...cdi,...ipa];
+  const minV=Math.min(...all)*0.995, maxV=Math.max(...all)*1.005, rng=maxV-minV||1;
+  const xs=i=>(pad.l+i/(n-1)*iW).toFixed(1);
+  const ys=v=>(pad.t+(1-(v-minV)/rng)*iH).toFixed(1);
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="chart-svg">`;
+  const ticks=4;
+  for(let i=0;i<=ticks;i++){
+    const v=minV+(maxV-minV)*i/ticks, y=ys(v);
+    svg+=`<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="#E8ECEF" stroke-width="1"/>`;
+    svg+=`<text x="${pad.l-4}" y="${parseFloat(y)+4}" text-anchor="end" font-size="10" fill="#90A4AE">${fmtK(v)}</text>`;
+  }
+  for(let i=0;i<n;i++) svg+=`<text x="${xs(i)}" y="${H-5}" text-anchor="middle" font-size="10" fill="#90A4AE">${i===0?'Início':'M'+i}</text>`;
+  const poly=arr=>`points="${arr.map((_,i)=>`${xs(i)},${ys(arr[i])}`).join(' ')}"`;
+  svg+=`<polyline ${poly(ipa)} fill="none" stroke="#F57F17" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  svg+=`<polyline ${poly(cdi)} fill="none" stroke="#90A4AE" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  svg+=`<polyline ${poly(pts)} fill="none" stroke="#1565C0" stroke-width="2.5"/>`;
+  pts.forEach((_,i)=>{ svg+=`<circle cx="${xs(i)}" cy="${ys(pts[i])}" r="4" fill="#1565C0"/>`; });
+  svg+='</svg>';
+  el.innerHTML=svg;
+}
+
+function novoJogo(){
+  _perfil=null;
+  document.querySelectorAll('.profile-card').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('perfil-desc').classList.remove('show');
+  document.getElementById('inp-nome').value='';
+  document.getElementById('inp-capital').value='5000';
+  document.getElementById('btn-iniciar').disabled=true;
+  showScreen('sc-setup');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BOOTSTRAP
+// ═══════════════════════════════════════════════════════════════════
+window.addEventListener('resize', ()=>{
+  if(document.querySelector('#tab-resumo.active')) drawLinhaChart();
+  if(document.querySelector('#tab-carteira.active')) drawDonutChart();
+});
+</script>
+</body>
+</html>

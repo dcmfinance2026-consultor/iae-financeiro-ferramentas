@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oficina IAê Educação Financeira</title>
+<style>
+:root{
+  --bg:#0B172A;--bg2:#162035;--bg3:#1E2E48;--bg4:#243355;
+  --cyan:#00C9D4;--orange:#FF7B00;--white:#FFFFFF;
+  --gray:#94A3B8;--lgray:#CBD5E1;--dgray:#475569;
+  --green:#22C55E;--red:#EF4444;--yellow:#F59E0B;--purple:#A855F7;
+  --grad:linear-gradient(135deg,#00C9D4,#FF7B00);
+  --grad2:linear-gradient(135deg,#162035 0%,#0B172A 100%);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--white)}
+
+/* ══ SLIDES ══ */
+.slide{
+  position:fixed;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .4s ease;overflow:hidden;
+  padding:0 48px
+}
+.slide.active{opacity:1;pointer-events:all}
+
+/* ══ PROGRESS BAR ══ */
+#progress{
+  position:fixed;bottom:0;left:0;height:4px;background:var(--grad);
+  transition:width .4s ease;z-index:99
+}
+#counter{
+  position:fixed;bottom:12px;right:16px;font-size:.75rem;
+  color:var(--dgray);letter-spacing:.08em;z-index:99
+}
+#nav{
+  position:fixed;bottom:10px;left:50%;transform:translateX(-50%);
+  display:flex;gap:8px;z-index:99
+}
+.nav-btn{
+  width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;
+  background:rgba(255,255,255,.08);color:var(--gray);font-size:1rem;
+  transition:all .2s;display:flex;align-items:center;justify-content:center
+}
+.nav-btn:hover{background:var(--cyan);color:#000}
+
+/* ══ TYPOGRAPHY ══ */
+.tag{
+  display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.15em;
+  text-transform:uppercase;padding:5px 14px;border-radius:999px;margin-bottom:14px
+}
+.tag-cyan{background:rgba(0,201,212,.15);color:var(--cyan);border:1px solid rgba(0,201,212,.3)}
+.tag-orange{background:rgba(255,123,0,.15);color:var(--orange);border:1px solid rgba(255,123,0,.3)}
+.tag-red{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.tag-green{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.tag-purple{background:rgba(168,85,247,.15);color:var(--purple);border:1px solid rgba(168,85,247,.3)}
+
+h1.super{font-size:clamp(2.2rem,5vw,4.5rem);font-weight:900;line-height:1}
+h1.hero{font-size:clamp(2rem,4.5vw,3.8rem);font-weight:900;line-height:1.1}
+h2.title{font-size:clamp(1.5rem,3.5vw,2.8rem);font-weight:800;line-height:1.15}
+h3.sub{font-size:clamp(1.1rem,2.5vw,1.8rem);font-weight:700;line-height:1.2}
+p.lead{font-size:clamp(.95rem,2vw,1.25rem);color:var(--lgray);line-height:1.6}
+p.sm{font-size:clamp(.8rem,1.5vw,1rem);color:var(--gray);line-height:1.5}
+.grad-text{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* ══ LAYOUT ══ */
+.center{text-align:center}
+.maxw{max-width:900px;width:100%}
+.maxw-sm{max-width:720px;width:100%}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:100%;max-width:900px}
+.cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;width:100%;max-width:900px}
+.cols4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;width:100%;max-width:960px}
+
+/* ══ CARDS ══ */
+.card{
+  background:var(--bg3);border:1px solid rgba(255,255,255,.07);
+  border-radius:16px;padding:20px;
+}
+.card-cyan{border-color:rgba(0,201,212,.3);background:rgba(0,201,212,.06)}
+.card-orange{border-color:rgba(255,123,0,.3);background:rgba(255,123,0,.06)}
+.card-red{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.06)}
+.card-green{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)}
+.card-purple{border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.06)}
+
+/* ══ SECTION BG ══ */
+.bg-section{background:var(--grad);padding:3px;border-radius:16px}
+.bg-section-inner{background:var(--bg);border-radius:14px;padding:20px}
+
+/* ══ STAT BLOCK ══ */
+.stat-num{font-size:clamp(2.5rem,5vw,5rem);font-weight:900;line-height:1}
+.stat-label{font-size:clamp(.75rem,1.5vw,.95rem);color:var(--gray);margin-top:4px}
+
+/* ══ PROGRESS BAR ELEMENT ══ */
+.bar-wrap{background:rgba(255,255,255,.1);border-radius:999px;height:12px;overflow:hidden;margin:6px 0}
+.bar-fill{height:100%;border-radius:999px;background:var(--grad)}
+
+/* ══ ICON ══ */
+.icon-big{font-size:clamp(2rem,4vw,3.5rem);margin-bottom:8px;display:block}
+
+/* ══ TABLE ══ */
+.slide-table{width:100%;border-collapse:collapse;font-size:clamp(.75rem,1.5vw,.95rem)}
+.slide-table th{
+  background:rgba(0,201,212,.12);color:var(--cyan);padding:10px 14px;
+  text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em
+}
+.slide-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);color:var(--lgray)}
+.slide-table tr:last-child td{border-bottom:none}
+.slide-table tr:hover td{background:rgba(255,255,255,.03)}
+
+/* ══ BADGE ══ */
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:999px
+}
+.badge-cyan{background:rgba(0,201,212,.2);color:var(--cyan)}
+.badge-orange{background:rgba(255,123,0,.2);color:var(--orange)}
+.badge-red{background:rgba(239,68,68,.2);color:var(--red)}
+.badge-green{background:rgba(34,197,94,.2);color:var(--green)}
+
+/* ══ BETS VISUAL ══ */
+.bets-stat{
+  background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(185,28,28,.1));
+  border:1px solid rgba(239,68,68,.4);border-radius:16px;padding:20px;text-align:center
+}
+.bets-funnel{
+  display:flex;flex-direction:column;align-items:center;gap:0
+}
+.funnel-row{
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;padding:8px 16px;border-radius:4px;transition:all .3s
+}
+
+/* ══ CHART AREA ══ */
+.chart-wrap{
+  background:var(--bg3);border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;padding:16px
+}
+
+/* ══ AGENDA ITEM ══ */
+.agenda-item{
+  display:flex;align-items:center;gap:14px;padding:12px 16px;
+  border-radius:10px;background:var(--bg3);border:1px solid rgba(255,255,255,.06)
+}
+.agenda-num{
+  width:36px;height:36px;border-radius:50%;background:var(--grad);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:.9rem;color:#000;flex-shrink:0
+}
+
+/* ══ QUOTE ══ */
+.quote{
+  border-left:4px solid var(--cyan);padding:14px 20px;
+  background:rgba(0,201,212,.06);border-radius:0 10px 10px 0;
+  font-style:italic;color:var(--lgray);font-size:1.05rem;line-height:1.6
+}
+
+/* ══ DISCLAIMER ══ */
+.disclaimer{
+  background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);
+  border-radius:10px;padding:12px 16px;font-size:.8rem;color:var(--yellow);
+  line-height:1.5
+}
+
+/* ══ SLIDE SPECIFIC BACKGROUNDS ══ */
+#s1{background:radial-gradient(ellipse at 50% 0%,#1E3560 0%,#0B172A 65%)}
+#s3{background:linear-gradient(135deg,#0B172A,#1A2040)}
+#s5{background:linear-gradient(135deg,#1A0505,#2D0808,#0B172A)}
+#s9{background:radial-gradient(ellipse at 50% 50%,#1A1030 0%,#0B172A 70%)}
+#s10{background:linear-gradient(135deg,#0B2A1A,#0B172A)}
+#s16{background:linear-gradient(135deg,#0B172A,#1A2D10)}
+#s22{background:radial-gradient(ellipse at 50% 100%,#1A3020 0%,#0B172A 65%)}
+
+/* ══ LOGO ══ */
+.logo-sm{height:40px;border-radius:8px;opacity:.9}
+.logo-fixed{position:fixed;top:14px;left:16px;z-index:98}
+
+/* responsive */
+@media(max-width:768px){
+  .cols2,.cols3,.cols4{grid-template-columns:1fr}
+  .slide{padding:0 24px}
+}
+</style>
+</head>
+<body>
+
+<img src="assets/logo-iae.jpg" alt="IAê" class="logo-fixed logo-sm">
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 1 — CAPA
+══════════════════════════════════════════════════ -->
+<div class="slide active center" id="s1">
+  <div class="maxw-sm">
+    <img src="assets/logo-iae.jpg" alt="IAê Educação Financeira" style="max-height:100px;border-radius:12px;margin-bottom:28px">
+    <h1 class="super grad-text" style="margin-bottom:12px">Oficina de Educação Financeira</h1>
+    <p class="lead" style="margin-bottom:24px">Decisões inteligentes, vida financeira livre.</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <span class="tag tag-cyan">📅 Hoje</span>
+      <span class="tag tag-orange">🎓 Workshop Prático</span>
+      <span class="tag tag-green">💡 Aprenda · Jogue · Invista</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 2 — AGENDA
+══════════════════════════════════════════════════ -->
+<div class="slide" id="s2">
+  <div class="maxw">
+    <div class="center" style="margin-bottom:28px">
+      <span class="tag tag-cyan">Hoje na Oficina</span>
+      <h2 class="title">O que vem por aí</h2>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="agenda-item">
+        <div class="agenda-num">1</div>
+        <div>
+          <div style="font-weight:700;font-size:1rem">💬 Vamos falar sobre finanças?</div>
+          <div class="sm">Risco × Retorno · Tempo · Cenário econômico atual</div>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-num">2</div>
+        <div>
+          <div style="font-weight:700;font-size:1rem">🧠 Quiz Financeiro</div>
+          <div class="sm">Teste seus conhecimentos — ao vivo pelo Menti</div>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-num">3</div>
+        <div>
+          <div style="font-weight:700;font-size:1rem">🏆 Circuito Financeiro</div>
+          <div class="sm">Competição de decisões — gerencie sua empresa por 4 meses</div>
+        </div>
+      </div>
+      <div class="agenda-item" style="border-left:3px solid rgba(255,255,255,.1)">
+        <div style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">☕</div>
+        <div class="sm" style="font-style:italic">Break</div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-num">4</div>
+        <div>
+          <div style="font-weight:700;font-size:1rem">📊 Mercado Financeiro</div>
+          <div class="sm">Renda fixa · Renda variável · Bolsa · Consórcio</div>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-num">5</div>
+        <div>
+          <div style="font-weight:700;font-size:1rem">🎮 Simulação de Investimentos</div>
+          <div class="sm">Use o lucro do Circuito e invista na bolsa virtual</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 3 — SEÇÃO 1 (provocativo)
+══════════════════════════════════════════════════ -->
+<div class="slide center" id="s3">
+  <div class="maxw-sm">
+    <span class="tag tag-cyan" style="margin-bottom:24px">Parte 1</span>
+    <h1 class="hero" style="margin-bottom:16px">
+      O que você <span class="grad-text">espera</span><br>desta oficina?
+    </h1>
+    <div style="display:flex;flex-direction:column;gap:10px;text-align:left;max-width:520px;margin:24px auto 0">
+      <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px 18px">
+        <span style="font-size:1.5rem">💰</span>
+        <span style="color:var(--lgray)">Vai ficar rico rápido?</span>
+      </div>
+      <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px 18px">
+        <span style="font-size:1.5rem">📱</span>
+        <span style="color:var(--lgray)">Vai aprender a ganhar dinheiro na internet sem trabalhar?</span>
+      </div>
+      <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px 18px">
+        <span style="font-size:1.5rem">🎰</span>
+        <span style="color:var(--lgray)">Vai descobrir o segredo das apostas esportivas?</span>
+      </div>
+      <div class="card card-cyan" style="display:flex;align-items:center;gap:12px;padding:14px 18px">
+        <span style="font-size:1.5rem">🧠</span>
+        <span style="color:var(--white);font-weight:700">Ou vai aprender como o dinheiro <em>realmente</em> funciona?</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 4 — BETS / DINHEIRO FÁCIL
+══════════════════════════════════════════════════ -->
+<div class="slide" id="s5" style="align-items:stretch">
+  <div style="display:flex;flex-direction:column;width:100%;max-width:960px;gap:16px">
+    <div class="center" style="margin-bottom:4px">
+      <span class="tag tag-red">⚠️ Alerta</span>
+      <h2 class="title">A armadilha do <span style="color:var(--red)">dinheiro fácil</span></h2>
+    </div>
+    <div class="cols2" style="max-width:100%">
+      <!-- Left: big stats -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="bets-stat">
+          <div class="stat-num" style="color:var(--red)">82%</div>
+          <div class="stat-label">dos apostadores esportivos tiveram<br><b style="color:var(--lgray)">saldo negativo</b> no último ano</div>
+        </div>
+        <div class="bets-stat">
+          <div class="stat-num" style="color:var(--red)">R$ 3,6<span style="font-size:1.5rem"> bi</span></div>
+          <div class="stat-label">apostados <b style="color:var(--lgray)">por semana</b> no Brasil em 2024</div>
+        </div>
+        <div class="bets-stat">
+          <div class="stat-num" style="color:var(--red)">36M</div>
+          <div class="stat-label">de apostadores ativos — mais de <b style="color:var(--lgray)">1 em cada 6 adultos</b></div>
+        </div>
+      </div>
+      <!-- Right: funnel -->
+      <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;gap:8px">
+        <div style="font-weight:700;font-size:.85rem;color:var(--gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">O que acontece com R$ 1.000 apostados</div>
+        <div class="bets-funnel">
+          <div class="funnel-row" style="background:rgba(239,68,68,.2);width:100%;color:var(--red)">💸 R$ 1.000 apostados</div>
+          <div style="font-size:1.5rem;color:var(--dgray)">↓</div>
+          <div class="funnel-row" style="background:rgba(239,68,68,.15);width:85%;color:#F87171">Taxa da plataforma: −5%</div>
+          <div style="font-size:1.5rem;color:var(--dgray)">↓</div>
+          <div class="funnel-row" style="background:rgba(239,68,68,.12);width:70%;color:#F87171">Odds sempre abaixo da probabilidade real</div>
+          <div style="font-size:1.5rem;color:var(--dgray)">↓</div>
+          <div class="funnel-row" style="background:rgba(239,68,68,.2);width:40%;color:var(--red);font-weight:900">≈ R$ 180–300 restam</div>
+        </div>
+        <div class="quote" style="font-size:.82rem;margin-top:8px">"As casas de apostas <strong>nunca perdem</strong>. O modelo de negócio garante isso matematicamente."</div>
+      </div>
+    </div>
+    <div class="disclaimer">
+      ⚡ Jovens de 18–30 anos são o <strong>maior grupo de apostadores</strong> do Brasil — e o grupo que mais <strong>perde dinheiro</strong>. Famílias beneficiárias do Bolsa Família movimentaram R$ 3 bilhões em apostas em 2024.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 5 — RISCO × RETORNO
+══════════════════════════════════════════════════ -->
+<div class="slide" id="s6">
+  <div class="maxw">
+    <div class="center" style="margin-bottom:24px">
+      <span class="tag tag-orange">Lei fundamental das finanças</span>
+      <h2 class="title">Risco <span style="color:var(--orange)">×</span> Retorno</h2>
+      <p class="lead" style="margin-top:8px">Quanto maior o retorno prometido, maior o risco envolvido.<br><strong>Sempre.</strong></p>
+    </div>
+    <!-- Risk/Return spectrum -->
+    <div class="card" style="margin-bottom:16px;padding:24px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:.8rem;color:var(--gray)">
+        <span>◀ Menor risco · Menor retorno</span>
+        <span>Maior risco · Maior retorno ▶</span>
+      </div>
+      <div style="position:relative;height:60px;border-radius:999px;overflow:hidden;background:linear-gradient(to right,#22C55E,#F59E0B,#EF4444)">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-around;padding:0 10px">
+          <span style="font-size:.7rem;font-weight:700;color:#000;text-align:center">Poupança<br>CDB</span>
+          <span style="font-size:.7rem;font-weight:700;color:#000;text-align:center">Tesouro<br>IPCA+</span>
+          <span style="font-size:.7rem;font-weight:700;color:#000;text-align:center">FIIs<br>Ações</span>
+          <span style="font-size:.7rem;font-weight:700;color:#000;text-align:center">Criptos<br>Derivativos</span>
+          <span style="font-size:.7rem;font-weight:700;color:#000;text-align:center">Bets<br>Pirâmides</span>
+        </div>
+      </div>
+    </div>
+    <div class="cols3">
+      <div class="card card-green center">
+        <div style="font-size:1.8rem;margin-bottom:6px">🛡️</div>
+        <div style="font-weight:700;color:var(--green);margin-bottom:4px">Conservador</div>
+        <p class="sm">Aceita retorno menor para ter previsibilidade. Risco baixo.</p>
+      </div>
+      <div class="card card-orange center">
+        <div style="font-size:1.8rem;margin-bottom:6px">⚖️</div>
+        <div style="font-weight:700;color:var(--orange);margin-bottom:4px">Moderado</div>
+        <p class="sm">Equilibra segurança e crescimento. Aceita alguma oscilação.</p>
+      </div>
+      <div class="card card-red center">
+        <div style="font-size:1.8rem;margin-bottom:6px">🚀</div>
+        <div style="font-weight:700;color:var(--red);margin-bottom:4px">Arrojado</div>
+        <p class="sm">Busca máximo crescimento. Aceita grandes perdas temporárias.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 6 — PODER DO TEMPO (juros compostos)
+══════════════════════════════════════════════════ -->
+<div class="slide" id="s7">
+  <div class="maxw">
+    <div class="center" style="margin-bottom:20px">
+      <span class="tag tag-cyan">O maior aliado do investidor</span>
+      <h2 class="title">O <span class="grad-text">Tempo</span> que trabalha por você</h2>
+    </div>
+    <div class="cols2">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card card-cyan">
+          <div style="font-size:.8rem;color:var(--gray);margin-bottom:6px">Cenário: R$ 200/mês investidos a 12% a.a.</div>
+          <div style="display:grid;grid-template-columns:auto 1fr auto;gap:8px 12px;align-items:center">
+            <span class="sm">5 anos</span><div class="bar-wrap"><div class="bar-fill" style="width:8%"></div></div><span style="font-weight:700;color:var(--cyan)">R$ 16k</span>
+            <span class="sm">10 anos</span><div class="bar-wrap"><div class="bar-fill" style="width:18%"></div></div><span style="font-weight:700;color:var(--cyan)">R$ 46k</span>
+            <span class="sm">20 anos</span><div class="bar-wrap"><div class="bar-fill" style="width:40%"></div></div><span style="font-weight:700;color:var(--cyan)">R$ 198k</span>
+            <span class="sm">30 anos</span><div class="bar-wrap"><div class="bar-fill" style="width:100%"></div></div><span style="font-weight:700;color:var(--orange);font-size:1.1rem">R$ 700k+</span>
+          </div>
+          <p class="sm" style="margin-top:8px">Total investido em 30 anos: apenas <strong style="color:var(--lgray)">R$ 72.000</strong></p>
+        </div>
+        <div class="card card-orange">
+          <div style="font-weight:700;font-size:1rem;margin-bottom:6px">💡 O segredo dos juros compostos</div>
+          <p class="sm">Juros sobre juros: você <strong>não ganha apenas sobre o principal</strong>, mas também sobre os rendimentos anteriores. Com o tempo, o crescimento é <em>exponencial</em>.</p>
+        </div>
+      </div>
+      <!-- SVG Chart -->
+      <div class="chart-wrap">
+        <div style="font-size:.8rem;color:var(--gray);margin-bottom:8px">Crescimento ao longo do tempo (R$ 200/mês)</div>
+        <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="width:100%">
+          <!-- grid -->
+          <line x1="40" y1="10" x2="40" y2="170" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+          <line x1="40" y1="170" x2="310" y2="170" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+          <line x1="40" y1="130" x2="310" y2="130" stroke="rgba(255,255,255,.05)" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="40" y1="90" x2="310" y2="90" stroke="rgba(255,255,255,.05)" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="40" y1="50" x2="310" y2="50" stroke="rgba(255,255,255,.05)" stroke-width="1" stroke-dasharray="3,3"/>
+          <!-- labels -->
+          <text x="30" y="174" font-size="9" fill="#64748B" text-anchor="end">0</text>
+          <text x="30" y="134" font-size="9" fill="#64748B" text-anchor="end">200k</text>
+          <text x="30" y="94" font-size="9" fill="#64748B" text-anchor="end">400k</text>
+          <text x="30" y="54" font-size="9" fill="#64748B" text-anchor="end">600k</text>
+          <text x="40" y="183" font-size="9" fill="#64748B" text-anchor="middle">0</text>
+          <text x="98" y="183" font-size="9" fill="#64748B" text-anchor="middle">5a</text>
+          <text x="156" y="183" font-size="9" fill="#64748B" text-anchor="middle">10a</text>
+          <text x="214" y="183" font-size="9" fill="#64748B" text-anchor="middle">20a</text>
+          <text x="310" y="183" font-size="9" fill="#64748B" text-anchor="middle">30a</text>
+          <!-- colchão line (linear) -->
+          <polyline points="40,170 98,163 156,157 214,145 310,130" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <!-- juros compostos curve -->
+          <polyline points="40,170 98,167 156,161 214,131 310,45" fill="none" stroke="url(#grad1)" stroke-width="2.5"/>
+          <defs>
+            <linearGradient id="grad1" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#00C9D4"/>
+              <stop offset="100%" stop-color="#FF7B00"/>
+            </linearGradient>
+          </defs>
+          <!-- dots -->
+          <circle cx="310" cy="45" r="5" fill="#FF7B00"/>
+          <text x="308" y="40" font-size="9" fill="#FF7B00" text-anchor="middle">R$700k+</text>
+          <circle cx="310" cy="130" r="4" fill="#475569"/>
+          <text x="308" y="125" font-size="9" fill="#64748B" text-anchor="middle">R$72k</text>
+        </svg>
+        <div style="display:flex;gap:14px;margin-top:4px;font-size:.75rem">
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:14px;height:3px;background:var(--grad);border-radius:2px"></div><span style="color:var(--gray)">Investindo 12% a.a.</span></div>
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:14px;height:2px;background:#475569;border-radius:2px"></div><span style="color:var(--gray)">Guardando no colchão</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 7 — CENÁRIO ECONÔMICO
+══════════════════════════════════════════════════ -->
+<div class="slide" id="s8">
+  <div class="maxw">
+    <div class="center" style="margin-bottom:20px">
+      <span class="tag tag-orange">Macroeconomia</span>
+      <h2 class="title">O que está acontecendo <span class="grad-text">com o Brasil?</span></h2>
+    </div>
+    <div class="cols2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card card-orange" style="display:flex;gap:14px;align-items:flex-start">
+          <div style="font-size:2rem">🏦</div>
+          <div>
+            <div style="font-weight:700;color:var(--orange);margin-bottom:3px">Taxa SELIC — ~14,75% a.a.</div>
+            <p class="sm">A taxa básica de juros da economia. Define o piso de retorno da renda fixa e o custo do crédito. Quando sobe → crédito fica caro, bolsa cai. Quando cai → economia aquece, bolsa sobe.</p>
+          </div>
+        </div>
+        <div class="card" style="display:flex;gap:14px;align-items:flex-start">
+          <div style="font-size:2rem">📊</div>
+          <div>
+            <div style="font-weight:700;color:var(--yellow);margin-bottom:3px">IPCA — ~5,5% a.a. (inflação)</div>
+            <p class="sm">Se você não investir pelo menos o valor da inflação, seu dinheiro perde poder de compra. Rentabilidade real = rentabilidade nominal − inflação.</p>
+          </div>
+        </div>
+        <div class="card card-red" style="display:flex;gap:14px;align-items:flex-start">
+          <div style="font-size:2rem">💱</div>
+          <div>
+            <div style="font-weight:700;color:var(--red);margin-bottom:3px">Dólar — pressão cambial</div>
+            <p class="sm">Dólar alto → importações ficam caras → inflação sobe. Afeta exportadoras (Petrobras, Vale), BDRs e toda a cadeia produtiva.</p>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card card-purple" style="display:flex;gap:14px;align-items:flex-start">
+          <div style="font-size:2rem">📋</div>
+          <div>
+            <div style="font-weight:700;color:var(--purple);margin-bottom:3px">Ajuste Fiscal</div>
+            <p class="sm">Quando o governo gasta mais do que arrecada → dívida pública cresce → mercado cobra juros maiores → ciclo vicioso. O ajuste fiscal é o corte de gastos para equilibrar as contas.</p>
+          </div>
+        </div>
+        <div class="card card-cyan" style="display:flex;gap:14px;align-items:flex-start">
+          <div style="font-size:2rem">📈</div>
+          <div>
+            <div style="font-weight:700;color:var(--cyan);margin-bottom:3px">CDI — benchmark da renda fixa</div>
+            <p class="sm">O Certificado de Depósito Interbancário acompanha a Selic de perto. É a referência para avaliar se um investimento de renda fixa vale a pena.</p>
+          </div>
+        </div>
+        <div class="quote">"Um bom investidor entende o contexto econômico. Não é preciso ser economista — basta saber ler o ambiente."</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 8 — FINANÇAS CORPORATIVAS (flash)
+══════════════════════════════════════════════════ -->
+<div class="slide" id="s8b">
+  <div class="maxw">
+    <div class="center" style="margin-bottom:20px">
+      <span class="tag tag-cyan">Conceitos corporativos</span>
+      <h2 class="title">Como as <span class="grad-text">empresas</span> gerenciam dinheiro</h2>
+    </div>
+    <div class="cols4" style="margin-bottom:16px">
+      <div class="card center">
+        <div style="font-size:1.8rem;margin-bottom:6px">💰</div>
+        <div style="font-weight:700;font-size:.9rem;color:var(--cyan);margin-bottom:4px">Faturamento</div>
+        <p class="sm">Tudo que a empresa recebe pelas vendas, antes de qualquer desconto.</p>
+      </div>
+      <div class="card center">
+        <div style="font-size:1.8rem;margin-bottom:6px">📉</div>
+        <div style="font-weight:700;font-size:.9rem;color:var(--orange);margin-bottom:4px">Custos &amp; Despesas</div>
+        <p class="sm">O que sai: salários, aluguel, fornecedores, impostos.</p>
+      </div>
+      <div class="card center">
+        <div style="font-size:1.8rem;margin-bottom:6px">📊</div>
+        <div style="font-weight:700;font-size:.9rem;color:var(--green);margin-bottom:4px">Lucro</div>
+        <p class="sm">Faturamento menos custos. Só existe se bem gerenciado.</p>
+      </div>
+      <div class="card center">
+        <div style="font-size:1.8rem;margin-bottom:6px">🌊</div>
+        <div style="font-weight:700;font-size:.9rem;color:var(--purple);margin-bottom:4px">Fluxo de Caixa</div>
+        <p class="sm">Dinheiro disponível no dia a dia. Empresa com lucro pode quebrar por falta de caixa!</p>
+      </div>
+    </div>
+    <div class="card" style="max-width:700px;margin:0 auto">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:1.3rem">🏢</span>
+        <span style="font-weight:700;color:var(--lgray)">Finanças pessoais = Finanças corporativas em miniatura</span>
+      </div>
+      <p class="sm">Assim como uma empresa tem um DRE (Demonstrativo de Resultado), você pode ter o seu. <strong style="color:var(--cyan)">Receitas − Despesas = Resultado.</strong> Lucro vira investimento. Investimento vira patrimônio.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 9 — QUIZ (Menti)
+══════════════════════════════════════════════════ -->
+<div class="slide center" id="s9">
+  <div class="maxw-sm">
+    <span class="tag tag-purple" style="margin-bottom:16px">Parte 2</span>
+    <h1 class="hero" style="margin-bottom:12px">Quiz <span class="grad-text">Financeiro</span></h1>
+    <p class="lead" style="margin-bottom:28px">Vamos alinhar conceitos? Participe pelo celular agora!</p>
+    <div class="card" style="padding:32px;text-align:center">
+      <div style="font-size:3.5rem;margin-bottom:12px">📱</div>
+      <div style="font-weight:900;font-size:1.3rem;color:var(--cyan);margin-bottom:4px;letter-spacing:.02em">menti.com</div>
+      <div style="font-size:2rem;font-weight:700;color:var(--white);margin-bottom:8px;letter-spacing:.1em">alxx45769yn8</div>
+      <p class="sm">ou escaneie o QR Code do apresentador</p>
+      <!-- QR placeholder -->
+      <div style="width:80px;height:80px;margin:12px auto 0;border:2px solid var(--cyan);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--dgray)">QR Code</div>
+    </div>
+    <p class="sm" style="margin-top:16px">🧠 Questões sobre juros, investimentos, economia e comportamento financeiro</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 10 — CIRCUITO FINANCEIRO
+══════════════════════════════════════════════════ -->
+<div class="slide center" id="s10">
+  <div class="maxw-sm">
+    <span class="tag tag-green" style="margin-bottom:16px">Parte 3</span>
+    <h1 class="hero" style="margin-bottom:8px">🏆 Circuito <span class="grad-text">Financeiro</span></h1>
+    <p class="lead" style="margin-bottom:24px">Uma competição de decisões financeiras que vai mexer com todos.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;text-align:left">
+      <div class="card" style="display:flex;gap:12px;align-items:flex-start">
+        <span style="font-size:1.5rem">🎭</span>
+        <div><div style="font-weight:700;margin-bottom:3px">Você é dono de uma empresa</div><p class="sm">Cada participante gerencia receitas e despesas ao longo de 4 rodadas (meses) com seu perfil exclusivo.</p></div>
+      </div>
+      <div class="card" style="display:flex;gap:12px;align-items:flex-start">
+        <span style="font-size:1.5rem">📋</span>
+        <div><div style="font-weight:700;margin-bottom:3px">Lançamentos e decisões</div><p class="sm">Registre entradas e saídas, contrate seguros, gerencie imprevistos e vire os meses sem quebrar.</p></div>
+      </div>
+      <div class="card" style="display:flex;gap:12px;align-items:flex-start">
+        <span style="font-size:1.5rem">💸</span>
+        <div><div style="font-weight:700;margin-bottom:3px">Crédito e saldo negativo</div><p class="sm">Se o saldo ficar negativo, você precisará contratar crédito — com IOF, juros e CET real de mercado.</p></div>
+      </div>
+      <div class="card card-cyan" style="display:flex;gap:12px;align-items:center">
+        <span style="font-size:1.5rem">🎯</span>
+        <div><div style="font-weight:700;color:var(--cyan)">Saldo final = capital para investir na bolsa!</div></div>
+      </div>
+    </div>
+    <p class="sm" style="margin-top:16px">👨‍💼 O facilitador vai dar as coordenadas. Sigam as instruções da tela.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 11 — SEÇÃO 4: MERCADO FINANCEIRO
+══════════════════════════════════════════════════ -->
+<div class="slide center" id="s11">
+  <div class="maxw-sm">
+    <span class="tag tag-cyan" style="margin-bottom:16px">Parte 4</span>
+    <h1 class="hero" style="margin-bottom:12px">📊 Mercado <span class="grad-text">Financeiro</span></h1>
+    <p class="lead">Entenda onde o dinheiro pode trabalhar para você</p>
+    <div class="cols3" style="margin-top:24px">
+      <div class="card card-green center">
+        <div style="font-size:2rem;margin-bottom:6px">🛡️</div>
+        <div style="font-weight:700;color:var(--green)">Renda Fixa</div>
+        <p class="sm">Regras claras antes de investir. Você sabe quanto vai render.</p>
+      </div>
+      <div class="card card-orange center">
+        <div style="font-size:2rem;margin-bottom:6px">📈</div>
+        <div style="font-weight:700;color:var(--orange)">Renda Variável</div>
+        <p class="sm">Retorno não garantido. Oscila com o mercado — maior potencial.</p>
+      </div>
+      <div class="card card-purple center">
+        <div style="font-size:2rem;margin-bottom:6px">🏢</div>
+        <div style="font-weight:700;color:var(--purple)">Ativos Reais</div>
+        <p class="sm">Imóveis, consórcios, ouro. Patrimônio tangível.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 12 — RESERVA DE EMERGÊNCIA
+══════════════════════════════════════════════════ -->
+<div class="slide" id="s12">
+  <div class="maxw">
+    <div class="center" style="margin-bottom:20px">
+      <span class="tag tag-red">Passo zero — antes de qualquer investimento</span>
+      <h2 class="title">🆘 Reserva de <span style="color:var(--red)">Emergência</span></h2>
+    </div>
+    <div class="cols2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card card-red">
+          <div style="font-weight:700;font-size:1.1rem;margin-bottom:8px;color:var(--red)">O que é?</div>
+          <p class="sm">Dinheiro <strong>disponível imediatamente</strong> para imprevistos: demissão, doença, emergência familiar.</p>
+        </div>
+        <div class="card">
+          <div style="font-weight:700;font-size:1rem;margin-bottom:8px;color:var(--cyan)">Quanto guardar?</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span class="sm">Autônomo / instável</span>
+              <span class="badge badge-orange">6–12 meses de gastos</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span class="sm">CLT / renda estável</span>
+              <span class="badge badge-cyan">3–6 meses de gastos</span>
+            </div>
+          </div>
+        </div>
+        <div class="card card-green">
+          <div style="font-weight:700;font-size:1rem;margin-bottom:6px;color:var(--green)">Onde guardar?</div>
+          <p class="sm">🏦 CDB com liquidez diária ou Tesouro Selic — <strong>nunca na poupança tradicional</strong>. Precisa render pelo menos o CDI e ter liquidez imediata.</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card" style="text-align:center;padding:28px">
+          <div style="font-size:4rem;margin-bottom:8px">🚨</div>
+          <h3 class="sub" style="margin-bottom:8px">Regra de ouro</h3>
+          <p class="lead" style="font-size:1.1rem">"Nunca invista em nada de risco<br>sem antes ter sua reserva completa."</p>
+        </div>
+        <div class="disclaimer">
+          Sem reserva de emergência, qualquer imprevisto força você a resgatar investimentos na hora errada — <strong>geralmente no pior momento do mercado</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 13 — RENDA FIXA: INSTRUMENTOS
+══════════════════════════════════════════════════ -->
+<div class="slide" id="s13">
+  <div class="maxw">
+    <div class="center" style="margin-bottom:16px">
+      <span class="tag tag-green">Renda Fixa</span>
+      <h2 class="title">CDB · LCI · LCA · Poupança</h2>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="slide-table" style="min-width:600px">
+        <thead>
+          <tr>
+            <th>Instrumento</th>
+            <th>Rentabilidade típica</th>
+            <th>IR</th>
+            <th>Liquidez</th>
+            <th>Garantia</th>
+            <th>Para quem?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Poupança</strong></td>
+            <td><span class="badge badge-red">≈ 70% da Selic</span></td>
+            <td><span class="badge badge-green">Isenta</span></td>
+            <td>Diária</td>
+            <td>FGC até R$ 250k</td>
+            <td style="color:var(--dgray)">Quase ninguém — rendimento abaixo da inflação</td>
+          </tr>
+          <tr>
+            <td><strong>CDB</strong></td>
+            <td><span class="badge badge-cyan">90–120% CDI</span></td>
+            <td><span class="badge badge-orange">IR regressivo</span></td>
+            <td>Diária ou prazo</td>
+            <td>FGC até R$ 250k</td>
+            <td style="color:var(--lgray)">Reserva de emergência e curto prazo</td>
+          </tr>
+          <tr>
+            <td><strong>LCI / LCA</strong></td>
+            <td><span class="badge badge-cyan">85–100% CDI</span></td>
+            <td><span class="badge badge-green">Isento PF</span></td>
+            <td>Carência 90d+</td>
+            <td>FGC até R$ 250k</td>
+            <td style="color:var(--lgray)">Médio prazo — retorno líquido maior pelo IR zero</td>
+          </tr>
+          <tr>
+            <td><strong>Tesouro Selic</strong></td>
+            <td><span class="badge badge-cyan">≈ 100% Selic</span></td>
+            <td><span class="badge badge-orange">IR regressivo</span></td>
+            <td>D+1</td>
+            <td>Governo Federal</td>
+            <td style="color:var(--lgray)">Reserva e investimento de baixo risco</td>
+          </tr>
+          <tr>
+            <td><strong>Tesouro IPCA+</strong></td>
+            <td><span class="badge badge-orange">IPCA + 7% a.a.</span></td>
+            <td><span class="badge badge-orange">IR regressivo</span></td>
+            <td>Pode oscilar</td>
+            <td>Governo Federal</td>
+            <td style="color:var(--lgray)">Proteção contra inflação — médio/longo prazo</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="disclaimer" style="margin-top:12px">
+      📌 <strong>IR Regressivo:</strong> 22,5% (até 180 dias) → 20% (181–360 dias) → 17,5% (361–720 dias) → 15% (acima de 720 dias). Quanto mais tempo investido, menos imposto.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 14 — RENDA VARIÁVEL / BOLSA
+══════════════════════════════════════════════════ -->
+<div class="slide" id="s14" style="id=s16">
+  <div class="maxw">
+    <div class="center" style="margin-bottom:16px">
+      <span class="tag tag-orange">Renda Variável</span>
+      <h2 class="title">O que se negocia na <span class="grad-text">B3?</span></h2>
+      <p class="sm" style="margin-top:4px">B3 — Brasil, Bolsa, Balcão. É a bolsa de valores do Brasil, em São Paulo.</p>
+    </div>
+    <div class="cols3" style="margin-bottom:12px">
+      <div class="card card-green">
+        <div style="font-weight:700;font-size:.9rem;color:var(--green);margin-bottom:6px">📈 Ações</div>
+        <p class="sm">Fragmento do capital de uma empresa. Você vira sócio. Lucro vem de valorização + dividendos. Alto potencial, alta oscilação.</p>
+      </div>
+      <div class="card card-orange">
+        <div style="font-weight:700;font-size:.9rem;color:var(--orange);margin-bottom:6px">📊 ETFs</div>
+        <p class="sm">Cesta de ações que replica um índice (ex: BOVA11 = Ibovespa). Diversificação automática com custo baixo.</p>
+      </div>
+      <div class="card card-purple">
+        <div style="font-weight:700;font-size:.9rem;color:var(--purple);margin-bottom:6px">🏢 FIIs</div>
+        <p class="sm">Fundos Imobiliários. Cotas de empreendimentos imobiliários. Pagam rendimentos mensais, geralmente isentos de IR para PF.</p>
+      </div>
+    </div>
+    <div class="cols2">
+      <div class="card">
+        <div style="font-weight:700;font-size:.9rem;color:var(--cyan);margin-bottom:8px">📌 Principais índices</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;justify-content:space-between"><span class="sm">Ibovespa</span><span class="badge badge-cyan">Principal índice da B3</span></div>
+          <div style="display:flex;justify-content:space-between"><span class="sm">CDI</span><span class="badge badge-green">Benchmark renda fixa</span></div>
+          <div style="display:flex;justify-content:space-between"><span class="sm">IFIX</span><span class="badge badge-purple">Índice dos FIIs</span></div>
+          <div style="display:flex;justify-content:space-between"><span class="sm">BDRs</span><span class="badge badge-orange">Ações globais no Brasil</span></div>
+        </div>
+      </div>
+      <div class="card card-orange">
+        <div style="font-weight:700;font-size:.9rem;color:var(--orange);margin-bottom:8px">⚠️ O que saber antes de investir</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div class="sm">1. <strong style="color:var(--lgray)">Liquidez:</strong> quando posso resgatar?</div>
+          <div class="sm">2. <strong style="color:var(--lgray)">Rentabilidade:</strong> quanto rende historicamente?</div>
+          <div class="sm">3. <strong style="color:var(--lgray)">Risco:</strong> qual é a chance de perda?</div>
+          <div class="sm">4. <strong style="color:var(--lgray)">IR / Taxas:</strong> qual é o custo real?</div>
+          <div class="sm">5. <strong style="color:var(--lgray)">Prazo:</strong> quando vou precisar do dinheiro?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 15 — CONSÓRCIO
+══════════════════════════════════════════════════ -->
+<div class="slide" id="s15">
+  <div class="maxw">
+    <div class="center" style="margin-bottom:20px">
+      <span class="tag tag-purple">Estratégia diferente</span>
+      <h2 class="title">Consórcio: <span class="grad-text">planejamento sem juros</span></h2>
+    </div>
+    <div class="cols2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card card-purple">
+          <div style="font-weight:700;color:var(--purple);margin-bottom:8px;font-size:1rem">📋 Como funciona?</div>
+          <p class="sm">Grupo de pessoas contribui mensalmente. Todo mês, um integrante recebe o crédito (por sorteio ou lance). No final do prazo, todos recebem.</p>
+        </div>
+        <div class="card card-green">
+          <div style="font-weight:700;color:var(--green);margin-bottom:6px">✅ Vantagens</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div class="sm">✓ Sem juros — apenas taxa de administração (~1,5% a.a.)</div>
+            <div class="sm">✓ Disciplina de poupança forçada</div>
+            <div class="sm">✓ Crédito para imóvel, carro, serviços</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card card-cyan">
+          <div style="font-weight:700;color:var(--cyan);margin-bottom:8px;font-size:1rem">💡 Estratégias inteligentes</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div class="sm"><strong style="color:var(--lgray)">📉 Comprar o menor valor:</strong> parcela menor = mais fácil de sustentar. Use o crédito como alavanca.</div>
+            <div class="sm"><strong style="color:var(--lgray)">🎯 Lance embutido:</strong> use parte do próprio crédito como lance para ser contemplado mais cedo — sem desembolso extra!</div>
+            <div class="sm"><strong style="color:var(--lgray)">⚡ Leilão mensal:</strong> quem oferece o maior percentual do crédito como lance vence. Estratégia de quem quer antecipar.</div>
+          </div>
+        </div>
+        <div class="card card-orange">
+          <div style="font-weight:700;color:var(--orange);margin-bottom:4px">⚠️ Atenção</div>
+          <p class="sm">Consórcio não é investimento — é <strong>planejamento</strong>. Se precisar do crédito com urgência, pode não ser a melhor opção. Sempre compare com financiamento convencional.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 16 — DISCLAIMER
+══════════════════════════════════════════════════ -->
+<div class="slide center" id="s_disc">
+  <div class="maxw-sm">
+    <div style="font-size:4rem;margin-bottom:16px">⚖️</div>
+    <h2 class="title" style="margin-bottom:16px">Aviso <span class="grad-text">Importante</span></h2>
+    <div class="disclaimer" style="text-align:left;margin-bottom:16px;font-size:.9rem;padding:20px 24px">
+      <div style="font-weight:700;font-size:1rem;margin-bottom:10px;color:var(--yellow)">📌 Esta apresentação tem caráter exclusivamente educacional.</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div>✗ <strong>Não é</strong> uma recomendação de investimento</div>
+        <div>✗ <strong>Não é</strong> consultoria financeira regulamentada</div>
+        <div>✗ <strong>Não é</strong> oferta de nenhum produto financeiro</div>
+        <div style="margin-top:6px">✓ <strong>É</strong> um espaço de aprendizado, reflexão e construção de conhecimento financeiro</div>
+      </div>
+    </div>
+    <div class="card card-cyan">
+      <p class="sm">Antes de investir, consulte um <strong style="color:var(--cyan)">profissional certificado</strong> (CFP®, CEA ou assessor credenciado pela CVM). Cada pessoa tem uma realidade financeira única.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 17 — PARTE 5: SIMULAÇÃO
+══════════════════════════════════════════════════ -->
+<div class="slide center" id="s17">
+  <div class="maxw-sm">
+    <span class="tag tag-orange" style="margin-bottom:16px">Parte 5</span>
+    <h1 class="hero" style="margin-bottom:8px">🎮 Hora de <span class="grad-text">jogar na bolsa!</span></h1>
+    <p class="lead" style="margin-bottom:24px">Bolsa Universitária: Desafio de 6 Meses</p>
+    <div style="display:flex;flex-direction:column;gap:10px;text-align:left">
+      <div class="card card-orange" style="display:flex;gap:12px;align-items:flex-start">
+        <span style="font-size:1.5rem">💰</span>
+        <div><div style="font-weight:700;margin-bottom:3px">Capital = seu resultado do Circuito</div><p class="sm">O saldo que você acumulou na competição anterior é o seu capital de investimento.</p></div>
+      </div>
+      <div class="card" style="display:flex;gap:12px;align-items:flex-start">
+        <span style="font-size:1.5rem">🛡️⚖️🚀</span>
+        <div><div style="font-weight:700;margin-bottom:3px">Escolha seu perfil de risco</div><p class="sm">Conservador, Moderado ou Arrojado — cada perfil tem uma carteira diferente. O facilitador explica o que isso significa para você.</p></div>
+      </div>
+      <div class="card" style="display:flex;gap:12px;align-items:flex-start">
+        <span style="font-size:1.5rem">🌪️</span>
+        <div><div style="font-weight:700;margin-bottom:3px">6 meses de mercado real simulado</div><p class="sm">Eventos macroeconômicos reais vão impactar sua carteira. Tome decisões, rebalanceie e veja quem acumula mais patrimônio.</p></div>
+      </div>
+      <div class="card card-cyan" style="display:flex;gap:12px;align-items:center">
+        <span style="font-size:1.5rem">🏆</span>
+        <div><div style="font-weight:700;color:var(--cyan)">Ranking final entre todos os participantes!</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 18 — REGRAS DA SIMULAÇÃO
+══════════════════════════════════════════════════ -->
+<div class="slide" id="s18">
+  <div class="maxw">
+    <div class="center" style="margin-bottom:20px">
+      <span class="tag tag-cyan">Como funciona</span>
+      <h2 class="title">Sua carteira de <span class="grad-text">investimentos</span></h2>
+    </div>
+    <div class="cols3" style="margin-bottom:14px">
+      <div class="card card-green center">
+        <div style="font-size:1.6rem;margin-bottom:6px">🛡️</div>
+        <div style="font-weight:700;color:var(--green);margin-bottom:4px">Conservador</div>
+        <p class="sm">Tesouro Selic · CDB · LCI/LCA · Tesouro IPCA+</p>
+        <div class="badge badge-green" style="margin-top:8px">100% renda fixa</div>
+      </div>
+      <div class="card card-orange center">
+        <div style="font-size:1.6rem;margin-bottom:6px">⚖️</div>
+        <div style="font-weight:700;color:var(--orange);margin-bottom:4px">Moderado</div>
+        <p class="sm">Renda fixa (60%) + BOVA11 e Ações (40%)</p>
+        <div class="badge badge-orange" style="margin-top:8px">Mix equilibrado</div>
+      </div>
+      <div class="card card-red center">
+        <div style="font-size:1.6rem;margin-bottom:6px">🚀</div>
+        <div style="font-weight:700;color:var(--red);margin-bottom:4px">Arrojado</div>
+        <p class="sm">BOVA11 · Ações · FIIs · BDRs</p>
+        <div class="badge badge-red" style="margin-top:8px">100% renda variável</div>
+      </div>
+    </div>
+    <div class="cols2">
+      <div class="card">
+        <div style="font-weight:700;color:var(--cyan);margin-bottom:8px">📅 A cada mês</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div class="sm">1. Um <strong style="color:var(--lgray)">evento macroeconômico</strong> impacta o mercado</div>
+          <div class="sm">2. Você <strong style="color:var(--lgray)">escolhe como reagir</strong> (3 opções)</div>
+          <div class="sm">3. A IA analisa qual <strong style="color:var(--lgray)">estratégia é melhor</strong></div>
+          <div class="sm">4. Sua carteira <strong style="color:var(--lgray)">é atualizada</strong> com retornos reais</div>
+          <div class="sm">5. Opção de <strong style="color:var(--lgray)">rebalancear</strong> antes do mês seguinte</div>
+        </div>
+      </div>
+      <div class="card card-orange">
+        <div style="font-weight:700;color:var(--orange);margin-bottom:8px">🏆 Pontuação Final</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div class="sm">60% — <strong style="color:var(--lgray)">Retorno líquido</strong> (após IR)</div>
+          <div class="sm">25% — <strong style="color:var(--lgray)">Aderência ao perfil</strong> escolhido</div>
+          <div class="sm">15% — <strong style="color:var(--lgray)">Qualidade das decisões</strong> nos eventos</div>
+        </div>
+        <div class="badge badge-cyan" style="margin-top:10px">Score de 0 a 100 pontos</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 19 — REFLEXÕES FINAIS
+══════════════════════════════════════════════════ -->
+<div class="slide center" id="s22">
+  <div class="maxw">
+    <div class="center" style="margin-bottom:20px">
+      <img src="assets/logo-iae.jpg" alt="IAê" style="max-height:60px;border-radius:10px;margin-bottom:16px">
+      <span class="tag tag-green" style="margin-bottom:12px">Para finalizar</span>
+      <h2 class="title">Reflexões e <span class="grad-text">Compromissos</span></h2>
+    </div>
+    <div class="cols2">
+      <div style="display:flex;flex-direction:column;gap:10px;text-align:left">
+        <div class="card card-cyan">
+          <div style="font-weight:700;color:var(--cyan);margin-bottom:8px;font-size:1rem">💬 O que aprendi hoje?</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:12px;min-height:80px">
+            <p class="sm" style="color:var(--dgray);font-style:italic">[Espaço para reflexão individual — compartilhe com o grupo]</p>
+          </div>
+        </div>
+        <div class="card card-green">
+          <div style="font-weight:700;color:var(--green);margin-bottom:8px;font-size:1rem">🎯 Me comprometo a...</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div class="sm">□ Começar (ou fortalecer) minha reserva de emergência</div>
+            <div class="sm">□ Registrar minhas despesas por pelo menos 1 mês</div>
+            <div class="sm">□ Aprender sobre um instrumento financeiro por semana</div>
+            <div class="sm">□ Compartilhar o que aprendi com alguém da minha família</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card" style="text-align:center;padding:24px">
+          <div style="font-size:3rem;margin-bottom:8px">🌱</div>
+          <h3 class="sub" style="margin-bottom:8px">Multiplique o conhecimento</h3>
+          <p class="sm">Educação financeira muda famílias. Leve o que aprendeu aqui para dentro de casa. Uma conversa pode mudar a vida de alguém.</p>
+        </div>
+        <div class="card card-orange" style="text-align:center;padding:16px">
+          <div style="font-weight:700;color:var(--orange);margin-bottom:4px">📱 Continue aprendendo</div>
+          <p class="sm">IAê Educação Financeira — ferramentas, simuladores e conteúdo para o seu bolso.</p>
+        </div>
+        <div class="quote">"O melhor momento para começar a investir foi há 10 anos. O segundo melhor momento é <strong>agora</strong>."</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NAVIGATION ══ -->
+<div id="progress"></div>
+<div id="counter">1/19</div>
+<div id="nav">
+  <button class="nav-btn" id="btn-prev" onclick="go(-1)" title="Anterior (←)">‹</button>
+  <button class="nav-btn" id="btn-next" onclick="go(1)"  title="Próximo (→)">›</button>
+</div>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+const total  = slides.length;
+let cur = 0;
+
+function go(d) {
+  slides[cur].classList.remove('active');
+  cur = Math.max(0, Math.min(total-1, cur+d));
+  slides[cur].classList.add('active');
+  document.getElementById('counter').textContent = `${cur+1}/${total}`;
+  document.getElementById('progress').style.width = `${((cur+1)/total)*100}%`;
+  document.getElementById('btn-prev').disabled = cur===0;
+  document.getElementById('btn-next').disabled = cur===total-1;
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ') go(1);
+  if(e.key==='ArrowLeft' ||e.key==='PageUp')               go(-1);
+  if(e.key==='Home') { slides[cur].classList.remove('active'); cur=0; slides[0].classList.add('active'); document.getElementById('counter').textContent=`1/${total}`; document.getElementById('progress').style.width=`${(1/total)*100}%`; }
+  if(e.key==='End')  { slides[cur].classList.remove('active'); cur=total-1; slides[cur].classList.add('active'); document.getElementById('counter').textContent=`${total}/${total}`; document.getElementById('progress').style.width='100%'; }
+});
+
+// Touch swipe
+let tx=0;
+document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>50) go(dx<0?1:-1);
+},{passive:true});
+
+// Init
+document.getElementById('progress').style.width=`${(1/total)*100}%`;
+document.getElementById('btn-prev').disabled=true;
+</script>
+</body>
+</html>

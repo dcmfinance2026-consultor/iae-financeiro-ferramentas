@@ -630,6 +630,7 @@ label{font-size:.8rem;color:var(--light);margin-bottom:5px;display:block;font-we
     <div class="fac-tabs-row">
       <button class="fac-tab sel" id="ftab-setup"       onclick="setFacTab('setup')">👥 Personagens</button>
       <button class="fac-tab"     id="ftab-lancamentos" onclick="setFacTab('lancamentos')">➕ Lançamentos</button>
+      <button class="fac-tab"     id="ftab-bolsa"       onclick="setFacTab('bolsa')">🏆 Bolsa</button>
       <button class="fac-tab aud" id="ftab-auditoria"   onclick="setFacTab('auditoria')">📊 Auditoria Final</button>
     </div>
     <button class="btn btn-ghost btn-sm" onclick="fecharFacilitador()">✕ Fechar</button>
@@ -712,6 +713,7 @@ let F = {
   tab: 'setup',
   sel: 0,
   txType: 'inc',
+  bolsaResults: [],
   chars: Array.from({length:6}, (_,i) => ({
     id: i+1,
     nome: `Personagem ${i+1}`,
@@ -747,6 +749,7 @@ function setFacTab(t) {
 function renderFac() {
   if (F.tab === 'setup')       renderFacSetup();
   else if (F.tab === 'lancamentos') renderFacLancamentos();
+  else if (F.tab === 'bolsa')  renderFacBolsa();
   else                         renderFacAuditoria();
 }
 
@@ -1195,8 +1198,134 @@ function facDelTx(charIdx, id) {
   renderFacLancamentos();
 }
 
+// ── Tab 4: Bolsa Universitária — Ranking ───────
+const PERFIL_LABEL = { conservador:'🛡️ Conservador', moderado:'⚖️ Moderado', arrojado:'🚀 Arrojado' };
+
+function renderFacBolsa() {
+  const res = F.bolsaResults;
+  const sorted = [...res].sort((a,b) => b.retorno_liquido - a.retorno_liquido);
+
+  const medal = i => i===0?'🥇':i===1?'🥈':i===2?'🥉':String(i+1);
+  const clrRet = v => v >= 0 ? 'var(--green)' : 'var(--red)';
+  const fmtPct = v => (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+
+  const rows = sorted.map((r,i) => `
+    <tr>
+      <td style="text-align:center;font-size:1.1rem">${medal(i)}</td>
+      <td><b>${esc(r.nome)}</b></td>
+      <td>${esc(PERFIL_LABEL[r.perfil] || r.perfil)}</td>
+      <td>${fmtR(r.capital_inicial)}</td>
+      <td><b>${fmtR(r.patrimonio_final)}</b></td>
+      <td style="color:${clrRet(r.retorno_liquido)};font-weight:700">${fmtPct(r.retorno_liquido)}</td>
+      <td style="color:${clrRet(r.vs_cdi)}">${fmtPct(r.vs_cdi)}</td>
+      <td style="font-weight:700;color:var(--cyan)">${r.score}</td>
+      <td style="font-size:.72rem;color:var(--gray)">${r.data} ${r.hora}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="removerBolsaResult(${res.indexOf(r)})" style="color:var(--red);padding:3px 8px">🗑️</button></td>
+    </tr>`).join('');
+
+  document.getElementById('fac-body').innerHTML = `
+    <div style="padding:16px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;font-size:1rem;font-weight:800;color:var(--cyan)">🏆 Ranking — Bolsa Universitária</div>
+        <label class="btn btn-sm" style="background:rgba(0,201,177,.12);border:1.5px solid var(--cyan);color:var(--cyan);cursor:pointer;border-radius:8px;padding:7px 14px">
+          📂 Importar JSONs
+          <input type="file" id="bolsa-file-input" accept=".json" multiple onchange="importarBolsaResults(this)" style="display:none">
+        </label>
+        ${res.length ? `
+          <button class="btn btn-sm" onclick="exportarRankingBolsa()" style="background:rgba(0,201,177,.12);border:1.5px solid var(--cyan);color:var(--cyan);border-radius:8px;padding:7px 14px">📊 Exportar CSV</button>
+          <button class="btn btn-sm btn-ghost" onclick="if(confirm('Limpar todos os resultados?'))F.bolsaResults=[];renderFacBolsa()">🗑️ Limpar</button>
+        ` : ''}
+      </div>
+
+      <div style="font-size:.8rem;color:var(--gray);background:rgba(0,0,0,.2);padding:10px 14px;border-radius:8px;line-height:1.5">
+        📌 Peça para cada aluno clicar em <b style="color:var(--lgray)">📥 Exportar Resultado para o Facilitador</b> na tela final do jogo e enviar o arquivo <code>.json</code>. Importe aqui para montar o ranking.
+      </div>
+
+      ${!res.length ? `
+        <div style="text-align:center;padding:40px 16px;color:var(--gray)">
+          Nenhum resultado importado ainda.
+        </div>
+      ` : `
+        <div style="overflow-x:auto;border-radius:12px;border:1px solid rgba(255,255,255,.07)">
+          <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+            <thead><tr style="background:rgba(0,201,177,.08)">
+              <th style="padding:9px 10px;text-align:center;color:var(--cyan);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em">#</th>
+              <th style="padding:9px 10px;color:var(--cyan);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em">Nome</th>
+              <th style="padding:9px 10px;color:var(--cyan);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em">Perfil</th>
+              <th style="padding:9px 10px;color:var(--cyan);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em">Capital</th>
+              <th style="padding:9px 10px;color:var(--cyan);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em">Patrimônio</th>
+              <th style="padding:9px 10px;color:var(--cyan);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em">Retorno Líq.</th>
+              <th style="padding:9px 10px;color:var(--cyan);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em">vs CDI</th>
+              <th style="padding:9px 10px;color:var(--cyan);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em">Score</th>
+              <th style="padding:9px 10px;color:var(--cyan);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em">Data</th>
+              <th></th>
+            </tr></thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:.78rem;color:var(--gray);text-align:right">${res.length} resultado(s) importado(s) · ordenado por retorno líquido</div>
+      `}
+    </div>`;
+}
+
+function importarBolsaResults(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  let done = 0, erros = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.tipo !== 'bolsa_resultado') { erros++; }
+        else {
+          const dup = F.bolsaResults.findIndex(r => r.nome === data.nome && r.data === data.data && r.hora === data.hora);
+          if (dup >= 0) F.bolsaResults[dup] = data;
+          else F.bolsaResults.push(data);
+          done++;
+        }
+      } catch(e) { erros++; }
+      if (done + erros === files.length) {
+        if (done) toast(`✅ ${done} resultado(s) importado(s)!`, 'ok', 3000);
+        if (erros) toast(`⚠️ ${erros} arquivo(s) inválido(s)`, 'warn', 3000);
+        renderFacBolsa();
+      }
+    };
+    reader.readAsText(file, 'utf-8');
+  });
+  input.value = '';
+}
+
+function removerBolsaResult(idx) {
+  F.bolsaResults.splice(idx, 1);
+  renderFacBolsa();
+}
+
+function exportarRankingBolsa() {
+  const sorted = [...F.bolsaResults].sort((a,b) => b.retorno_liquido - a.retorno_liquido);
+  const BOM = '﻿';
+  const header = ['Posição','Nome','Perfil','Capital Inicial','Patrimônio Final','Retorno Bruto %','Retorno Líquido %','vs CDI %','Score','Aderência %','Qualidade Decisões %','Data','Hora'];
+  const csvRows = sorted.map((r,i) => [
+    i+1, r.nome, r.perfil, r.capital_inicial.toFixed(2),
+    r.patrimonio_final.toFixed(2), r.retorno_bruto.toFixed(4),
+    r.retorno_liquido.toFixed(4), r.vs_cdi.toFixed(4),
+    r.score, r.aderencia.toFixed(2), r.qualidade_decisoes.toFixed(2),
+    r.data, r.hora,
+  ].join(';'));
+  const csv = BOM + [header.join(';'), ...csvRows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `ranking_bolsa_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('📊 Ranking exportado em CSV!', 'ok', 3000);
+}
+
 function exportAudit() {
-  const rows = [['Posição','Personagem','Capital','Receitas','Despesas','Saldo Final','Resultado %','Seguro','Crédito','Lançamentos']];
   const data = F.chars.filter(c => c.capital > 0)
     .map(c => ({ ...c, ...facCalcChar(c) }))
     .sort((a,b) => b.bal - a.bal);

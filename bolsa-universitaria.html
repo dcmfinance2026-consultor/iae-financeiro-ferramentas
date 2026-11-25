@@ -1601,7 +1601,10 @@ function renderReport(retLiq, ader, qual, score){
 
       ${ranking_html}
 
-      <button class="btn btn-primary btn-full" onclick="novoJogo()" style="margin-top:4px">🔄 Jogar Novamente</button>
+      <button class="btn btn-success btn-full" onclick="exportarResultado()" style="margin-top:4px;font-size:1rem;padding:14px">
+        📥 Exportar Resultado para o Facilitador
+      </button>
+      <button class="btn btn-primary btn-full" onclick="novoJogo()" style="margin-top:6px">🔄 Jogar Novamente</button>
       <div class="disc">⚠️ Simulação educacional — nenhum dinheiro real. IAê Financeiro © 2025</div>
     </div>`;
 
@@ -1660,6 +1663,45 @@ function drawLinhaChartReport(){
   pts.forEach((_,i)=>{ svg+=`<circle cx="${xs(i)}" cy="${ys(pts[i])}" r="4" fill="#1565C0"/>`; });
   svg+='</svg>';
   el.innerHTML=svg;
+}
+
+function exportarResultado(){
+  const retLiq  = calcRetLiquido();
+  const retBruto= (S.patrimonio - S.capital) / S.capital;
+  const cdiAcum = (S.cdi_hist[S.cdi_hist.length-1] - S.capital) / S.capital;
+  const ader    = calcAderencia();
+  const qual    = calcQualDecisoes();
+  const score   = calcScore(retLiq, ader, qual);
+  const agora   = new Date();
+
+  const payload = {
+    tipo: 'bolsa_resultado',
+    versao: '1.0',
+    nome: S.nome,
+    perfil: S.perfil,
+    capital_inicial: parseFloat(S.capital.toFixed(2)),
+    patrimonio_final: parseFloat(S.patrimonio.toFixed(2)),
+    retorno_bruto: parseFloat((retBruto*100).toFixed(4)),
+    retorno_liquido: parseFloat((retLiq*100).toFixed(4)),
+    vs_cdi: parseFloat(((retBruto - cdiAcum)*100).toFixed(4)),
+    score,
+    aderencia: parseFloat((ader*100).toFixed(2)),
+    qualidade_decisoes: parseFloat((qual*100).toFixed(2)),
+    meses: 6,
+    eventos: S.historico.filter(h=>h.evento_id).map(h=>({mes:h.mes, evento:h.evento_id})),
+    data: agora.toLocaleDateString('pt-BR'),
+    hora: agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+  };
+
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob(['﻿'+json],{type:'application/json;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `bolsa_${S.nome.replace(/\s+/g,'_')}_${agora.toLocaleDateString('pt-BR').replace(/\//g,'-')}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('📥 Resultado exportado! Envie o .json para o facilitador.','ok',5000);
 }
 
 function novoJogo(){
